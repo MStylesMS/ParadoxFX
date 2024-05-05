@@ -1,4 +1,68 @@
-# Paradox Effects
+# Paradox Effects (PxFx)
+
+This is a multi-modal media and effect controller.  It is intended to act as an inteface between mqtt messages and various other applications running on a machine such as:
+
+- Media players like cvlc and mpv.
+- Screen buffers like fbi and feh.
+- Smart lights like Philips Hue and WiZ.
+- Other automation controllers, as added later.
+
+The configuration will be set with the following JSON compatable configuration files:
+
+- pxfx-interfaces.json = Defines the avaliable apps that will be controlled.
+- pxfx-topics.json = which controllers are attached to each prop topic.
+
+When launching external applications, such as media players, this controller will maintain a connection so that it can send additional commands.
+
+## Avaliable Commands
+
+### Media Players
+
+The following is a summary of the 
+
+### Light Controllers
+
+
+## MQTT Topic and Command Structures
+
+The MQTT topics will be organized as follows, where BASE is the base topic is defined for a type of controller:
+
+### Media Player Topics and Commands
+
+PROP is the topic for a specific media controller, which will be served by whichever media controller is set in the px-interfaces.json file.  The following topics will automatically be generated:
+
+- PROP/command is the topic to subscribe to for incoming media commands.
+- PROP/events is the topic to publish normal status messages to.
+- PROP/warnings is the topic to publish errors and exceptions to.
+
+Additionally, every time there is a warning published it will be duplicated to a special topic WARNINGS that will be common for all devices in a given setup.  Messages plublished to this topic will also include the PROP topic appened at the end of the JSON ball.
+
+### Light Effect Players and Topics
+
+#### Topic Maping
+GROUP is the topic for a specific groups of lights, which will be served by whichever controller or controllers are attached to it.  LIGHT is a specific light in a GROUP.  If a command is sent to a GROUP without specifying one or more LIGHTs (multiple allowed) then all lights in the group will respond.  When one or more lights is included in the command, it will be applied to only those lights.
+
+When configuring the pxfx-topics.json file, more than one lighting controller can be used per GROUP, but only one controller per LIGHT.  The mapping is that each LIGHT is configured to use one of the automation controllers, and then that LIGHT is mapped to only one GROUP.  Therefore two LIGHT with the same name but different GROUP will be considered different lights.  
+
+If more than one controller is attached to a single topic, then each LIGHT will respond to whatever commands it understands and ignores the others. However, if "groups" or "rooms" are supported by the external API's then a LIGHT could be a group/room as defined in the external API.
+
+#### Effect Macros and Scripts
+
+With lighting, some external controllers may support "scenes" or "automations" but they are unlikely to match across various models and brands.  Therefore we will support some pre-defined macros and scripts that handle some common automations across multiple types of controllers.  The following will be included, and can be extended by updates to this software.
+
+- FADE = (target color and brightness, trasnition duration)
+- BLINK = (target on color and brightness, duration on, duration off, transition duration) 
+- FLIP = (target color 1, target color 2, etc., duration on, duration off, transition duration)
+- DISCO = (target brightness, duration between triggers, transition duration, synced or not)
+- FLAME = (target brightness and color, synced or not)
+- MORSE = (target on color and brightness, dot duration)
+
+NOTE: "synced or not" refers to whether individual lights in a group are locked to the same brightness and color or are sent different commands.
+
+For Neopixel type devices we will only support them as solid strip or by indivicually addressing single LEDs on a strip.
+
+
+
 
 
 
