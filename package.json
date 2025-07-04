@@ -1,0 +1,38 @@
+{
+    "name": "paradox-fx",
+    "version": "1.0.0",
+    "description": "Multi-modal media and effect controller for interactive installations",
+    "main": "pxfx.js",
+    "scripts": {
+        "start": "node start.js",
+        "dev": "node start.js",
+        "test": "jest",
+        "test:unit": "jest test/unit",
+        "test:integration": "jest test/integration",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "test:ci": "SKIP_INTEGRATION_TESTS=1 jest --coverage --ci",
+        "lint": "echo 'No linter configured yet'",
+        "validate": "node -c pxfx.js && node -c start.js"
+    },
+    "keywords": [
+        "mqtt",
+        "media",
+        "effects",
+        "raspberry-pi",
+        "escape-room",
+        "interactive"
+    ],
+    "author": "Paradox",
+    "license": "ISC",
+    "dependencies": {
+        "mqtt": "^5.3.4",
+        "ini": "^4.1.1"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0"
+    },
+    "engines": {
+        "node": ">=15.1.0"
+    }
+}

@@ -1,0 +1,88 @@
+# Paradox Effects (PxFx) Configuration
+# Copy this file to pxfx.ini and customize for your setup
+
+[mqtt]
+# MQTT broker connection settings
+broker = localhost
+port = 1883
+username = 
+password = 
+client_id = pxfx-01
+keepalive = 60
+clean_session = true
+
+[global]
+# Global application settings
+log_level = info
+media_base_path = /opt/media
+heartbeat_interval = 30000
+
+# Screen device configurations
+[screen:living-room]
+type = screen
+topic = paradox/living-room/screen
+media_path = /opt/media/living-room
+player_type = mpv
+audio_device = default
+
+[screen:bedroom]
+type = screen
+topic = paradox/bedroom/screen
+media_path = /opt/media/bedroom
+player_type = fbi
+framebuffer = /dev/fb0
+
+# Light device configurations
+[light:living-room-hue]
+type = light
+topic = paradox/living-room/lights
+controller = hue
+bridge_ip = 192.168.1.100
+bridge_username = your-hue-username
+
+[light:bedroom-wiz]
+type = light
+topic = paradox/bedroom/lights
+controller = wiz
+bulb_ip = 192.168.1.101
+
+[light-group:living-room-all]
+type = light-group
+topic = paradox/living-room/all-lights
+devices = living-room-hue,living-room-strip
+
+# Relay device configurations
+[relay:front-door]
+type = relay
+topic = paradox/entrance/door-lock
+controller = zigbee
+device_id = 0x00158d0001234567
+
+[relay:garage-door]
+type = relay
+topic = paradox/garage/door
+controller = zwave
+node_id = 5
+
+# Controller configurations
+[controller:hue]
+type = hue
+bridge_ip = 192.168.1.100
+bridge_username = your-hue-username
+polling_interval = 5000
+
+[controller:wiz]
+type = wiz
+discovery_enabled = true
+polling_interval = 10000
+
+[controller:zigbee]
+type = zigbee
+serial_port = /dev/ttyUSB0
+channel = 11
+pan_id = 0x1234
+
+[controller:zwave]
+type = zwave
+serial_port = /dev/ttyACM0
+network_key = 0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,0x10

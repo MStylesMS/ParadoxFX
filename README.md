@@ -1,178 +1,211 @@
 # Paradox Effects (PxFx)
 
-## Description
+A Node.js multi-modal media and effect controller for screens, lights, and relays via MQTT.
 
-This Node.js module allows a Raspberry Pi or other Linux machines to be used as an video and audio playback device controlled via MQTT.  It will also allow relaying basic commands for other devices such as smart lights and switches.  So in that sense, this is a basic multi-modal media and effect controller.  Where appropriate, it will respond back with status and error messages.  
+## Overview
 
-This module acts like a wrapper around apps and modules.  The three types of FX that cna be controled are:
+PxFx is a comprehensive system for controlling various devices through MQTT messaging. It supports:
 
-- Screens: Audio/Video output via media players such as mpv and vlc, and screen buffers such as fbi and feh.
-- Lights: Hue and WiZ (future)
-- Relays: Zigbee, Z-Wave (future)
+- **Screens**: Video/audio playback via media players (mpv, vlc, fbi, etc.)
+- **Lights**: Philips Hue, WiZ, and other smart lighting systems
+- **Relays**: Zigbee and Z-Wave devices for automation
 
-The configuration for each of these will be set with the following .conf compatable configuration files:
+All configuration is managed through a single `pxfx.ini` file with device-specific sections.
 
-- pxfx-mqtt-screens.conf = Maps MQTT topics to screens.
-- pxfx-alsa.conf = Settings for the asla audio.
-- pxfx-mqtt-wiz.conf = Maps MQTT topics to Wiz lights.
-- pxfx-mqtt-hue.conf = Maps Mqtt topics to Hue lights.
-- pxfx-mqtt-zigbee.conf = Maps MQTT to Zigbee devices.
-- pxfx-zwave.conf = Maps MQTT to Z-Wave devices.
+## Architecture
 
-There are a few things to note here:
-
-- It is possible to control multiple screens with this module by setting up the MQTT topics for each display in the px-screens.conf file.
-- By default, the audio is sent via the HDMi connection to the attached monitors.  To use other audio output devices, those can be configured in the alsa settings.
-- For other automation controllers this apps acts as "write only".  Sensors and triggers are not supported.
-
-## Requirements
-
-Somewhere on the 'PATH':
-
-- node.js >= v15.1
-- mpv (or other configured audio player)
-- fbi (or some other configured frame buffer)
-- [riv](https://github.com/royaltm/rust-royal-image-viewer) [optional]
-
-NOTE: currently `riv` is not being used on production due to problems with a Wayland emulation on Raspbian, so this version uses `fbi` instead. The drawback is that it requires passwordless sudo access to run `fbi` executable.
-
-## How to Install
-
-### Basic Setup
-
-(Need info here.)
-
-### Optional
-
-- `dist/armv7-raspbian-linux-gnueabihf/bin/riv` copy to `/usr/bin/riv` and set `chmod +x`.
-- `dist/sendcmd.js` - the helper for sending commands to image-switcher, not required, only for testing.
-- Disable mosquitto server `sudo systemctl disable mosquitto`
-- Disable `lxpanel` by copying `etc/xdg/lxsession/LXDE-pi/autostart` to `/etc/xdg/lxsession/LXDE-pi/`.
-
-### Autostart
-
-_NOTE_: Do not start image-switcher from `/etc/rc.local` because it requires the x-windows system to be up and running.
-
-- install `xterm` (see below)
-- copy `dist/image-switcher.desktop` to `$HOME/.config/autostart/image-switcher.desktop`
-
-### Permissions
-
-In order for the `sudo fbi` to be working you need to disable sudo password for the current user:
-
-- copy `dist/etc/sudoers.d/010_paradox-nopasswd` to `/etc/sudoers.d/010_paradox-nopasswd` and set owner to root and permission to 0440
-
-### Channel support
-
-If your site has a surround speaker setup copy one of the alsa pseudodevice definitions:
-
-```
-sudo cp etc/alsa/conf.d/80-paradox-CHOICE.conf /etc/alsa/conf.d/
+```text
+pxfx/
+├── pxfx.js              # Main entry point
+├── pxfx.ini             # Configuration file
+├── package.json         # Dependencies and scripts
+├── lib/
+│   ├── core/            # Core system components
+│   │   ├── config-loader.js    # INI configuration parser
+│   │   ├── mqtt-client.js      # MQTT connection manager
+│   │   ├── device-manager.js   # Device registry and lifecycle
+│   │   └── message-router.js   # MQTT message routing
+│   ├── devices/         # Device implementations
+│   │   ├── screen-device.js      # Screen/media device control
+│   │   ├── light-device.js       # Individual light control
+│   │   ├── light-group-device.js # Light group control
+│   │   └── relay-device.js       # Relay/switch control
+│   ├── media/           # Media player framework
+│   │   ├── media-player-factory.js # Player creation and management
+│   │   ├── process-manager.js      # Process lifecycle management
+│   │   └── players/              # Media player implementations
+│   │       ├── base-player.js    # Base player interface
+│   │       ├── fbi-player.js     # FBI framebuffer player
+│   │       ├── mpv-player.js     # MPV video player
+│   │       └── cvlc-player.js    # VLC video player
+│   ├── controllers/     # External system controllers
+│   │   ├── hue-controller.js     # Philips Hue integration
+│   │   ├── wiz-controller.js     # WiZ lighting integration
+│   │   ├── zigbee-controller.js  # Zigbee device integration
+│   │   └── zwave-controller.js   # Z-Wave device integration
+│   ├── effects/         # Effect macro system
+│   │   └── effect-engine.js      # Effect sequence management
+│   └── utils/           # Utility modules
+│       ├── logger.js             # Logging system
+│       └── utils.js              # Common utilities
+└── test/                # Test suite
+    ├── unit/            # Unit tests
+    ├── integration/     # Integration tests
+    └── fixtures/        # Test data and media
 ```
 
-- `80-paradox-40speakers.conf` - vanilla configuration for 4 speaker setup
-- `80-paradox-51speakers.conf` - vanilla configuration for 51 (6) speaker setup
-- `80-paradox-71speakers.conf` - vanilla configuration for 71 (8) speaker setup
-- `80-paradox-tlt-chamber3.conf` - IC-TLT chamber 3 configuration
+## Getting Started
 
-This will provide new ALSA pseudodevices that will allow sound redirection to specific speakers.
+### Prerequisites
 
-### How to Make a System Service
+- Node.js >= 16.0
+- Media players (mpv, vlc, fbi) in PATH
+- MQTT broker accessible on network
 
-(Add stuff here.)
-No other javascript dependencies or files are required.
+### Setup
 
-## Avaliable Commands
+```bash
+npm install
+cp pxfx.ini.example pxfx.ini
+# Edit pxfx.ini with your configuration
+npm start
+```
 
-For each of the types of devices, the following are the avaliable commands.  
+## Configuration
 
-### Screens (and Audio Devices)
+Edit `pxfx.ini` to configure your devices and MQTT connection:
 
-- `{"Command":"playVideo","Video":"FileName.mp4"}` - plays immediately or when another video is currently playing queues video file: `FileName.mp4`.
-- `{"Command":"setImage","Image":"Picture1.png"}` - displays image: `Picture1.png`.
-- `{"Command":"transition","Image":"EndFrame.png","Video":"Transition.mp4"}` - plays immediately or when another video is currently playing queues video file: `Transition.mp4` and when the requested video starts playing sets the displayed image to the `EndFrame.png` file, so the image becomes visible when the video ends.
-- `{"Command":"playAudio","Audio":"FileName.mp3"}` - plays immediately or when another audio file is currently playing queues audio file: `FileName.mp3`.
-- `{"Command":"playAudioFx","Audio":"SoundFx1.wav"}` - immediately plays audio file: `SoundFx1.wav`.
-- `{"Command":"stopVideo"}` - immediately stops the video playback and removes all queued video.
-- `{"Command":"stopAudio"}` - immediately stops the audio playback and removes all queued audio clips.
-- `{"Command":"stopAllAudioFx"}` - immediately stops all the audio-fx playbacks.
-- `{"Command":"stopAll"}` - immediately stops all video, audio and audio-fx playbacks, removes all queued media.
-- `{"Command":"getConfig"}` - sends current configuration to the reply topic.
-- `{"Command":"videoQueue"}` - sends the names of the currently playing and queued video files to the reply topic.
-- `{"Command":"audioQueue"}` - sends the names of the currently playing and queued audio files to the reply topic.
-- `{"Command":"displayOff"}` - turns off the display if `PX_DISPLAY_OFF_CMD` is set.
-- `{"Command":"displayOn"}` - turns on the display if `PX_DISPLAY_ON_CMD` is set.
-- `{"Command":"reboot"}` - reboots the host if `PX_REBOOT_CMD` is set.
-- `{"Command":"shutdown"}` - shutdowns the host if `PX_SHUTDOWN_CMD` is set.
+```ini
+[mqtt]
+broker = localhost
+port = 1883
+username = 
+password = 
+client_id = pxfx-01
 
-Note: In a future update, there will be the ability to specify a list of audio files to be pre-loaded and paused in order to reduce the latency in playing the audio file.  A limited number of these will be avaliable, so they should be used sparingly for sounds that must have as little of a delay between seeing the MQTT message and the sound actually being played.  
+[screen:living-room]
+topic = paradox/living-room/screen
+media_path = /opt/media
+player_type = mpv
 
-### Light Controllers
+[light:hue-group-1]
+type = hue
+topic = paradox/living-room/lights
+controller = hue
+bridge_ip = 192.168.1.100
 
-(These should be copied over from the ESP32 projects that supported light controls.)
+[relay:bedroom-switch]
+type = relay
+topic = paradox/bedroom/switch
+controller = zigbee
+```
 
-## MQTT Topic and Command Structures
+## MQTT Commands
 
-For each screen, light, or relay, the following MQTT topics must be defined:
+### Screen Devices
 
-- Device Command Topic - Top level topic for the device where commands are sent (ex. Paradox/Room/Screen1).  While this should normally be unique for each device being controlled, by setting two or more devices to watch the same base topic they will mirror each other (although perfect syncronization is not guaranteed).
-- Device Status Topic (automatic) - This topic is automaticlally created and will be a subtopic of the Device Command Topic (ex. Paradox/Room/Screen1/Status) and will report the status, events, and warnings associated with that device.
-- Heartbeat Topic* - Typically, this is a topic shared by all the devices in a particular room where key status information is published on a regular basis.  
+Send commands to `{topic}/command`:
 
-### Light Effect Players and Topics
+```json
+{"command": "playVideo", "file": "video.mp4"}
+{"command": "setImage", "file": "image.png"}
+{"command": "stopAll"}
+```
 
-(Need to pull these form ESP32 projects and merge with the text below.)
+### Light Devices
 
-GROUP is the topic for a specific groups of lights, which will be served by whichever controller or controllers are attached to it.  LIGHT is a specific light in a GROUP.  If a command is sent to a GROUP without specifying one or more LIGHTs (multiple allowed) then all lights in the group will respond.  When one or more lights is included in the command, it will be applied to only those lights.
+```json
+{"command": "on", "brightness": 100, "color": {"r": 255, "g": 0, "b": 0}}
+{"command": "off"}
+{"command": "effect", "name": "fade", "duration": 2000}
+```
 
-When configuring the pxfx-topics.json file, more than one lighting controller can be used per GROUP, but only one controller per LIGHT.  The mapping is that each LIGHT is configured to use one of the automation controllers, and then that LIGHT is mapped to only one GROUP.  Therefore two LIGHT with the same name but different GROUP will be considered different lights.  
+### Relay Devices
 
-If more than one controller is attached to a single topic, then each LIGHT will respond to whatever commands it understands and ignores the others. However, if "groups" or "rooms" are supported by the external API's then a LIGHT could be a group/room as defined in the external API.
+```json
+{"command": "on"}
+{"command": "off"}
+{"command": "toggle"}
+```
 
-#### Effect Macros and Scripts
+## Development
 
-With lighting, some external controllers may support "scenes" or "automations" but they are unlikely to match across various models and brands.  Therefore we will support some pre-defined macros and scripts that handle some common automations across multiple types of controllers.  The following will be included, and can be extended by updates to this software.
+### Running Tests
 
-- FADE = (target color and brightness, trasnition duration)
-- BLINK = (target on color and brightness, duration on, duration off, transition duration)
-- FLIP = (target color 1, target color 2, etc., duration on, duration off, transition duration)
-- DISCO = (target brightness, duration between triggers, transition duration, synced or not)
-- FLAME = (target brightness and color, synced or not)
-- MORSE = (target on color and brightness, dot duration)
+```bash
+npm test                # Run all tests
+npm run test:unit      # Unit tests only
+npm run test:integration # Integration tests only
+npm run test:watch     # Watch mode
+```
 
-NOTE: "synced or not" refers to whether individual lights in a group are locked to the same brightness and color or are sent different commands.
+### Project Structure
 
-For Neopixel type devices we will only support them as solid strip or by indivicually addressing single LEDs on a strip.
+- **Core**: System initialization, configuration, MQTT, and device management
+- **Devices**: Device-specific implementations for screens, lights, and relays
+- **Media**: Media player framework with support for multiple player types
+- **Controllers**: Integration with external systems (Hue, WiZ, Zigbee, Z-Wave)
+- **Effects**: Macro system for complex device sequences
+- **Utils**: Logging and common utilities
 
-==================================================================================
+### Adding New Devices
 
-## Name
+1. Create device class in `lib/devices/`
+2. Implement required methods from base device interface
+3. Add device configuration section to `pxfx.ini`
+4. Register device type in `device-manager.js`
+5. Add unit tests in `test/unit/`
 
-## Description
+### Adding New Controllers
 
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+1. Create controller class in `lib/controllers/`
+2. Implement controller interface for external system communication
+3. Add configuration options to device sections
+4. Test integration with actual hardware
 
-## Badges
+## Media Players
 
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Supported media players:
 
-## Visuals
+- **mpv**: Full-featured video player with JSON IPC
+- **vlc**: VLC media player with RC interface
+- **fbi**: Framebuffer image viewer for static images
 
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Players are automatically selected based on file type and configuration.
 
-## Installation
+## Effect System
 
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+The effect engine supports complex device sequences:
 
-## Usage
+```javascript
+// Example effect definition
+{
+  "name": "sunrise",
+  "devices": ["light:bedroom"],
+  "steps": [
+    {"command": "on", "brightness": 1, "color": {"r": 255, "g": 100, "b": 0}},
+    {"command": "fade", "brightness": 100, "duration": 30000}
+  ]
+}
+```
 
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## License
+
+MIT License - see LICENSE file for details.
+
+## Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Add tests for new functionality
+4. Run test suite
+5. Submit pull request
 
 ## Support
 
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
+- Create an issue for bugs or feature requests
+- Check existing issues before creating new ones
+- Provide configuration and log files when reporting issues
 
 If you have ideas for releases in the future, it is a good idea to list them in the README.
 
