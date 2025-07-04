@@ -44,9 +44,12 @@
 ### ✅ Test Framework
 
 - **Unit Tests**: 35 passing tests for core components
-- **Integration Tests**: MQTT integration test structure
+- **Integration Tests**: MQTT integration and media playback test structure
+- **Media Tests**: Comprehensive media file format testing (images, video, audio)
+- **Transition Tests**: Media type switching and player selection validation
 - **Coverage**: Jest configuration with coverage reporting
 - **Mocking**: Comprehensive mock setup for testing
+- **Test Media**: Structured test media files for realistic testing
 
 ### ✅ Configuration & Documentation
 
@@ -91,17 +94,27 @@ pxfx/
     ├── setup.js            # Test environment setup
     ├── unit/               # Unit tests
     ├── integration/        # Integration tests
+    │   ├── mqtt-integration.test.js    # MQTT broker tests
+    │   └── media-playback.test.js      # Media player tests
     └── fixtures/           # Test data
+        └── test-media/     # Media files for testing
+            ├── README.md   # Media file documentation
+            ├── default.jpg # Test image files
+            ├── default.png # (Copy from /opt/paradox/media/)
+            ├── houdini_picture_24bit.png
+            ├── intro_short.mp4  # Test video files
+            └── default.*   # Additional media formats
 ```
 
 ## Next Steps
 
 ### High Priority
 
-1. **Fix MQTT Client Unit Test**: Update test to work with private properties
-2. **Implement Device Placeholders**: Add actual logic for light and relay devices
-3. **Media Player Integration**: Complete process management and error handling
-4. **Controller Implementations**: Add real API integration for Hue, WiZ, etc.
+1. **Copy Test Media Files**: Copy media files to test/fixtures/test-media/
+2. **Fix MQTT Client Unit Test**: Update test to work with private properties  
+3. **Implement Device Placeholders**: Add actual logic for light and relay devices
+4. **Media Player Integration**: Complete process management and error handling
+5. **Controller Implementations**: Add real API integration for Hue, WiZ, etc.
 
 ### Medium Priority
 

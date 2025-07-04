@@ -130,14 +130,41 @@ Send commands to `{topic}/command`:
 
 ## Development
 
+### Setting Up Test Media
+
+To run the complete test suite, copy media files to the test fixtures directory:
+
+```bash
+# Create test media directory (if not exists)
+mkdir -p test/fixtures/test-media
+
+# Copy test media files from your media collection
+cp /opt/paradox/media/default.* test/fixtures/test-media/
+cp /opt/paradox/media/houdini_picture_24bit.png test/fixtures/test-media/
+cp /opt/paradox/media/intro_short.mp4 test/fixtures/test-media/
+
+# Verify files are copied
+ls -la test/fixtures/test-media/
+```
+
+The tests require various media formats:
+
+- **Images**: JPEG, PNG, GIF, BMP
+- **Video**: MP4, AVI, MKV
+- **Audio**: MP3, WAV, OGG
+
 ### Running Tests
 
 ```bash
-npm test                # Run all tests
-npm run test:unit      # Unit tests only
-npm run test:integration # Integration tests only
-npm run test:watch     # Watch mode
+npm test                # Run all tests (unit + integration)
+npm run test:ci         # Unit tests only (faster, no external dependencies)
+npm run test:manual     # Real media playback tests (you will see/hear media!)
+npm run check-media     # Check available test media files
 ```
+
+**Real Media Playback Tests**: Set `ENABLE_REAL_PLAYBACK=true` to actually display images, play videos, and output audio during testing. Requires X11 display and audio system. See `test/manual/README.md` for details.
+
+**Note**: Integration tests will skip missing media files with warnings.
 
 ### Project Structure
 

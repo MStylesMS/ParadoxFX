@@ -17,6 +17,14 @@ log_level = info
 media_base_path = /opt/media
 heartbeat_interval = 30000
 
+# Image display preferences (for screen devices)
+# Options: feh, pqiv, fim, fbi, imagemagick, auto
+# 'auto' will automatically select the best available option
+preferred_image_player = auto
+
+# Fallback if no framebuffer access (for fbi/fim)
+require_video_group = false
+
 # Screen device configurations
 [screen:living-room]
 type = screen
@@ -24,13 +32,19 @@ topic = paradox/living-room/screen
 media_path = /opt/media/living-room
 player_type = mpv
 audio_device = default
+# Display targeting options:
+display = :0              # X11 display
+xinerama_screen = 0       # Xinerama screen index (for multi-monitor)
+# OR custom geometry for specific monitor positioning:
+# monitor_geometry = 1920x1080+1920+0  # width x height + x_offset + y_offset
 
 [screen:bedroom]
 type = screen
 topic = paradox/bedroom/screen
 media_path = /opt/media/bedroom
-player_type = fbi
-framebuffer = /dev/fb0
+player_type = feh
+display = :0.1            # Second display
+xinerama_screen = 1       # Second monitor
 
 # Light device configurations
 [light:living-room-hue]

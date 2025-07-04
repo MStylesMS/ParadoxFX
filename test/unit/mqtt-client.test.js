@@ -82,11 +82,11 @@ describe('MqttClient', () => {
             mqttClient.subscribe('test/topic', handler);
 
             expect(mockMqttInstance.subscribe).toHaveBeenCalledWith('test/topic', expect.any(Function));
-            
+
             // Simulate successful subscription callback
             const subscribeCallback = mockMqttInstance.subscribe.mock.calls[0][1];
             subscribeCallback(null); // null = no error
-            
+
             // Now verify subscription was registered by triggering a message
             mqttClient._handleMessage('test/topic', JSON.stringify({ test: 'data' }));
             expect(handler).toHaveBeenCalledWith('test/topic', { test: 'data' });
