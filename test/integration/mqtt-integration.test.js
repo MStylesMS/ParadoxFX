@@ -10,25 +10,40 @@ describe('MQTT Integration', () => {
     let mqttClient;
 
     beforeAll(async () => {
-        // Skip integration tests - MQTT functionality is verified separately
-        // These tests have timing issues in Jest but MQTT works perfectly
-        // See test-mqtt-connection.js and main application for proof
-        console.log('📝 Skipping MQTT integration tests (Jest timing issues)');
-        console.log('✅ MQTT functionality verified via:');
-        console.log('   - test-mqtt-connection.js');
-        console.log('   - Main application startup');
-        console.log('   - mosquitto_pub/sub commands');
+        // These tests require an actual MQTT broker running on localhost
+        // Skip if SKIP_INTEGRATION_TESTS is set
+        if (process.env.SKIP_INTEGRATION_TESTS) {
+            console.log('Skipping MQTT integration tests');
+            return;
+        }
     });
 
     beforeEach(() => {
-        // Skip all tests - Jest has timing issues with MQTT
+        if (process.env.SKIP_INTEGRATION_TESTS) {
+            return;
+        }
+
+        const config = {
+            mqttServer: 'localhost',
+            mqttPort: 1883,
+            heartbeatTopic: 'test/integration/heartbeat',
+            heartbeatInterval: 5000
+        };
+
+        mqttClient = new MqttClient(config);
     });
 
     afterEach(async () => {
-        // Skip cleanup - tests are skipped
+        if (process.env.SKIP_INTEGRATION_TESTS) {
+            return;
+        }
+
+        if (mqttClient) {
+            await mqttClient.disconnect();
+        }
     });
 
-    test.skip('should connect to real MQTT broker', async () => {
+    test('should connect to real MQTT broker', async () => {
         if (process.env.SKIP_INTEGRATION_TESTS) {
             return;
         }
@@ -37,7 +52,7 @@ describe('MQTT Integration', () => {
         expect(mqttClient.connected).toBe(true);
     }, 15000);
 
-    test.skip('should publish and receive messages', async () => {
+    test('should publish and receive messages', async () => {
         if (process.env.SKIP_INTEGRATION_TESTS) {
             return;
         }
@@ -70,7 +85,7 @@ describe('MQTT Integration', () => {
         });
     }, 10000);
 
-    test.skip('should handle multiple subscribers', async () => {
+    test('should handle multiple subscribers', async () => {
         if (process.env.SKIP_INTEGRATION_TESTS) {
             return;
         }
@@ -115,7 +130,7 @@ describe('MQTT Integration', () => {
         });
     }, 10000);
 
-    test.skip('should handle connection loss and reconnection', async () => {
+    test('should handle connection loss and reconnection', async () => {
         if (process.env.SKIP_INTEGRATION_TESTS) {
             return;
         }
@@ -131,7 +146,7 @@ describe('MQTT Integration', () => {
         // This test verifies the event handling works correctly
     }, 10000);
 
-    test.skip('should respect QoS settings', async () => {
+    test('should respect QoS settings', async () => {
         if (process.env.SKIP_INTEGRATION_TESTS) {
             return;
         }
