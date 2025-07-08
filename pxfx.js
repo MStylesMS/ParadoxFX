@@ -24,8 +24,13 @@ class PxFxApplication {
         try {
             this.logger.info('Starting Paradox Effects application...');
 
+            // Parse command line for --config or -c
+            const argv = require('minimist')(process.argv.slice(2));
+            const configFile = argv.config || argv.c || './pxfx.ini';
+            this.logger.info(`Using config file: ${configFile}`);
+
             // Load configuration
-            this.config = await ConfigLoader.load('./pxfx.ini');
+            this.config = await ConfigLoader.load(configFile);
             this.logger.info(`Loaded configuration for ${Object.keys(this.config.devices).length} devices`);
 
             // Initialize MQTT client

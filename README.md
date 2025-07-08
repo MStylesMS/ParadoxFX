@@ -10,7 +10,33 @@ PxFx is a comprehensive system for controlling various devices through MQTT mess
 - **Lights**: Philips Hue, WiZ, and other smart lighting systems
 - **Relays**: Zigbee and Z-Wave devices for automation
 
-All configuration is managed through a single `pxfx.ini` file with device-specific sections.
+All configuration is managed through a `pxfx.ini` file (or a custom file via `--config`) with device-specific sections.
+
+## Test Configuration
+
+For testing, you can use a separate configuration file (e.g. `pxfx-test.ini`) to point to test media and settings. To run with a test config:
+
+```sh
+node pxfx.js --config pxfx-test.ini
+```
+
+If no `--config` or `-c` argument is provided, the application defaults to `pxfx.ini` in the project root.
+
+**Example `pxfx-test.ini`:**
+
+```ini
+[global]
+media_root=./test/fixtures/test-media
+mqtt_broker=mqtt://localhost:1883
+
+[ScreenA]
+display=0
+default_image=TestPattern_1920x1080.png
+video_volume=70
+audio_volume=70
+videoQueueMax=5
+audioQueueMax=5
+```
 
 ## Architecture
 
@@ -100,33 +126,63 @@ topic = paradox/bedroom/switch
 controller = zigbee
 ```
 
+## Updated Configuration
+
+### Screen Settings
+
+- `DEFAULT_IMAGE`: Default image to display when no media is queued. Defaults to `default.png`.
+
+- `VIDEO_VOLUME`: Base volume for video playback, used as 100% reference.
+
+### Audio Settings
+
+- `AUDIO_VOLUME`: Base volume for audio playback, used as 100% reference.
+
+- `AUDIOFX_MAX_POLY`: Maximum number of polyphonic audio FX files allowed.
+
 ## MQTT Commands
 
-### Screen Devices
+### Video Commands
 
-Send commands to `{topic}/command`:
+- `playVideo`: Play a video file. Parameters: `Video`, `Volume` (optional).
 
-```json
-{"command": "playVideo", "file": "video.mp4"}
-{"command": "setImage", "file": "image.png"}
-{"command": "stopAll"}
-```
+- `setImage`: Set an image file.
 
-### Light Devices
+- `transition`: Transition from an image to a video. Parameters: `Image`, `Video`.
 
-```json
-{"command": "on", "brightness": 100, "color": {"r": 255, "g": 0, "b": 0}}
-{"command": "off"}
-{"command": "effect", "name": "fade", "duration": 2000}
-```
+- `clearQueue`: Clear the video queue.
 
-### Relay Devices
+- `pause`: Pause the current video.
 
-```json
-{"command": "on"}
-{"command": "off"}
-{"command": "toggle"}
-```
+- `resume`: Resume the paused video.
+
+- `skip`: Skip to the next video in the queue.
+
+- `stopAll`: Stop all video playback and clear the queue.
+
+### Audio Commands
+
+- `playAudio`: Play an audio file. Parameters: `Audio`, `Volume` (optional).
+
+- `playAudioFX`: Play an audio FX file. Parameters: `Audio`, `Type` (optional, default: `one-shot`), `Volume` (optional).
+
+- `clearQueue`: Clear the audio queue.
+
+- `pause`: Pause the current audio.
+
+- `resume`: Resume the paused audio.
+
+- `skip`: Skip to the next audio in the queue.
+
+- `stopAll`: Stop all audio playback and clear the queue.
+
+## Error Handling
+
+### Status Messages
+
+- `Type`: `event` or `warning`.
+
+- `Description`: Detailed information about the event or warning.
 
 ## Development
 

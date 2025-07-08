@@ -12,8 +12,10 @@
 const path = require('path');
 const fs = require('fs');
 
-// Determine configuration file
-const configFile = process.argv[2] || 'pxfx.ini';
+// Parse --config/-c or positional argument for config file
+const minimist = require('minimist');
+const argv = minimist(process.argv.slice(2));
+const configFile = argv.config || argv.c || argv._[0] || 'pxfx.ini';
 const configPath = path.resolve(configFile);
 
 // Check if config file exists
@@ -30,6 +32,7 @@ console.log('Press Ctrl+C to stop the application.');
 // Load and start the main application
 try {
     const PxFx = require('./pxfx');
+    // Pass config path to PxFx constructor if supported, else set env var
     const app = new PxFx(configPath);
 
     // Handle graceful shutdown

@@ -10,6 +10,7 @@ describe('ScreenDevice', () => {
     let mockConfig;
 
     beforeEach(() => {
+        // For unit tests, use a mock config object (do not load .ini)
         mockConfig = {
             name: 'TestScreen',
             type: 'screen',
@@ -27,6 +28,12 @@ describe('ScreenDevice', () => {
         screenDevice = new ScreenDevice(mockConfig, mockMqttClient);
     });
 
+    // Example for integration/system test:
+    // const loadTestConfig = require('../utils/loadTestConfig');
+    // let realConfig;
+    // beforeAll(async () => {
+    //     realConfig = await loadTestConfig();
+    // });
     describe('initialization', () => {
         test('should initialize with correct configuration', async () => {
             await screenDevice.initialize();
