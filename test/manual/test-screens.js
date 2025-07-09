@@ -1,11 +1,29 @@
+/**
+ * @fileoverview MPV Screen Test Script - Seamless Video/Image Transition Demo
+ * @description This script demonstrates seamless media transitions using a single MPV instance
+ * for screen display. It showcases how to display an image, wait, then transition to a video
+ * without any flicker or interruption.
+ * 
+ * @author Paradox FX Team
+ * @version 1.0.0
+ * @since 2025-07-09
+ */
+
 const net = require('net');
 const path = require('path');
 const { spawn, execSync } = require('child_process');
 const fs = require('fs');
 const readline = require('readline');
 
+/**
+ * Test media file paths
+ */
 const IMAGE_PATH = path.resolve(__dirname, '../fixtures/test-media/default.png');
 const VIDEO_PATH = path.resolve(__dirname, '../fixtures/test-media/default.mp4');
+
+/**
+ * MPV IPC socket path for screen control
+ */
 const SCREEN_MPV_SOCKET = '/tmp/mpv-screen-ipc.sock';
 
 // Clean up old socket file before starting
@@ -15,11 +33,35 @@ try {
     // Ignore error if file doesn't exist
 }
 
-// --- MPV Configuration ---
-// One set of arguments for the single screen instance.
-// --fs-screen=0 and --fullscreen are used to target a specific monitor.
-// --keep-open=yes ensures the last frame of a video or an image is held.
-// --no-osd-bar hides the on-screen controls.
+/**
+ * MPV SEAMLESS TRANSITION CONFIGURATION
+ * ====================================
+ * 
+ * This script uses a single MPV instance to control screen display with seamless transitions.
+ * The key to seamless playback is the combination of specific MPV arguments that ensure:
+ * 1. No interruption between media files
+ * 2. Fullscreen display on target monitor
+ * 3. IPC control for programmatic commands
+ * 
+ * MPV Arguments Explained:
+ * - --idle=yes: Keeps MPV running even when no file is loaded
+ * - --input-ipc-server=/tmp/mpv-screen-ipc.sock: Enables IPC control via Unix socket
+ * - --no-terminal: Prevents terminal output interference
+ * - --fs-screen=0: Targets specific monitor (0 = primary display)
+ * - --fullscreen: Forces fullscreen mode
+ * - --keep-open=yes: Holds the last frame of videos/images until replaced
+ * - --no-osd-bar: Hides on-screen controls for clean display
+ * - --msg-level=all=info: Sets logging level for debugging
+ * 
+ * The seamless transition works because:
+ * 1. MPV stays running in idle mode between media files
+ * 2. --keep-open=yes ensures the current frame remains visible
+ * 3. loadfile with 'replace' mode switches content instantly
+ * 4. No process restart = no screen flicker or black frames
+ */
+/**
+ * MPV command line arguments for seamless screen display
+ */
 const screenArgs = [
     '--idle=yes',
     '--input-ipc-server=' + SCREEN_MPV_SOCKET,
@@ -31,8 +73,12 @@ const screenArgs = [
     '--msg-level=all=info'
 ];
 
-// --- IPC Command Function ---
-// A single function to send commands to the mpv instance.
+/**
+ * Send IPC command to MPV instance
+ * @param {Object} cmdObj - Command object with 'command' array property
+ * @returns {Promise<Object>} Promise resolving to MPV response
+ * @throws {Error} If command times out or connection fails
+ */
 function sendMpvCommand(cmdObj) {
     return new Promise((resolve, reject) => {
         console.log(`[IPC] Connecting to ${SCREEN_MPV_SOCKET}`);
@@ -98,7 +144,19 @@ function sendMpvCommand(cmdObj) {
     });
 }
 
-// --- Main Execution Logic ---
+/**
+ * Main execution logic - Demonstrates seamless media transitions
+ * 
+ * Sequence:
+ * 1. Clean up any existing MPV instances
+ * 2. Launch single MPV instance with seamless transition configuration
+ * 3. Wait for IPC socket to be ready
+ * 4. Display initial image
+ * 5. Wait specified duration
+ * 6. Transition to video playback
+ * 7. Wait for user input to terminate
+ * 8. Gracefully quit MPV
+ */
 (async () => {
     // Terminate any old MPV instances to ensure a clean start.
     try {
