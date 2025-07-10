@@ -145,7 +145,191 @@ function sendMpvCommand(cmdObj) {
 }
 
 /**
- * Main execution logic - Demonstrates seamless media transitions
+ * Create a smart property observer that waits for video to actually start before monitoring end
+ * @returns {Promise<void>} Promise that resolves when video actually reaches its end
+ */
+function createSmartPropertyObserver() {
+    return new Promise((resolve, reject) => {
+        console.log('[OBSERVER] Creating smart property observer...');
+        const client = net.createConnection(SCREEN_MPV_SOCKET, () => {
+            console.log('[OBSERVER] Connected to MPV for smart property monitoring');
+
+            // Set up property observations
+            const setupCommands = [
+                { command: ['observe_property', 1, 'eof-reached'] },
+                { command: ['observe_property', 2, 'pause'] },
+                { command: ['observe_property', 3, 'playback-time'] },
+                { command: ['observe_property', 4, 'duration'] }
+            ];
+
+            setupCommands.forEach(cmd => {
+                const cmdString = JSON.stringify(cmd) + '\n';
+                console.log(`[OBSERVER] Setting up observation: ${cmdString.trim()}`);
+                client.write(cmdString);
+            });
+        });
+
+        let buffer = '';
+        let videoHasStarted = false;
+        let currentTime = 0;
+        let videoDuration = 0;
+        let isCurrentlyPaused = false;
+
+        const timeout = setTimeout(() => {
+            client.destroy();
+            reject(new Error('Smart property observer timed out'));
+        }, 60000);
+
+        client.on('data', (chunk) => {
+            buffer += chunk.toString();
+
+            // Process buffer line by line
+            let newlineIndex;
+            while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+                const line = buffer.substring(0, newlineIndex);
+                buffer = buffer.substring(newlineIndex + 1);
+
+                if (line.trim() === '') continue;
+
+                try {
+                    const responseJson = JSON.parse(line);
+
+                    // Log all events and property changes for debugging
+                    if (responseJson.event) {
+                        console.log(`[OBSERVER] Event: ${responseJson.event}${responseJson.reason ? ` (${responseJson.reason})` : ''}`);
+                    }
+
+                    // Check for property changes
+                    if (responseJson.event === 'property-change') {
+                        const propName = responseJson.name;
+                        const propValue = responseJson.data;
+                        console.log(`[OBSERVER] Property changed: ${propName} = ${propValue}`);
+
+                        // Track video properties
+                        if (propName === 'playback-time' && propValue !== null) {
+                            currentTime = propValue;
+                            // Consider video started if we have positive playback time
+                            if (propValue > 0.1 && !videoHasStarted) {
+                                videoHasStarted = true;
+                                console.log('[OBSERVER] Video playback confirmed - now monitoring for end...');
+                            }
+                        }
+
+                        if (propName === 'duration' && propValue !== null) {
+                            videoDuration = propValue;
+                            console.log(`[OBSERVER] Video duration: ${videoDuration} seconds`);
+                        }
+
+                        if (propName === 'pause') {
+                            isCurrentlyPaused = propValue;
+                        }
+
+                        // Only detect end if video has actually started
+                        if (videoHasStarted) {
+                            // Method 1: eof-reached becomes true after video started
+                            if (propName === 'eof-reached' && propValue === true) {
+                                console.log('[OBSERVER] *** Video reached EOF after starting! ***');
+                                clearTimeout(timeout);
+                                client.end();
+                                resolve();
+                                return;
+                            }
+
+                            // Method 2: Check if paused and at/near the end time
+                            if (propName === 'pause' && propValue === true && videoDuration > 0) {
+                                const percentComplete = (currentTime / videoDuration) * 100;
+                                console.log(`[OBSERVER] Video paused at ${percentComplete.toFixed(1)}% (${currentTime.toFixed(2)}s / ${videoDuration.toFixed(2)}s)`);
+
+                                if (percentComplete > 95) { // Consider 95%+ as "end"
+                                    console.log('[OBSERVER] *** Video paused at end! ***');
+                                    clearTimeout(timeout);
+                                    client.end();
+                                    resolve();
+                                    return;
+                                }
+                            }
+                        } else {
+                            // Before video starts, log but don't trigger end detection
+                            if (propName === 'eof-reached' && propValue === true) {
+                                console.log('[OBSERVER] eof-reached=true detected before video started (ignoring)');
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // Ignore parsing errors for property observer
+                }
+            }
+        });
+
+        client.on('end', () => {
+            console.log('[OBSERVER] Smart property observer connection ended.');
+            clearTimeout(timeout);
+        });
+
+        client.on('close', (hadError) => {
+            console.log(`[OBSERVER] Smart property observer connection closed. Had error: ${hadError}`);
+            clearTimeout(timeout);
+        });
+
+        client.on('error', (err) => {
+            console.error('[OBSERVER] Smart property observer connection error:', err);
+            clearTimeout(timeout);
+            reject(err);
+        });
+    });
+}
+
+/**
+ * Wait for video to reach its end using smart property observation
+ * @param {Promise} videoEndPromise - Optional pre-started smart property observer promise
+ * @returns {Promise<void>} Promise that resolves when video ends
+ */
+async function waitForVideoEnd(videoEndPromise = null) {
+    console.log('[WAIT] Starting to monitor for video end using smart property observation...');
+    try {
+        if (videoEndPromise) {
+            await videoEndPromise;
+        } else {
+            await createSmartPropertyObserver();
+        }
+        console.log('[WAIT] Video end detected via smart property observation!');
+    } catch (error) {
+        console.error('[WAIT] Error waiting for video end:', error);
+        // Fallback to polling method
+        console.log('[WAIT] Falling back to polling method...');
+        await pollForVideoEnd();
+    }
+}
+
+/**
+ * Fallback polling method to detect video end
+ * @returns {Promise<void>} Promise that resolves when video ends
+ */
+async function pollForVideoEnd() {
+    console.log('[POLL] Starting polling for video end...');
+    let attempts = 0;
+    const maxAttempts = 60; // 30 seconds with 500ms intervals
+
+    while (attempts < maxAttempts) {
+        try {
+            const eofResponse = await sendMpvCommand({ command: ['get_property', 'eof-reached'] });
+            if (eofResponse.data === true) {
+                console.log('[POLL] Video end detected via polling!');
+                return;
+            }
+        } catch (error) {
+            console.error('[POLL] Error checking eof-reached:', error);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+        attempts++;
+    }
+
+    console.log('[POLL] Polling timeout reached');
+}
+
+/**
+ * Main execution logic - Demonstrates seamless media transitions with immediate video end detection
  * 
  * Sequence:
  * 1. Clean up any existing MPV instances
@@ -153,9 +337,12 @@ function sendMpvCommand(cmdObj) {
  * 3. Wait for IPC socket to be ready
  * 4. Display initial image
  * 5. Wait specified duration
- * 6. Transition to video playback
- * 7. Wait for user input to terminate
- * 8. Gracefully quit MPV
+ * 6. Start property observer for immediate video end detection
+ * 7. Transition to video playback
+ * 8. Wait for video to reach its end (detected via property observation)
+ * 9. Display completion message
+ * 10. Wait for user input to terminate
+ * 11. Gracefully quit MPV
  */
 (async () => {
     // Terminate any old MPV instances to ensure a clean start.
@@ -214,19 +401,29 @@ function sendMpvCommand(cmdObj) {
         console.log('Waiting 3 seconds...');
         await new Promise(resolve => setTimeout(resolve, 3000));
 
-        // 3. Play the video. --keep-open will hold the last frame.
+        // 3. Start smart property observer before playing video
+        console.log('Starting smart property observer before video playback...');
+        const videoEndPromise = createSmartPropertyObserver();
+
+        // 4. Play the video. --keep-open will hold the last frame.
         console.log(`Playing video: ${VIDEO_PATH}`);
         await sendMpvCommand({ command: ['loadfile', VIDEO_PATH, 'replace'] });
         console.log('Ensuring video is playing...');
         await sendMpvCommand({ command: ['set_property', 'pause', false] });
 
-        // 4. Wait for user input to terminate the script.
-        console.log('\nPlayback sequence complete. Press ENTER to quit.');
+        // 5. Wait for video to reach its end using smart property observation
+        console.log('Waiting for video to reach its end via smart property observation...');
+        await waitForVideoEnd(videoEndPromise);
+        console.log('✓ Video has reached its end and is paused on the last frame!');
+
+        // 6. Wait for user input to terminate the script.
+        console.log('\nVideo playback complete! The last frame is being held on screen.');
+        console.log('Press ENTER to quit.');
         const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
         await new Promise(resolve => rl.question('', resolve));
         rl.close();
 
-        // 5. Quit mpv gracefully and exit.
+        // 7. Quit mpv gracefully and exit.
         console.log('Quitting MPV and exiting...');
         await sendMpvCommand({ command: ['quit'] });
 
