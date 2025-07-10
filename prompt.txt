@@ -27,13 +27,14 @@ COMPLETED WORK:
 
 2. AUDIO TEST SCRIPT (/opt/paradox/apps/pxfx/test/manual/test-audio.js):
    - Multiple MPV instances for different audio purposes:
-     * Background music (looping, volume control, ducking)
-     * Sound effects (pre-loaded, ultra-low latency ~1ms achieved)
-     * Speech/narration (with auto-ducking of background music)
+     * Background music (persistent IPC instance, looping, volume control, ducking)
+     * Sound effects (fire-and-forget spawn, multiple can overlap, ultra-low latency ~1ms)
+     * Speech/narration (queue-based system planned, auto-ducking of background music)
    - Real-time volume control via IPC
    - Multiple simultaneous audio streams
    - Comprehensive latency testing and performance monitoring
-   - Integration-ready with detailed architecture comments
+   - Integration-ready with detailed architecture comments and clear MPV launch strategies
+   - Three sound effect methods tested with Method 3 (low-latency spawn) marked as PREFERRED
    - All requirements met with excellent performance
 
 3. INTEGRATION PREPARATION:
@@ -42,6 +43,14 @@ COMPLETED WORK:
    - Clear separation of test logic vs. production-ready components
    - Socket management patterns established
    - Error handling and cleanup patterns implemented
+
+4. COMMENT IMPROVEMENTS (LATEST):
+   - Enhanced audio type classifications with clear management strategies
+   - Detailed MPV launch settings and rationale for each audio type
+   - Clarified that speech will use queue-based system in PxFx integration
+   - Emphasized fire-and-forget nature of sound effects (multiple can overlap)
+   - Marked preferred method for sound effects (Method 3: low-latency spawn)
+   - Added comprehensive integration summary with performance benchmarks
 
 KEY ACHIEVEMENTS:
 ================
@@ -55,16 +64,17 @@ KEY ACHIEVEMENTS:
 CURRENT STATE:
 =============
 - test-screens.js: Complete, integration-ready
-- test-audio.js: Complete, integration-ready  
+- test-audio.js: Complete, integration-ready with enhanced documentation
 - Test media available in /opt/paradox/apps/pxfx/test/fixtures/test-media/
-- Both scripts fully documented with integration notes
+- Both scripts fully documented with integration notes and clear architecture
 - All core functionality validated through testing
+- Audio management strategies clearly documented for PxFx integration
 
 PENDING WORK:
 ============
-1. IMMEDIATE (mentioned by user):
-   - Modify order and selection of test sounds in audio test script
-   - User will provide specific instructions for sound order changes
+1. IMMEDIATE (if needed):
+   - Any additional modifications to test sound order or selection
+   - User feedback on current audio test implementation
 
 2. NEXT STEPS:
    - Create combined audio+video test script to verify synchronized operation
