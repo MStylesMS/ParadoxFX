@@ -7,6 +7,28 @@
  * - Real-time volume control via IPC
  * - Multiple simultaneous audio streams
  * 
+ * INTEGRATION NOTES:
+ * =================
+ * This file contains reusable components for the main PxFx system:
+ * 
+ * REUSABLE FUNCTIONS (for integration):
+ * - createAudioArgs() - MPV argument configuration
+ * - sendMpvCommand() - IPC communication (can be shared with video)
+ * - waitForSocket() - Socket ready detection
+ * - measureAudioLatency() - Performance monitoring
+ * 
+ * AUDIO ARCHITECTURE (for PxFx integration):
+ * - Multiple MPV instances for different audio purposes
+ * - Background music instance with ducking capability
+ * - Low-latency effects instance with pre-loading
+ * - Speech/narration instance with auto-ducking
+ * 
+ * INTEGRATION STRATEGY:
+ * - Audio instances run independently from video instance
+ * - All use same IPC communication pattern
+ * - Volume control coordinated through central controller
+ * - Socket management can be unified
+ * 
  * @author Paradox FX Team
  * @version 1.0.0
  * @since 2025-07-09
@@ -20,6 +42,9 @@ const readline = require('readline');
 
 /**
  * Test audio file paths
+ * 
+ * INTEGRATION NOTE: In PxFx system, these will be dynamically resolved
+ * from the media configuration system
  */
 const BACKGROUND_MUSIC = path.resolve(__dirname, '../fixtures/test-media/houdini_music.mp3');
 const SOUND_EFFECT = path.resolve(__dirname, '../fixtures/test-media/default_fx.wav');
@@ -28,11 +53,15 @@ const SHORT_AUDIO = path.resolve(__dirname, '../fixtures/test-media/default.wav'
 
 /**
  * MPV IPC socket paths for different audio purposes
+ * 
+ * INTEGRATION NOTE: In PxFx system, these will be managed by a central
+ * socket manager to avoid conflicts with video sockets
  */
 const BACKGROUND_MUSIC_SOCKET = '/tmp/mpv-background-ipc.sock';
 const SOUND_EFFECTS_SOCKET = '/tmp/mpv-effects-ipc.sock';
 const SPEECH_SOCKET = '/tmp/mpv-speech-ipc.sock';
 
+// INTEGRATION FUNCTION: Socket cleanup utility (reusable)
 // Clean up old socket files before starting
 const sockets = [BACKGROUND_MUSIC_SOCKET, SOUND_EFFECTS_SOCKET, SPEECH_SOCKET];
 sockets.forEach(socket => {
@@ -74,19 +103,28 @@ sockets.forEach(socket => {
  */
 
 /**
- * Create MPV arguments for different audio purposes
+ * INTEGRATION FUNCTION: Create MPV arguments for different audio purposes
+ * 
+ * This function will be used in the main PxFx system to configure
+ * audio instances with appropriate settings for their purpose.
+ * 
+ * @param {string} socketPath - IPC socket path
+ * @param {string} purpose - Audio purpose: 'background', 'effects', 'speech'
+ * @returns {string[]} MPV command line arguments
  */
 function createAudioArgs(socketPath, purpose) {
+    // INTEGRATION NOTE: Base arguments shared across all audio instances
     const baseArgs = [
         '--idle=yes',
         `--input-ipc-server=${socketPath}`,
         '--no-terminal',
-        '--no-video',  // Audio-only mode
+        '--no-video',  // Audio-only mode for efficiency
         '--msg-level=all=info'
     ];
 
     switch (purpose) {
         case 'background':
+            // INTEGRATION: Background music configuration
             return [
                 ...baseArgs,
                 '--volume=70',           // Lower default volume for background
@@ -95,6 +133,7 @@ function createAudioArgs(socketPath, purpose) {
             ];
 
         case 'effects':
+            // INTEGRATION: Low-latency sound effects configuration
             return [
                 ...baseArgs,
                 '--volume=100',          // Full volume for effects
@@ -104,6 +143,7 @@ function createAudioArgs(socketPath, purpose) {
             ];
 
         case 'speech':
+            // INTEGRATION: Speech/narration configuration
             return [
                 ...baseArgs,
                 '--volume=90',           // High volume for speech
@@ -117,7 +157,11 @@ function createAudioArgs(socketPath, purpose) {
 }
 
 /**
- * Send IPC command to specific MPV instance
+ * INTEGRATION FUNCTION: Send IPC command to specific MPV instance
+ * 
+ * This function can be shared between audio and video systems.
+ * It handles the low-level IPC communication with any MPV instance.
+ * 
  * @param {string} socketPath - Path to the MPV IPC socket
  * @param {Object} cmdObj - Command object with 'command' array property
  * @returns {Promise<Object>} Promise resolving to MPV response
@@ -147,6 +191,7 @@ function sendMpvCommand(socketPath, cmdObj) {
 
                 try {
                     const responseJson = JSON.parse(line);
+                    // INTEGRATION NOTE: This handles command responses, not events
                     if (responseJson.error !== undefined) {
                         clearTimeout(timeout);
                         client.end();
@@ -169,7 +214,11 @@ function sendMpvCommand(socketPath, cmdObj) {
 }
 
 /**
- * Measure audio latency by timing command execution
+ * INTEGRATION FUNCTION: Measure audio latency by timing command execution
+ * 
+ * This function can be used in production to monitor performance
+ * and ensure sound effects meet latency requirements.
+ * 
  * @param {string} socketPath - MPV socket path
  * @param {Object} command - MPV command to execute
  * @returns {Promise<number>} Latency in milliseconds
@@ -187,7 +236,11 @@ async function measureAudioLatency(socketPath, command) {
 }
 
 /**
- * Wait for MPV socket to be ready
+ * INTEGRATION FUNCTION: Wait for MPV socket to be ready
+ * 
+ * This function is reusable for both audio and video socket management.
+ * It ensures MPV instances are ready before sending commands.
+ * 
  * @param {string} socketPath - Path to socket file
  * @param {number} maxRetries - Maximum retry attempts
  * @returns {Promise<boolean>} True if socket is ready
@@ -202,8 +255,21 @@ async function waitForSocket(socketPath, maxRetries = 20) {
     return false;
 }
 
+// ============================================================================
+// AUDIO TEST FUNCTIONS
+// 
+// INTEGRATION NOTE: These functions demonstrate the capabilities and can be
+// adapted for the main PxFx system. The core functionality (volume control,
+// loading, etc.) will be used in production.
+// ============================================================================
+
 /**
- * Test background music playback and volume control
+ * INTEGRATION REFERENCE: Test background music playback and volume control
+ * 
+ * Key features for PxFx integration:
+ * - Background music loading and looping
+ * - Real-time volume control (for ducking)
+ * - Volume restoration after speech
  */
 async function testBackgroundMusic() {
     console.log('\n=== Testing Background Music ===');
@@ -249,7 +315,13 @@ async function testBackgroundMusic() {
 }
 
 /**
- * Test low-latency sound effects
+ * INTEGRATION REFERENCE: Test low-latency sound effects
+ * 
+ * Key features for PxFx integration:
+ * - Sound effect pre-loading for instant playback
+ * - Latency measurement and monitoring
+ * - Sub-100ms response time achievement
+ * - Reset/replay capability for repeated effects
  */
 async function testSoundEffects() {
     console.log('\n=== Testing Low-Latency Sound Effects ===');
@@ -327,7 +399,13 @@ async function testSoundEffects() {
 }
 
 /**
- * Test speech/narration with background music ducking
+ * INTEGRATION REFERENCE: Test speech/narration with background music ducking
+ * 
+ * Key features for PxFx integration:
+ * - Coordinated volume management between instances
+ * - Automatic background music ducking during speech
+ * - Speech audio loading and playback
+ * - Volume restoration timing
  */
 async function testSpeechWithDucking() {
     console.log('\n=== Testing Speech with Background Music Ducking ===');
@@ -374,7 +452,13 @@ async function testSpeechWithDucking() {
 }
 
 /**
- * Test multiple simultaneous audio streams
+ * INTEGRATION REFERENCE: Test multiple simultaneous audio streams
+ * 
+ * Key features for PxFx integration:
+ * - Multi-instance coordination
+ * - Simultaneous playback capability
+ * - Volume balancing between different audio types
+ * - Timing coordination for complex audio scenarios
  */
 async function testMultipleAudioStreams() {
     console.log('\n=== Testing Multiple Simultaneous Audio Streams ===');
@@ -418,6 +502,19 @@ async function testMultipleAudioStreams() {
         return false;
     }
 }
+
+// ============================================================================
+// MAIN EXECUTION LOGIC - AUDIO TESTING
+// 
+// INTEGRATION BLUEPRINT: This section demonstrates the complete audio system
+// initialization and management pattern for the PxFx system.
+// 
+// Key integration patterns:
+// 1. Multiple MPV instance management
+// 2. Socket coordination and cleanup
+// 3. Error handling and recovery
+// 4. Performance monitoring and validation
+// ============================================================================
 
 /**
  * Main execution logic - Comprehensive audio testing

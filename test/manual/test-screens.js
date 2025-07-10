@@ -4,6 +4,29 @@
  * for screen display. It showcases how to display an image, wait, then transition to a video
  * without any flicker or interruption.
  * 
+ * INTEGRATION NOTES:
+ * =================
+ * This file contains reusable components for the main PxFx system:
+ * 
+ * REUSABLE FUNCTIONS (for integration):
+ * - sendMpvCommand() - IPC communication (shared with audio system)
+ * - createSmartPropertyObserver() - Video end detection
+ * - waitForVideoEnd() - Video completion monitoring
+ * - pollForVideoEnd() - Fallback detection method
+ * 
+ * VIDEO ARCHITECTURE (for PxFx integration):
+ * - Single MPV instance for seamless screen transitions
+ * - Smart property observation for immediate end detection
+ * - Fullscreen video display with last frame holding
+ * - IPC-based control for synchronized operations
+ * 
+ * INTEGRATION STRATEGY:
+ * - Video instance runs independently from audio instances
+ * - Same IPC communication pattern as audio system
+ * - Property observation can trigger audio events
+ * - Socket management unified with audio sockets
+ * - End detection triggers next sequence in show
+ * 
  * @author Paradox FX Team
  * @version 1.0.0
  * @since 2025-07-09
@@ -17,15 +40,22 @@ const readline = require('readline');
 
 /**
  * Test media file paths
+ * 
+ * INTEGRATION NOTE: In PxFx system, these will be dynamically resolved
+ * from the show configuration and media management system
  */
 const IMAGE_PATH = path.resolve(__dirname, '../fixtures/test-media/default.png');
 const VIDEO_PATH = path.resolve(__dirname, '../fixtures/test-media/default.mp4');
 
 /**
  * MPV IPC socket path for screen control
+ * 
+ * INTEGRATION NOTE: In PxFx system, this will be managed by a central
+ * socket manager alongside audio sockets
  */
 const SCREEN_MPV_SOCKET = '/tmp/mpv-screen-ipc.sock';
 
+// INTEGRATION FUNCTION: Socket cleanup utility (reusable)
 // Clean up old socket file before starting
 try {
     fs.unlinkSync(SCREEN_MPV_SOCKET);
@@ -61,6 +91,9 @@ try {
  */
 /**
  * MPV command line arguments for seamless screen display
+ * 
+ * INTEGRATION NOTE: These arguments are optimized for video display
+ * and will be used in the main PxFx video player configuration
  */
 const screenArgs = [
     '--idle=yes',
@@ -74,7 +107,11 @@ const screenArgs = [
 ];
 
 /**
- * Send IPC command to MPV instance
+ * INTEGRATION FUNCTION: Send IPC command to MPV instance
+ * 
+ * This function can be shared with the audio system - same pattern
+ * for all MPV IPC communication in the PxFx system.
+ * 
  * @param {Object} cmdObj - Command object with 'command' array property
  * @returns {Promise<Object>} Promise resolving to MPV response
  * @throws {Error} If command times out or connection fails
@@ -134,8 +171,18 @@ function sendMpvCommand(cmdObj) {
 }
 
 /**
- * Create a smart property observer that waits for video to actually start before monitoring end
- * This solves the issue where eof-reached=true is set immediately with --keep-open=yes
+ * INTEGRATION FUNCTION: Create a smart property observer for video end detection
+ * 
+ * This solves the critical issue where eof-reached=true is set immediately 
+ * with --keep-open=yes. The function waits for actual video start before 
+ * monitoring for end, preventing false positives.
+ * 
+ * Key integration features:
+ * - Immediate video end detection after playback starts
+ * - No false positives from --keep-open behavior  
+ * - Can trigger audio events or next sequence in show
+ * - Property observation pattern reusable for other MPV monitoring
+ * 
  * @returns {Promise<void>} Promise that resolves when video actually reaches its end
  */
 function createSmartPropertyObserver() {
@@ -232,7 +279,11 @@ function createSmartPropertyObserver() {
 }
 
 /**
- * Wait for video to reach its end using smart property observation
+ * INTEGRATION FUNCTION: Wait for video to reach its end using smart property observation
+ * 
+ * This function provides the main interface for video end detection in PxFx.
+ * It uses the smart property observer with polling fallback for reliability.
+ * 
  * @param {Promise} videoEndPromise - Optional pre-started smart property observer promise
  * @returns {Promise<void>} Promise that resolves when video ends
  */
@@ -246,14 +297,18 @@ async function waitForVideoEnd(videoEndPromise = null) {
         console.log('Video end detected successfully!');
     } catch (error) {
         console.error('Error waiting for video end:', error);
-        // Fallback to polling method
+        // INTEGRATION NOTE: Fallback polling ensures reliability
         console.log('Falling back to polling method...');
         await pollForVideoEnd();
     }
 }
 
 /**
- * Fallback polling method to detect video end
+ * INTEGRATION FUNCTION: Fallback polling method to detect video end
+ * 
+ * This provides a reliable backup method when property observation fails.
+ * Used as secondary detection method in production PxFx system.
+ * 
  * @returns {Promise<void>} Promise that resolves when video ends
  */
 async function pollForVideoEnd() {
@@ -278,6 +333,22 @@ async function pollForVideoEnd() {
 
     console.log('Polling timeout reached');
 }
+
+// ============================================================================
+// MAIN EXECUTION LOGIC - VIDEO TESTING
+// 
+// INTEGRATION BLUEPRINT: This section demonstrates the complete video system
+// initialization and control pattern for the PxFx system.
+// 
+// Key integration patterns:
+// 1. Single MPV instance for seamless video transitions
+// 2. Image to video transition workflow
+// 3. Smart video end detection preventing false positives
+// 4. Graceful cleanup and process management
+// 
+// COMBINATION NOTES: This video system will run alongside the audio system
+// with coordinated timing and event triggering between them.
+// ============================================================================
 
 /**
  * Main execution logic - Demonstrates seamless media transitions with reliable video end detection
