@@ -76,20 +76,6 @@ pxfx.ini
 ehthumbs.db
 Thumbs.db
 
-# Media files (typically large)
-media/
-*.mp4
-*.avi
-*.mkv
-*.mp3
-*.wav
-*.flac
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.bmp
-
 # Process management
 *.pid
 processes/
