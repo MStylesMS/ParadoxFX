@@ -77,7 +77,7 @@ try {
  * - --idle=yes: Keeps MPV running even when no file is loaded
  * - --input-ipc-server=/tmp/mpv-screen-ipc.sock: Enables IPC control via Unix socket
  * - --no-terminal: Prevents terminal output interference
- * - --fs-screen=0: Targets specific monitor (0 = primary display)
+ * - --fs-screen=1: Targets specific monitor (1 = secondary display)
  * - --fullscreen: Forces fullscreen mode
  * - --keep-open=yes: Holds the last frame of videos/images until replaced
  * - --no-osd-bar: Hides on-screen controls for clean display
@@ -99,7 +99,7 @@ const screenArgs = [
     '--idle=yes',
     '--input-ipc-server=' + SCREEN_MPV_SOCKET,
     '--no-terminal',
-    '--fs-screen=0',
+    '--fs-screen=1',
     '--fullscreen',
     '--keep-open=yes',
     '--no-osd-bar',
