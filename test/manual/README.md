@@ -1,15 +1,30 @@
-# Real Media Playback Tests
+# Manual Tests
 
-This directory contains tests that actually play media files, displaying images on screen, playing videos, and outputting audio through speakers.
+This directory contains manual tests for both media playback and MQTT communication that require human interaction or real system integration.
 
-## Purpose
+## Test Types
 
-While the main integration tests only verify that the correct media players are selected and configured, these manual tests actually execute the media players so you can:
+### 1. Real Media Playback Tests
+
+Tests that actually play media files, displaying images on screen, playing videos, and outputting audio through speakers.
+
+**Purpose**: While the main integration tests only verify that the correct media players are selected and configured, these manual tests actually execute the media players so you can:
 
 - **Visually verify** that images display correctly
 - **Hear audio** to confirm sound files work
 - **Watch videos** to ensure video playback functions
 - **Test media transitions** between different types
+
+### 2. MQTT Communication Tests
+
+Interactive tests that validate MQTT connectivity and demonstrate all device commands.
+
+**Purpose**: Test MQTT broker communication and provide examples of all supported commands:
+
+- **Verify MQTT connectivity** with publish/subscribe test
+- **Test all device commands** for screens, lights, and relays
+- **Interactive demonstration** of command formats and options
+- **Real-time command validation** with actual MQTT broker
 
 ## Requirements
 
@@ -44,7 +59,36 @@ The test media files must be present in `test/fixtures/test-media/`. If they're 
 
 ## Usage
 
-### Run All Real Playback Tests
+### MQTT Communication Tests
+
+Test MQTT connectivity and demonstrate all device commands:
+
+```bash
+# Run with default config (pxfx.ini)
+node test/manual/test-mqtt.js
+
+# Run with specific config file
+node test/manual/test-mqtt.js pxfx-test.ini
+```
+
+**Requirements for MQTT Tests:**
+
+- MQTT broker running (mosquitto on localhost:1883 by default)
+- Valid configuration file with device definitions
+- Network connectivity to MQTT broker
+
+**What the test does:**
+
+1. Loads configuration from INI file
+2. Connects to MQTT broker
+3. Tests basic connectivity with publish/subscribe
+4. Demonstrates all commands for each device type
+5. Shows JSON message format for each command
+6. Provides interactive command execution
+
+### Real Media Playback Tests
+
+Test actual media playback with real files:
 
 ```bash
 npm run test:manual
