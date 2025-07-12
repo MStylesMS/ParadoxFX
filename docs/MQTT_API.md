@@ -90,10 +90,21 @@ System heartbeat messages:
 {
   "timestamp": "2025-07-12T10:30:00.000Z",
   "application": "pxfx",
+  "device_name": "media-controller-01",
+  "ip_address": "192.168.1.150",
   "status": "online",
   "uptime": 3600.5
 }
 ```
+
+**Fields:**
+
+- `timestamp`: ISO 8601 timestamp when heartbeat was generated
+- `application`: Always "pxfx"
+- `device_name`: Device name from global DEVICE_NAME configuration
+- `ip_address`: Current IP address of the system
+- `status`: System status ("online", "offline", "error")
+- `uptime`: System uptime in seconds
 
 ## Screen/Media Commands
 
@@ -110,23 +121,32 @@ Display an image on the screen.
 ```json
 {
   "Command": "setImage",
-  "Image": "/path/to/image.jpg"
+  "Image": "image.jpg"
 }
 ```
 
 **Parameters:**
 
-- `Image` (required): Full path to image file
+- `Image` (required): Filename or subdirectory path relative to device MEDIA_DIR
 - Supported formats: JPEG, PNG, GIF, BMP, TIFF, WebP
 
-**Example:**
+**Examples:**
 
 ```json
 {
   "Command": "setImage",
-  "Image": "/opt/media/backgrounds/lobby.jpg"
+  "Image": "lobby.jpg"
 }
 ```
+
+```json
+{
+  "Command": "setImage",
+  "Image": "backgrounds/lobby.jpg"
+}
+```
+
+**Note:** Image paths are relative to the device's configured MEDIA_DIR. For example, if MEDIA_DIR is `/opt/media/room1/`, then "lobby.jpg" resolves to `/opt/media/room1/lobby.jpg` and "backgrounds/lobby.jpg" resolves to `/opt/media/room1/backgrounds/lobby.jpg`.
 
 ### Video Commands
 
@@ -139,18 +159,37 @@ Play a video file with optional volume control.
 ```json
 {
   "Command": "playVideo",
-  "Video": "/path/to/video.mp4",
-  "Volume": 75
+  "Video": "intro.mp4",
+  "VolumeAdjust": -10
 }
 ```
 
 **Parameters:**
 
-- `Video` (required): Full path to video file
-- `Volume` (optional): Volume level 0-100, defaults to device default
+- `Video` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `VolumeAdjust` (optional): Volume adjustment percentage (-100 to +100), applied to device base VOLUME setting
 - `Channel` (optional): Audio channel routing
 
 **Supported formats:** MP4, AVI, MKV, MOV, WebM
+
+**Examples:**
+
+```json
+{
+  "Command": "playVideo",
+  "Video": "intro.mp4"
+}
+```
+
+```json
+{
+  "Command": "playVideo",
+  "Video": "room1/intro.mp4",
+  "VolumeAdjust": 20
+}
+```
+
+**Note:** Video paths are relative to the device's MEDIA_DIR. VolumeAdjust modifies the base VOLUME setting from the device configuration. For example, if device VOLUME is 80 and VolumeAdjust is -10, the effective volume will be 72 (80 * 0.90).
 
 #### stopVideo
 
@@ -211,18 +250,37 @@ Play an audio file with optional volume control.
 ```json
 {
   "Command": "playAudio",
-  "Audio": "/path/to/audio.mp3",
-  "Volume": 80
+  "Audio": "background.mp3",
+  "VolumeAdjust": -20
 }
 ```
 
 **Parameters:**
 
-- `Audio` (required): Full path to audio file
-- `Volume` (optional): Volume level 0-100
+- `Audio` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `VolumeAdjust` (optional): Volume adjustment percentage (-100 to +100), applied to device base VOLUME setting
 - `Channel` (optional): Audio channel routing
 
 **Supported formats:** MP3, WAV, FLAC, OGG, AAC, OPUS
+
+**Examples:**
+
+```json
+{
+  "Command": "playAudio",
+  "Audio": "ambient.mp3"
+}
+```
+
+```json
+{
+  "Command": "playAudio",
+  "Audio": "music/background.mp3",
+  "VolumeAdjust": 15
+}
+```
+
+**Note:** Audio paths are relative to the device's MEDIA_DIR. VolumeAdjust modifies the base VOLUME setting from the device configuration.
 
 #### playAudioFx
 
@@ -233,17 +291,35 @@ Play audio effects (supports polyphonic playback).
 ```json
 {
   "Command": "playAudioFx",
-  "Audio": "/path/to/effect.wav",
+  "Audio": "effects/explosion.wav",
   "Type": "one-shot",
-  "Volume": 90
+  "VolumeAdjust": 10
 }
 ```
 
 **Parameters:**
 
-- `Audio` (required): Full path to audio file
+- `Audio` (required): Filename or subdirectory path relative to device MEDIA_DIR
 - `Type` (optional): Playback type ("one-shot", "loop"), default: "one-shot"
-- `Volume` (optional): Volume level 0-100
+- `VolumeAdjust` (optional): Volume adjustment percentage (-100 to +100), applied to device base VOLUME setting
+
+**Examples:**
+
+```json
+{
+  "Command": "playAudioFx",
+  "Audio": "doorbell.wav"
+}
+```
+
+```json
+{
+  "Command": "playAudioFx",
+  "Audio": "fx/ambient_loop.wav",
+  "Type": "loop",
+  "VolumeAdjust": -30
+}
+```
 
 #### stopAudio
 
@@ -280,9 +356,25 @@ Play a video followed by an image.
 ```json
 {
   "Command": "transition",
-  "Video": "/path/to/transition.mp4",
-  "Image": "/path/to/final.jpg",
+  "Video": "transitions/intro.mp4",
+  "Image": "backgrounds/final.jpg",
   "Channel": "default"
+}
+```
+
+**Parameters:**
+
+- `Video` (required): Video filename or subdirectory path relative to device MEDIA_DIR
+- `Image` (required): Image filename or subdirectory path relative to device MEDIA_DIR
+- `Channel` (optional): Audio channel routing
+
+**Example:**
+
+```json
+{
+  "Command": "transition",
+  "Video": "intro.mp4",
+  "Image": "lobby.jpg"
 }
 ```
 
@@ -503,6 +595,8 @@ Published periodically to the global heartbeat topic:
 {
   "timestamp": "2025-07-12T10:30:00.000Z",
   "application": "pxfx",
+  "device_name": "media-controller-01",
+  "ip_address": "192.168.1.150",
   "status": "online",
   "uptime": 3600.5
 }
@@ -591,21 +685,21 @@ Non-fatal issues are reported as warnings:
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"Command": "setImage", "Image": "/media/background.jpg"}'
+  -m '{"Command": "setImage", "Image": "background.jpg"}'
 ```
 
 2. **Play intro video:**
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"Command": "playVideo", "Video": "/media/intro.mp4", "Volume": 80}'
+  -m '{"Command": "playVideo", "Video": "intro.mp4", "VolumeAdjust": -20}'
 ```
 
 3. **Play background music:**
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"Command": "playAudio", "Audio": "/media/ambient.mp3", "Volume": 40}'
+  -m '{"Command": "playAudio", "Audio": "ambient.mp3", "VolumeAdjust": -40}'
 ```
 
 4. **Stop all playback:**
@@ -657,19 +751,28 @@ mosquitto_sub -h localhost -t "paradox/devices"
 Device topics are configured in `pxfx.ini`:
 
 ```ini
+[global]
+device_name = media-controller-01
+heartbeat_topic = paradox/devices
+heartbeat_interval = 30000
+
 [screen:living-room]
 type = screen
 topic = paradox/living-room/screen
 status_topic = paradox/living-room/screen/status
+media_dir = /opt/media/living-room
+volume = 80
 
 [light:living-room-hue]
 type = light
 topic = paradox/living-room/lights
 controller = hue
-
-[global]
-heartbeat_topic = paradox/devices
-heartbeat_interval = 30000
 ```
+
+**Key Configuration Parameters:**
+
+- `device_name`: Unique device identifier included in heartbeat messages
+- `media_dir`: Base directory for media files (images, videos, audio)
+- `volume`: Base volume level for the device (0-100)
 
 For complete configuration options, see the [Configuration Guide](CONFIGURATION.md).

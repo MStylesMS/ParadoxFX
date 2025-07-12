@@ -25,8 +25,9 @@ clean_session = true      # Clean session flag
 
 ```ini
 [global]
+device_name = media-controller-01   # Unique device identifier for heartbeat messages
 log_level = info                    # Logging level: debug, info, warn, error
-media_base_path = /opt/media       # Base path for media files
+media_base_path = /opt/media       # Base path for media files (deprecated - use device-specific media_dir)
 heartbeat_interval = 30000         # Heartbeat interval in milliseconds
 preferred_image_player = auto      # Image player preference
 require_video_group = false       # Require video group membership
@@ -43,7 +44,8 @@ Screen devices handle image display, video playback, and audio output.
 type = screen
 topic = paradox/room/screen
 status_topic = paradox/room/screen/status
-media_path = /opt/media/room
+media_dir = /opt/media/room
+volume = 80
 player_type = mpv
 audio_device = default
 display = :0
@@ -55,11 +57,18 @@ xinerama_screen = 0
 - `type`: Must be "screen"
 - `topic`: Base MQTT topic for commands
 - `status_topic`: Topic for status updates (optional)
-- `media_path`: Path to media files for this device
+- `media_dir`: Directory containing media files for this device (replaces media_path)
+- `volume`: Base volume level (0-100) for audio and video playback
 - `player_type`: Media player preference (mpv, vlc, fbi, auto)
 - `audio_device`: ALSA audio device name
 - `display`: X11 display target
 - `xinerama_screen`: Xinerama screen index for multi-monitor
+
+**Media File Handling:**
+
+- All media commands use filenames relative to `media_dir`
+- Subdirectories are supported (e.g., "music/background.mp3")
+- Volume adjustments in commands are applied as percentages to the base `volume` setting
 
 ### Light Devices
 
@@ -145,6 +154,22 @@ controller_config = controller_port=/dev/ttyACM0
 
 ## Audio Configuration
 
+### Volume Settings
+
+Each screen device has a base `volume` setting (0-100) that serves as the reference level for all audio and video playback. Volume adjustments in MQTT commands are applied as percentage changes to this base level.
+
+**Volume Calculation:**
+
+```
+Effective Volume = Base Volume × (1 + VolumeAdjust/100)
+```
+
+**Examples:**
+
+- Base volume: 80, VolumeAdjust: -10 → Effective volume: 72 (80 × 0.90)
+- Base volume: 60, VolumeAdjust: +20 → Effective volume: 72 (60 × 1.20)
+- Base volume: 50, VolumeAdjust: -50 → Effective volume: 25 (50 × 0.50)
+
 ### ALSA Device Names
 
 Common ALSA device configurations:
@@ -225,14 +250,15 @@ broker = localhost
 port = 1883
 
 [global]
+device_name = main-controller
 log_level = info
-media_base_path = /opt/media
 heartbeat_interval = 30000
 
 [screen:main]
 type = screen
 topic = paradox/main/screen
-media_path = /opt/media
+media_dir = /opt/media
+volume = 75
 player_type = auto
 audio_device = default
 display = :0
@@ -246,21 +272,23 @@ broker = 192.168.1.10
 port = 1883
 
 [global]
+device_name = entertainment-system
 log_level = info
-media_base_path = /opt/media
 heartbeat_interval = 30000
 
 [screen:living-room]
 type = screen
 topic = paradox/living-room/screen
-media_path = /opt/media/living-room
+media_dir = /opt/media/living-room
+volume = 85
 audio_device = hw:0,3
 display = :0
 
 [screen:bedroom]
 type = screen
 topic = paradox/bedroom/screen
-media_path = /opt/media/bedroom
+media_dir = /opt/media/bedroom
+volume = 70
 audio_device = hw:1,0
 display = :0.1
 
@@ -285,15 +313,16 @@ broker = localhost
 port = 1883
 
 [global]
+device_name = raspberry-pi-display
 log_level = info
-media_base_path = /opt/media
 preferred_image_player = fbi
 require_video_group = true
 
 [screen:pi-display]
 type = screen
 topic = paradox/pi/screen
-media_path = /opt/media
+media_dir = /opt/media
+volume = 60
 player_type = mpv
 audio_device = hw:0,1
 display = /dev/fb0
