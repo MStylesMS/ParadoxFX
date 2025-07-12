@@ -11,9 +11,14 @@ PxFx is a comprehensive system for controlling various devices through MQTT mess
 - **Relays**: Switch and outlet control
 - **Effects**: Coordinated device sequences and macros
 
+### Platform Variants
+
+- **PxFx (Main)**: Optimized for Raspberry Pi 4+ and modern systems
+- **PxFx Pi3**: Specialized version for Raspberry Pi 3 with hardware acceleration
+
 ## Quick Start
 
-### Installation
+### Standard Installation (Pi4+)
 
 ```bash
 # Clone the repository
@@ -29,6 +34,30 @@ cp pxfx.ini.example pxfx.ini
 
 # Run the application
 npm start
+```
+
+### Raspberry Pi 3 Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd pxfx
+
+# Install dependencies
+npm install
+
+# Configure for Pi3
+node pxfx-pi3.js config
+
+# Copy Pi3 configuration
+cp pxfx-pi3.ini.example pxfx-pi3.ini
+# Edit pxfx-pi3.ini with your settings
+
+# Test hardware acceleration
+node pxfx-pi3.js test-screens
+
+# Run Pi3-optimized version
+node pxfx-pi3.js start
 ```
 
 ### Basic Configuration

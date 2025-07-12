@@ -26,6 +26,17 @@ Interactive tests that validate MQTT connectivity and demonstrate all device com
 - **Interactive demonstration** of command formats and options
 - **Real-time command validation** with actual MQTT broker
 
+### 3. Raspberry Pi 3 Specialized Tests
+
+Hardware-specific tests optimized for Raspberry Pi 3 with Bullseye (Legacy).
+
+**Purpose**: Validate Pi3-specific hardware acceleration and performance:
+
+- **GPU acceleration verification** with VideoCore IV hardware decode
+- **Optimized media playback** using MMAL and hardware-accelerated codecs
+- **Performance testing** for 1080p video and audio on Pi3 hardware
+- **Fallback testing** when hardware acceleration is unavailable
+
 ## Requirements
 
 ### System Requirements
@@ -85,6 +96,31 @@ node test/manual/test-mqtt.js pxfx-test.ini
 4. Demonstrates all commands for each device type
 5. Shows JSON message format for each command
 6. Provides interactive command execution
+
+### Raspberry Pi 3 Hardware Tests
+
+Test hardware acceleration and performance on Pi3 with Bullseye:
+
+```bash
+# Run Pi3-optimized screen tests
+node test/manual/test-screens-pi3.js
+```
+
+**Requirements for Pi3 Tests:**
+
+- Raspberry Pi 3 with Raspberry Pi OS Bullseye (Legacy)
+- GPU memory split configured (gpu_mem=128 or higher)
+- Hardware acceleration packages (mpv, vlc, fbi)
+- Test media files in test/fixtures/test-media/
+
+**What the test does:**
+
+1. Verifies Pi3 hardware requirements (GPU memory, packages)
+2. Tests image display with FBI (framebuffer)
+3. Tests video playback with MPV hardware acceleration
+4. Tests VLC fallback if MPV hardware decode fails
+5. Tests audio playback with optimized settings
+6. Reports hardware acceleration status and performance
 
 ### Real Media Playback Tests
 
