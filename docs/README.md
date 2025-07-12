@@ -22,16 +22,19 @@ This directory contains the complete documentation for PxFx (Paradox Effects).
 ## Quick Links
 
 ### Getting Started
+
 1. [Installation](../README.md#installation) - Basic setup
 2. [Configuration Guide](CONFIGURATION.md) - Configure devices and MQTT
 3. [MQTT API Reference](MQTT_API.md) - Send commands to devices
 
 ### Development
+
 1. [Project Architecture](SCAFFOLD_SUMMARY.md) - Understand the codebase
 2. [Running Tests](SCAFFOLD_SUMMARY.md#usage) - Test the application
 3. [Media Testing](MEDIA_FORMAT_TEST_SUMMARY.md) - Test media playback
 
 ### Troubleshooting
+
 1. [Configuration Issues](CONFIGURATION.md#troubleshooting) - Common setup problems
 2. [MQTT Commands](MQTT_API.md#error-handling) - Command format and error codes
 3. [Media Playback](MEDIA_FORMAT_TEST_SUMMARY.md) - Media file issues
@@ -39,6 +42,7 @@ This directory contains the complete documentation for PxFx (Paradox Effects).
 ## Documentation Maintenance
 
 This documentation is organized to provide:
+
 - Quick reference for users (MQTT API)
 - Detailed setup guide (Configuration)
 - Technical details for developers (Architecture)

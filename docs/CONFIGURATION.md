@@ -9,6 +9,7 @@ PxFx uses INI format configuration files. Copy `pxfx.ini.example` to `pxfx.ini` 
 ## Global Configuration
 
 ### [mqtt] Section
+
 ```ini
 [mqtt]
 broker = localhost          # MQTT broker hostname/IP
@@ -21,6 +22,7 @@ clean_session = true      # Clean session flag
 ```
 
 ### [global] Section
+
 ```ini
 [global]
 log_level = info                    # Logging level: debug, info, warn, error
@@ -49,6 +51,7 @@ xinerama_screen = 0
 ```
 
 **Parameters:**
+
 - `type`: Must be "screen"
 - `topic`: Base MQTT topic for commands
 - `status_topic`: Topic for status updates (optional)
@@ -71,6 +74,7 @@ controller_config = bridge_ip=192.168.1.100;username=api_key
 ```
 
 **Parameters:**
+
 - `type`: Must be "light"
 - `topic`: Base MQTT topic for commands
 - `controller`: Light controller type (hue, wiz, zigbee, zwave)
@@ -89,6 +93,7 @@ lights = light1,light2,light3
 ```
 
 **Parameters:**
+
 - `lights`: Comma-separated list of light IDs in the group
 
 ### Relay Devices
@@ -104,6 +109,7 @@ node_id = 5
 ```
 
 **Parameters:**
+
 - `controller`: Relay controller type (zwave, zigbee, gpio)
 - `node_id`: Controller-specific node/device identifier
 
@@ -298,22 +304,26 @@ display = /dev/fb0
 ### Common Issues
 
 #### MQTT Connection Failed
+
 - Verify broker hostname and port
 - Check network connectivity
 - Verify credentials if authentication is enabled
 
 #### Media Files Not Playing
+
 - Check file paths are absolute
 - Verify file permissions
 - Ensure media players are installed
 - Check audio device configuration
 
 #### Permission Denied
+
 - Add user to `video` group for framebuffer access
 - Add user to `audio` group for audio device access
 - Verify file ownership and permissions
 
 #### Display Issues
+
 - Verify X11 display is accessible
 - Check Xinerama configuration for multi-monitor
 - Ensure proper graphics drivers are installed
