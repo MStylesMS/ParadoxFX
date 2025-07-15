@@ -1,6 +1,6 @@
 # MQTT API Reference
 
-This document provides the complete MQTT API specification for PxFx (Paradox Effects), including command formats, message structures, topic patterns, and response formats.
+This document provides the complete MQTT API specification for ParadoxFX (Paradox Effects), including command formats, message structures, topic patterns, and response formats.
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@ This document provides the complete MQTT API specification for PxFx (Paradox Eff
 
 ## Overview
 
-PxFx uses MQTT for all device communication. Each device subscribes to a command topic and publishes status updates and responses. The system also provides heartbeat messages and error reporting.
+ParadoxFX uses MQTT for all device communication. Each device subscribes to a command topic and publishes status updates and responses. The system also provides heartbeat messages and error reporting.
 
 ### Base Architecture
 
@@ -29,7 +29,7 @@ PxFx uses MQTT for all device communication. Each device subscribes to a command
 
 ### Device Topics
 
-Each device has a base topic configured in `pxfx.ini`:
+Each device has a base topic configured in `pfx.ini`:
 
 ```
 {baseTopic}/command    # Incoming commands
@@ -89,7 +89,7 @@ System heartbeat messages:
 ```json
 {
   "timestamp": "2025-07-12T10:30:00.000Z",
-  "application": "pxfx",
+  "application": "pfx",
   "device_name": "media-controller-01",
   "ip_address": "192.168.1.150",
   "status": "online",
@@ -100,7 +100,7 @@ System heartbeat messages:
 **Fields:**
 
 - `timestamp`: ISO 8601 timestamp when heartbeat was generated
-- `application`: Always "pxfx"
+- `application`: Always "pfx"
 - `device_name`: Device name from global DEVICE_NAME configuration
 - `ip_address`: Current IP address of the system
 - `status`: System status ("online", "offline", "error")
@@ -594,7 +594,7 @@ Published periodically to the global heartbeat topic:
 ```json
 {
   "timestamp": "2025-07-12T10:30:00.000Z",
-  "application": "pxfx",
+  "application": "pfx",
   "device_name": "media-controller-01",
   "ip_address": "192.168.1.150",
   "status": "online",
@@ -748,7 +748,7 @@ mosquitto_sub -h localhost -t "paradox/devices"
 
 ## Configuration Reference
 
-Device topics are configured in `pxfx.ini`:
+Device topics are configured in `pfx.ini`:
 
 ```ini
 [global]

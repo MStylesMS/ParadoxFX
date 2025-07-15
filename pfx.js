@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Paradox Effects (PxFx) - Main Application Entry Point
+ * Paradox Effects (ParadoxFX) - Main Application Entry Point
  * 
  * Multi-modal media and effect controller for interactive installations.
  * Supports screens, lights, and relays via MQTT commands.
@@ -12,9 +12,9 @@ const ConfigLoader = require('./lib/core/config-loader');
 const MqttClient = require('./lib/core/mqtt-client');
 const Logger = require('./lib/utils/logger');
 
-class PxFxApplication {
+class ParadoxFXApplication {
     constructor() {
-        this.logger = new Logger('PxFx');
+        this.logger = new Logger('ParadoxFX');
         this.config = null;
         this.deviceManager = null;
         this.mqttClient = null;
@@ -26,7 +26,7 @@ class PxFxApplication {
 
             // Parse command line for --config or -c
             const argv = require('minimist')(process.argv.slice(2));
-            const configFile = argv.config || argv.c || './pxfx.ini';
+            const configFile = argv.config || argv.c || './pfx.ini';
             this.logger.info(`Using config file: ${configFile}`);
 
             // Load configuration
@@ -83,8 +83,8 @@ class PxFxApplication {
 
 // Start the application if this file is run directly
 if (require.main === module) {
-    const app = new PxFxApplication();
+    const app = new ParadoxFXApplication();
     app.start();
 }
 
-module.exports = PxFxApplication;
+module.exports = ParadoxFXApplication;

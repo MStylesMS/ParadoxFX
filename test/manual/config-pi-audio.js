@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * @fileoverview PxFx Audio Configuration and Testing Script
- * @description This script validates and configures Raspberry Pi audio settings for PxFx
+ * @fileoverview ParadoxFX Audio Configuration and Testing Script
+ * @description This script validates and configures Raspberry Pi audio settings for ParadoxFX
  * 
  * Features:
  * - Detects current audio system (ALSA, PulseAudio, PipeWire)
- * - Recommends disabling PulseAudio/PipeWire for optimal PxFx performance
+ * - Recommends disabling PulseAudio/PipeWire for optimal ParadoxFX performance
  * - Tests all available audio devices and subdevices
  * - Validates multi-channel audio capabilities
  * - Provides configuration recommendations
@@ -24,35 +24,35 @@ const readline = require('readline');
 const TEST_AUDIO_PATHS = {
     subwoofer: [
         '/usr/share/sounds/alsa/Noise.wav',
-        '/opt/paradox/apps/pxfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
     ],
     leftChannel: [
         '/usr/share/sounds/alsa/Side_Left.wav',
-        '/opt/paradox/apps/pxfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
     ],
     rightChannel: [
         '/usr/share/sounds/alsa/Side_Right.wav',
-        '/opt/paradox/apps/pxfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
     ],
     frontLeft: [
         '/usr/share/sounds/alsa/Front_Left.wav',
-        '/opt/paradox/apps/pxfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
     ],
     frontRight: [
         '/usr/share/sounds/alsa/Front_Right.wav',
-        '/opt/paradox/apps/pxfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
     ],
     rearLeft: [
         '/usr/share/sounds/alsa/Rear_Left.wav',
-        '/opt/paradox/apps/pxfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
     ],
     rearRight: [
         '/usr/share/sounds/alsa/Rear_Right.wav',
-        '/opt/paradox/apps/pxfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
     ],
     center: [
         '/usr/share/sounds/alsa/Front_Center.wav',
-        '/opt/paradox/apps/pxfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
     ]
 };
 
@@ -369,7 +369,7 @@ function displayTestResults() {
 
     if (workingDevices === totalDevices) {
         console.log('   🎉 All audio devices are working correctly!');
-        console.log('   ✅ Your Pi is ready for PxFx multi-screen audio!');
+        console.log('   ✅ Your Pi is ready for ParadoxFX multi-screen audio!');
     } else {
         console.log('   ⚠️  Some audio devices may need attention.');
         console.log('   💡 Check connections and audio settings.');
@@ -380,9 +380,9 @@ function displayTestResults() {
  * Main execution function
  */
 async function main() {
-    console.log('🍓 PxFx Audio Configuration & Testing Script');
+    console.log('🍓 ParadoxFX Audio Configuration & Testing Script');
     console.log('===========================================');
-    console.log('This script will help configure your Raspberry Pi for optimal PxFx audio performance.\n');
+    console.log('This script will help configure your Raspberry Pi for optimal ParadoxFX audio performance.\n');
 
     // Step 1: Check current audio system
     console.log('1️⃣ Checking Current Audio System Configuration');
@@ -406,8 +406,8 @@ async function main() {
     if (audioSystemState.pulseAudioRunning || audioSystemState.pipewireRunning) {
         console.log('\n⚠️  IMPORTANT RECOMMENDATION');
         console.log('============================');
-        console.log('For optimal PxFx performance, we recommend disabling PulseAudio and PipeWire.');
-        console.log('This will give PxFx direct access to all audio hardware for:');
+        console.log('For optimal ParadoxFX performance, we recommend disabling PulseAudio and PipeWire.');
+        console.log('This will give ParadoxFX direct access to all audio hardware for:');
         console.log('  • Lower latency audio effects');
         console.log('  • Independent audio routing to each screen');
         console.log('  • Better resource utilization');
@@ -464,7 +464,7 @@ async function main() {
             }
         }
     } else {
-        console.log('\n✅ Audio system is already optimized for PxFx!');
+        console.log('\n✅ Audio system is already optimized for ParadoxFX!');
         console.log('Direct ALSA access is available for all audio devices.');
     }
 
@@ -482,22 +482,22 @@ async function main() {
     }
 
     // Step 4: Final recommendations
-    console.log('\n3️⃣ PxFx Configuration Recommendations');
+    console.log('\n3️⃣ ParadoxFX Configuration Recommendations');
     console.log('====================================');
 
-    console.log('For your pxfx.ini file, use these device identifiers:');
+    console.log('For your pfx.ini file, use these device identifiers:');
     for (const card of audioSystemState.audioCards) {
         console.log(`   ${card.description}: plughw:${card.id}`);
     }
 
     console.log('\n💡 Pro Tips:');
     console.log('  • Use plughw: instead of hw: for better compatibility');
-    console.log('  • Test each device before deploying PxFx');
+    console.log('  • Test each device before deploying ParadoxFX');
     console.log('  • Consider audio cable quality for best performance');
     console.log('  • Set appropriate volume levels for each zone');
 
     console.log('\n🎉 Audio configuration complete!');
-    console.log('Your Raspberry Pi is ready for PxFx multi-screen audio.');
+    console.log('Your Raspberry Pi is ready for ParadoxFX multi-screen audio.');
 }
 
 // Run the script

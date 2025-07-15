@@ -1,4 +1,4 @@
-# PxFx Pi3 Configuration Example
+# ParadoxFX Pi3 Configuration Example
 # Optimized for Raspberry Pi 3 with Bullseye (Legacy) and hardware acceleration
 
 [global]
@@ -6,7 +6,7 @@ MQTT_SERVER=localhost
 MQTT_PORT=1883
 HEARTBEAT_TOPIC=paradox/heartbeat
 HEARTBEAT_INTERVAL_MS=30000
-DEVICE_NAME=pxfx-pi3
+DEVICE_NAME=pfx-pi3
 IP_ADDRESS=auto
 
 # Pi3-optimized screen device

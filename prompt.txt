@@ -1,22 +1,22 @@
-PXFX MPV MEDIA CONTROL SYSTEM - SESSION CONTINUITY PROMPT
+PFX MPV MEDIA CONTROL SYSTEM - SESSION CONTINUITY PROMPT
 =========================================================
 Date: January 2025
-Project: Robust MPV-based media control system for PxFx application
+Project: Robust MPV-based media control system for ParadoxFX application
 
 TASK OVERVIEW:
 =============
-Develop and test a robust MPV-based media control system for the PxFx application, focusing on:
+Develop and test a robust MPV-based media control system for the ParadoxFX application, focusing on:
 - Seamless video transitions with robust end detection
 - Advanced audio playback (background music, sound effects, speech/narration)
 - Low latency audio (<100ms for sound effects)
 - Real-time volume control and audio ducking
-- Prepare code for easy integration into main PxFx system
+- Prepare code for easy integration into main ParadoxFX system
 - Ensure test scripts are modular and well-documented for future combination and reuse
 
 COMPLETED WORK:
 ==============
 
-1. VIDEO TEST SCRIPT (/opt/paradox/apps/pxfx/test/manual/test-screens.js):
+1. VIDEO TEST SCRIPT (/opt/paradox/apps/pfx/test/manual/test-screens.js):
    - Single MPV instance for seamless image/video transitions
    - "Smart property observer" for reliable video end detection
    - Waits for actual playback start before monitoring 'eof-reached' 
@@ -25,7 +25,7 @@ COMPLETED WORK:
    - Successfully tested and validated
    - Clean debug output, production-ready code
 
-2. AUDIO TEST SCRIPT (/opt/paradox/apps/pxfx/test/manual/test-audio.js):
+2. AUDIO TEST SCRIPT (/opt/paradox/apps/pfx/test/manual/test-audio.js):
    - Multiple MPV instances for different audio purposes:
      * Background music (persistent IPC instance, looping, volume control, ducking)
      * Sound effects (fire-and-forget spawn, multiple can overlap, ultra-low latency ~1ms)
@@ -47,7 +47,7 @@ COMPLETED WORK:
 4. COMMENT IMPROVEMENTS (LATEST):
    - Enhanced audio type classifications with clear management strategies
    - Detailed MPV launch settings and rationale for each audio type
-   - Clarified that speech will use queue-based system in PxFx integration
+   - Clarified that speech will use queue-based system in ParadoxFX integration
    - Emphasized fire-and-forget nature of sound effects (multiple can overlap)
    - Marked preferred method for sound effects (Method 3: low-latency spawn)
    - Added comprehensive integration summary with performance benchmarks
@@ -59,16 +59,16 @@ KEY ACHIEVEMENTS:
 - Multi-track audio: Background + effects + speech simultaneously
 - Volume ducking: Real-time background music control during speech
 - Socket management: Multiple MPV instances coordinated via IPC
-- Performance: All PxFx requirements met or exceeded
+- Performance: All ParadoxFX requirements met or exceeded
 
 CURRENT STATE:
 =============
 - test-screens.js: Complete, integration-ready
 - test-audio.js: Complete, integration-ready with enhanced documentation
-- Test media available in /opt/paradox/apps/pxfx/test/fixtures/test-media/
+- Test media available in /opt/paradox/apps/pfx/test/fixtures/test-media/
 - Both scripts fully documented with integration notes and clear architecture
 - All core functionality validated through testing
-- Audio management strategies clearly documented for PxFx integration
+- Audio management strategies clearly documented for ParadoxFX integration
 
 PENDING WORK:
 ============
@@ -79,10 +79,10 @@ PENDING WORK:
 2. NEXT STEPS:
    - Create combined audio+video test script to verify synchronized operation
    - Test event coordination between audio and video systems
-   - Extract reusable components for main PxFx integration
+   - Extract reusable components for main ParadoxFX integration
    - Create modular library structure for production use
    - Implement central socket/instance manager
-   - Plan integration into main PxFx application architecture
+   - Plan integration into main ParadoxFX application architecture
 
 3. FUTURE DEVELOPMENT:
    - Error recovery and fallback mechanisms
@@ -93,10 +93,10 @@ PENDING WORK:
 
 CODE LOCATIONS:
 ==============
-- Video test: /opt/paradox/apps/pxfx/test/manual/test-screens.js
-- Audio test: /opt/paradox/apps/pxfx/test/manual/test-audio.js
-- Test media: /opt/paradox/apps/pxfx/test/fixtures/test-media/
-- Main workspace: /opt/paradox/apps/pxfx/
+- Video test: /opt/paradox/apps/pfx/test/manual/test-screens.js
+- Audio test: /opt/paradox/apps/pfx/test/manual/test-audio.js
+- Test media: /opt/paradox/apps/pfx/test/fixtures/test-media/
+- Main workspace: /opt/paradox/apps/pfx/
 
 TECHNICAL DETAILS:
 =================
@@ -157,7 +157,7 @@ NEXT SESSION ACTIONS:
 ====================
 1. Resume with audio test script modifications (user will specify sound order changes)
 2. Create combined audio+video test for full system validation
-3. Begin extraction of reusable components for main PxFx integration
+3. Begin extraction of reusable components for main ParadoxFX integration
 4. Plan production architecture based on test learnings
 
 ENVIRONMENT:
@@ -172,7 +172,7 @@ ENVIRONMENT:
 COMMANDS TO RESUME:
 ==================
 # Navigate to project
-cd /opt/paradox/apps/pxfx
+cd /opt/paradox/apps/pfx
 
 # Run video test
 node test/manual/test-screens.js
@@ -189,7 +189,7 @@ ls -la test/manual/
 NOTES:
 =====
 - Both test scripts are production-ready with comprehensive integration documentation
-- All core MPV capabilities validated for PxFx requirements
+- All core MPV capabilities validated for ParadoxFX requirements
 - Socket management patterns established for multi-instance coordination
 - Error handling and cleanup patterns implemented
 - Performance meets or exceeds all specified requirements
@@ -204,5 +204,5 @@ USER PREFERENCE:
 - Needs clear next steps and continuation path
 
 This prompt provides complete context for resuming the MPV media control system development
-for the PxFx application. All essential information, current state, and next steps are documented
+for the ParadoxFX application. All essential information, current state, and next steps are documented
 to enable seamless continuation of the work.

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * PxFx Pi3 Starter Script
+ * ParadoxFX Pi3 Starter Script
  * 
- * Lightweight launcher for Raspberry Pi 3 optimized PxFx
+ * Lightweight launcher for Raspberry Pi 3 optimized ParadoxFX
  */
 
 const { spawn } = require('child_process');
@@ -31,7 +31,7 @@ function checkPi3Environment() {
 }
 
 function printUsage() {
-    console.log('🍓 PxFx Pi3 - Raspberry Pi 3 Optimized Version');
+    console.log('🍓 ParadoxFX Pi3 - Raspberry Pi 3 Optimized Version');
     console.log('=============================================\n');
 
     if (!checkPi3Environment()) {
@@ -45,19 +45,19 @@ function printUsage() {
     console.log('Available commands:');
     console.log('');
     console.log('📋 Testing:');
-    console.log('  node pxfx-pi3.js test-screens    # Test screen hardware acceleration');
-    console.log('  node pxfx-pi3.js test-mqtt       # Test MQTT communication');
+    console.log('  node pfx-pi3.js test-screens    # Test screen hardware acceleration');
+    console.log('  node pfx-pi3.js test-mqtt       # Test MQTT communication');
     console.log('');
     console.log('🚀 Running:');
-    console.log('  node pxfx-pi3.js start [config]  # Start PxFx with Pi3 optimizations');
-    console.log('  node pxfx-pi3.js start pxfx-pi3.ini  # Use Pi3-specific config');
+    console.log('  node pfx-pi3.js start [config]  # Start ParadoxFX with Pi3 optimizations');
+    console.log('  node pfx-pi3.js start pfx-pi3.ini  # Use Pi3-specific config');
     console.log('');
     console.log('⚙️  Configuration:');
-    console.log('  node pxfx-pi3.js config          # Show Pi3 configuration guide');
+    console.log('  node pfx-pi3.js config          # Show Pi3 configuration guide');
     console.log('');
     console.log('Examples:');
-    console.log('  node pxfx-pi3.js test-screens');
-    console.log('  node pxfx-pi3.js start pxfx-pi3.ini');
+    console.log('  node pfx-pi3.js test-screens');
+    console.log('  node pfx-pi3.js start pfx-pi3.ini');
 }
 
 function runCommand(command, args = []) {
@@ -99,11 +99,11 @@ function showPi3Config() {
     console.log('   sudo apt install mpv vlc-bin vlc-plugin-base fbi nodejs npm git\n');
 
     console.log('5. 🔧 Copy Pi3 Configuration:');
-    console.log('   cp pxfx-pi3.ini.example pxfx-pi3.ini');
-    console.log('   # Edit pxfx-pi3.ini for your setup\n');
+    console.log('   cp pfx-pi3.ini.example pfx-pi3.ini');
+    console.log('   # Edit pfx-pi3.ini for your setup\n');
 
     console.log('6. ✅ Verify Setup:');
-    console.log('   node pxfx-pi3.js test-screens\n');
+    console.log('   node pfx-pi3.js test-screens\n');
 
     console.log('💡 Pro Tips:');
     console.log('   - Use H.264 encoded videos for best performance');
@@ -126,9 +126,9 @@ switch (command) {
         break;
 
     case 'start':
-        const configFile = args[1] || 'pxfx-pi3.ini';
-        console.log(`🚀 Starting PxFx Pi3 with config: ${configFile}`);
-        runCommand('../pxfx.js', ['--config', configFile]);
+        const configFile = args[1] || 'pfx-pi3.ini';
+        console.log(`🚀 Starting ParadoxFX Pi3 with config: ${configFile}`);
+        runCommand('../pfx.js', ['--config', configFile]);
         break;
 
     case 'config':

@@ -1,4 +1,4 @@
-# PxFx Scaffold Summary
+# ParadoxFX Scaffold Summary
 
 ## Completed Implementation
 
@@ -53,7 +53,7 @@
 
 ### ✅ Configuration & Documentation
 
-- **Example Configuration**: Complete pxfx.ini.example
+- **Example Configuration**: Complete pfx.ini.example
 - **README**: Comprehensive project documentation
 - **Package.json**: Dependencies and scripts
 - **License**: MIT license
@@ -73,12 +73,12 @@ Tests:       6 failed, 35 passed, 41 total
 ## File Structure
 
 ```
-pxfx/
+pfx/
 ├── package.json              # Dependencies and scripts
-├── pxfx.js                   # Main application entry
+├── pfx.js                   # Main application entry
 ├── start.js                  # Startup script with config handling
-├── pxfx.ini                  # Runtime configuration
-├── pxfx.ini.example          # Configuration template
+├── pfx.ini                  # Runtime configuration
+├── pfx.ini.example          # Configuration template
 ├── README.md                 # Project documentation
 ├── LICENSE                   # MIT license
 ├── .gitignore               # Version control exclusions
@@ -137,8 +137,8 @@ pxfx/
 npm install
 
 # Copy and edit configuration
-cp pxfx.ini.example pxfx.ini
-# Edit pxfx.ini with your settings
+cp pfx.ini.example pfx.ini
+# Edit pfx.ini with your settings
 
 # Run the application
 npm start
@@ -150,4 +150,4 @@ npm run test:ci
 node start.js /path/to/custom.ini
 ```
 
-The scaffold provides a solid foundation for the PxFx system with a clean architecture, comprehensive testing, and room for extension.
+The scaffold provides a solid foundation for the ParadoxFX system with a clean architecture, comprehensive testing, and room for extension.

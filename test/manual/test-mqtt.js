@@ -21,7 +21,7 @@ class MqttTester {
         });
     }
 
-    async initialize(configPath = 'pxfx.ini') {
+    async initialize(configPath = 'pfx.ini') {
         console.log('🚀 Initializing MQTT Test Suite...\n');
 
         try {
@@ -45,7 +45,7 @@ class MqttTester {
 
         return new Promise((resolve, reject) => {
             this.client = mqtt.connect(brokerUrl, {
-                clientId: `pxfx-test-${Date.now()}`,
+                clientId: `pfx-test-${Date.now()}`,
                 clean: true
             });
 
@@ -80,7 +80,7 @@ class MqttTester {
     async testMqttConnectivity() {
         console.log('🔍 Testing MQTT Connectivity...\n');
 
-        const testTopic = 'pxfx/test/connectivity';
+        const testTopic = 'pfx/test/connectivity';
         const testMessage = {
             test: 'connectivity',
             timestamp: new Date().toISOString(),
@@ -474,7 +474,7 @@ class MqttTester {
         console.log(`   Total: ${this.testResults.length}`);
 
         console.log('\n💡 Note: "SENT" means the command was published to MQTT.');
-        console.log('   Check your PxFx application logs to see if commands were processed correctly.');
+        console.log('   Check your ParadoxFX application logs to see if commands were processed correctly.');
     }
 
     async cleanup() {
@@ -521,8 +521,8 @@ class MqttTester {
 
 // Main execution
 async function main() {
-    const configPath = process.argv[2] || 'pxfx.ini';
-    console.log('🧪 PxFx MQTT Test Suite');
+    const configPath = process.argv[2] || 'pfx.ini';
+    console.log('🧪 ParadoxFX MQTT Test Suite');
     console.log('========================\n');
 
     const tester = new MqttTester();

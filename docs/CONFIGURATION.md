@@ -1,10 +1,10 @@
 # Configuration Guide
 
-This document provides detailed configuration instructions for PxFx (Paradox Effects).
+This document provides detailed configuration instructions for ParadoxFX (Paradox Effects).
 
 ## Configuration File Structure
 
-PxFx uses INI format configuration files. Copy `pxfx.ini.example` to `pxfx.ini` and customize for your setup.
+ParadoxFX uses INI format configuration files. Copy `pfx.ini.example` to `pfx.ini` and customize for your setup.
 
 ## Global Configuration
 
@@ -16,7 +16,7 @@ broker = localhost          # MQTT broker hostname/IP
 port = 1883                # MQTT broker port
 username =                 # MQTT username (optional)
 password =                 # MQTT password (optional)
-client_id = pxfx-01       # Unique client identifier
+client_id = pfx-01       # Unique client identifier
 keepalive = 60            # Keep-alive interval in seconds
 clean_session = true      # Clean session flag
 ```
@@ -226,7 +226,7 @@ monitor_geometry = 1920x1080+1920+0    # width x height + x_offset + y_offset
 
 ### Player Selection
 
-PxFx automatically selects appropriate players for media types:
+ParadoxFX automatically selects appropriate players for media types:
 
 - **Images**: fbi, feh, imagemagick
 - **Video**: mpv, vlc

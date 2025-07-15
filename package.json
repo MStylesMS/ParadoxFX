@@ -1,10 +1,11 @@
 {
-    "name": "paradox-fx",
+    "name": "pfx",
     "version": "1.0.0",
-    "description": "Multi-modal media and effect controller for interactive installations",
-    "main": "pxfx.js",
+    "description": "ParadoxFX - Multi-screen audio/video effects system for Raspberry Pi",
+    "main": "pfx.js",
     "scripts": {
-        "start": "node start.js",
+        "start": "node pfx.js",
+        "pi3": "node pfx-pi3.js",
         "dev": "node start.js",
         "test": "jest",
         "test:unit": "jest test/unit",
@@ -16,7 +17,7 @@
         "test:manual": "ENABLE_REAL_PLAYBACK=true jest test/manual/ --verbose --runInBand",
         "check-media": "node -e \"const fs=require('fs'); const path='test/fixtures/test-media'; console.log('Media files:', fs.existsSync(path) ? fs.readdirSync(path).filter(f=>!f.startsWith('.')).join(', ') : 'Directory not found');\"",
         "lint": "echo 'No linter configured yet'",
-        "validate": "node -c pxfx.js && node -c start.js"
+        "validate": "node -c pfx.js && node -c start.js"
     },
     "keywords": [
         "mqtt",

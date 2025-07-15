@@ -1,5 +1,5 @@
-# Paradox Effects (PxFx) Configuration
-# Copy this file to pxfx.ini and customize for your setup
+# Paradox Effects (ParadoxFX) Configuration
+# Copy this file to pfx.ini and customize for your setup
 
 [mqtt]
 # MQTT broker connection settings
@@ -7,7 +7,7 @@ broker = localhost
 port = 1883
 username = 
 password = 
-client_id = pxfx-01
+client_id = pfx-01
 keepalive = 60
 clean_session = true
 

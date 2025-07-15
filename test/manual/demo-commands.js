@@ -8,10 +8,10 @@
 const ConfigLoader = require('../../lib/core/config-loader');
 
 async function showCommands() {
-    console.log('🎮 PxFx MQTT Command Examples\n');
+    console.log('🎮 ParadoxFX MQTT Command Examples\n');
 
     try {
-        const config = await ConfigLoader.load('pxfx-test.ini');
+        const config = await ConfigLoader.load('pfx-test.ini');
 
         for (const [deviceName, deviceConfig] of Object.entries(config.devices)) {
             console.log(`\n🔧 Device: ${deviceName} (${deviceConfig.type})`);

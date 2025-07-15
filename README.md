@@ -1,10 +1,10 @@
-# PxFx - Paradox Effects
+# ParadoxFX - Paradox Effects
 
 A Node.js multi-modal media and effect controller for screens, lights, and relays via MQTT.
 
 ## Overview
 
-PxFx is a comprehensive system for controlling various devices through MQTT messaging. It supports:
+ParadoxFX is a comprehensive system for controlling various devices through MQTT messaging. It supports:
 
 - **Screens**: Video/audio playback via media players (mpv, vlc, fbi, etc.)
 - **Lights**: Individual and group lighting control (Hue, WiZ, Zigbee, Z-Wave)  
@@ -13,8 +13,8 @@ PxFx is a comprehensive system for controlling various devices through MQTT mess
 
 ### Platform Variants
 
-- **PxFx (Main)**: Optimized for Raspberry Pi 4+ and modern systems
-- **PxFx Pi3**: Specialized version for Raspberry Pi 3 with hardware acceleration
+- **ParadoxFX (Main)**: Optimized for Raspberry Pi 4+ and modern systems
+- **ParadoxFX Pi3**: Specialized version for Raspberry Pi 3 with hardware acceleration
 
 ## Quick Start
 
@@ -23,14 +23,14 @@ PxFx is a comprehensive system for controlling various devices through MQTT mess
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd pxfx
+cd pfx
 
 # Install dependencies
 npm install
 
 # Copy and edit configuration
-cp pxfx.ini.example pxfx.ini
-# Edit pxfx.ini with your settings
+cp pfx.ini.example pfx.ini
+# Edit pfx.ini with your settings
 
 # Run the application
 npm start
@@ -41,28 +41,28 @@ npm start
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd pxfx
+cd pfx
 
 # Install dependencies
 npm install
 
 # Configure for Pi3
-node pxfx-pi3.js config
+node pfx-pi3.js config
 
 # Copy Pi3 configuration
-cp pxfx-pi3.ini.example pxfx-pi3.ini
-# Edit pxfx-pi3.ini with your settings
+cp pfx-pi3.ini.example pfx-pi3.ini
+# Edit pfx-pi3.ini with your settings
 
 # Test hardware acceleration
-node pxfx-pi3.js test-screens
+node pfx-pi3.js test-screens
 
 # Run Pi3-optimized version
-node pxfx-pi3.js start
+node pfx-pi3.js start
 ```
 
 ### Basic Configuration
 
-Edit `pxfx.ini` to configure your devices and MQTT connection:
+Edit `pfx.ini` to configure your devices and MQTT connection:
 
 ```ini
 [mqtt]

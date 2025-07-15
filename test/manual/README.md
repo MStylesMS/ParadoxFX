@@ -75,11 +75,11 @@ The test media files must be present in `test/fixtures/test-media/`. If they're 
 Test MQTT connectivity and demonstrate all device commands:
 
 ```bash
-# Run with default config (pxfx.ini)
+# Run with default config (pfx.ini)
 node test/manual/test-mqtt.js
 
 # Run with specific config file
-node test/manual/test-mqtt.js pxfx-test.ini
+node test/manual/test-mqtt.js pfx-test.ini
 ```
 
 **Requirements for MQTT Tests:**

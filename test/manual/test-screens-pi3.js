@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * PxFx Pi3 Screen Test Script
+ * ParadoxFX Pi3 Screen Test Script
  * 
  * Optimized for Raspberry Pi 3 running Raspberry Pi OS Bullseye (Legacy)
  * with hardware video acceleration via VideoCore IV GPU.
@@ -81,7 +81,7 @@ const path = require('path');
 class Pi3ScreenTester {
     constructor() {
         this.testResults = [];
-        this.mediaDir = '/opt/paradox/apps/pxfx/test/fixtures/test-media';
+        this.mediaDir = '/opt/paradox/apps/pfx/test/fixtures/test-media';
 
         // Pi3-optimized player configurations
         this.playerConfigs = {
@@ -434,11 +434,11 @@ class Pi3ScreenTester {
             console.log('   - Try rebooting after changing /boot/config.txt');
         }
 
-        console.log('\n🎯 Pi3-Optimized PxFx is ready for testing!');
+        console.log('\n🎯 Pi3-Optimized ParadoxFX is ready for testing!');
     }
 
     async run() {
-        console.log('🍓 PxFx Raspberry Pi 3 Screen Test Suite');
+        console.log('🍓 ParadoxFX Raspberry Pi 3 Screen Test Suite');
         console.log('==========================================\n');
 
         const requirementsMet = await this.checkPi3Requirements();

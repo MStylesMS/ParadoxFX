@@ -1,28 +1,28 @@
-# Paradox Effects (PxFx)
+# Paradox Effects (ParadoxFX)
 
 A Node.js multi-modal media and effect controller for screens, lights, and relays via MQTT.
 
 ## Overview
 
-PxFx is a comprehensive system for controlling various devices through MQTT messaging. It supports:
+ParadoxFX is a comprehensive system for controlling various devices through MQTT messaging. It supports:
 
 - **Screens**: Video/audio playback via media players (mpv, vlc, fbi, etc.)
 - **Lights**: Philips Hue, WiZ, and other smart lighting systems
 - **Relays**: Zigbee and Z-Wave devices for automation
 
-All configuration is managed through a `pxfx.ini` file (or a custom file via `--config`) with device-specific sections.
+All configuration is managed through a `pfx.ini` file (or a custom file via `--config`) with device-specific sections.
 
 ## Test Configuration
 
-For testing, you can use a separate configuration file (e.g. `pxfx-test.ini`) to point to test media and settings. To run with a test config:
+For testing, you can use a separate configuration file (e.g. `pfx-test.ini`) to point to test media and settings. To run with a test config:
 
 ```sh
-node pxfx.js --config pxfx-test.ini
+node pfx.js --config pfx-test.ini
 ```
 
-If no `--config` or `-c` argument is provided, the application defaults to `pxfx.ini` in the project root.
+If no `--config` or `-c` argument is provided, the application defaults to `pfx.ini` in the project root.
 
-**Example `pxfx-test.ini`:**
+**Example `pfx-test.ini`:**
 
 ```ini
 [global]
@@ -41,9 +41,9 @@ audioQueueMax=5
 ## Architecture
 
 ```text
-pxfx/
-├── pxfx.js              # Main entry point
-├── pxfx.ini             # Configuration file
+pfx/
+├── pfx.js              # Main entry point
+├── pfx.ini             # Configuration file
 ├── package.json         # Dependencies and scripts
 ├── lib/
 │   ├── core/            # Core system components
@@ -92,14 +92,14 @@ pxfx/
 
 ```bash
 npm install
-cp pxfx.ini.example pxfx.ini
-# Edit pxfx.ini with your configuration
+cp pfx.ini.example pfx.ini
+# Edit pfx.ini with your configuration
 npm start
 ```
 
 ## Configuration
 
-Edit `pxfx.ini` to configure your devices and MQTT connection:
+Edit `pfx.ini` to configure your devices and MQTT connection:
 
 ```ini
 [mqtt]
@@ -107,7 +107,7 @@ broker = localhost
 port = 1883
 username = 
 password = 
-client_id = pxfx-01
+client_id = pfx-01
 
 [screen:living-room]
 topic = paradox/living-room/screen
@@ -233,7 +233,7 @@ npm run check-media     # Check available test media files
 
 1. Create device class in `lib/devices/`
 2. Implement required methods from base device interface
-3. Add device configuration section to `pxfx.ini`
+3. Add device configuration section to `pfx.ini`
 4. Register device type in `device-manager.js`
 5. Add unit tests in `test/unit/`
 

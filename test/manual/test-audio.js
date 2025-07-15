@@ -1,6 +1,6 @@
 /**
  * @fileoverview MPV Audio Test Script - Multi-track Audio with Low-Latency Sound Effects
- * @description This script tests MPV's audio capabilities for the PxFx system, including:
+ * @description This script tests MPV's audio capabilities for the ParadoxFX system, including:
  * - Background music playback and looping
  * - Low-latency sound effects (target: <100ms)
  * - Audio ducking (lowering background music for speech)
@@ -26,12 +26,12 @@
  * - Cons: Slightly more resource usage per effect
  * - Settings: --audio-buffer=0.02, --cache=no for <50ms latency
  * 
- * INTEGRATION RECOMMENDATION: Use Method 3 for PxFx sound effects
+ * INTEGRATION RECOMMENDATION: Use Method 3 for ParadoxFX sound effects
  * - Allows multiple simultaneous effects (button clicks, alerts, etc.)
  * - Fire-and-forget approach simplifies code
  * - Optimized for minimum latency
  * 
- * Key features for PxFx integration:
+ * Key features for ParadoxFX integration:
  * - Sound effect pre-loading for instant playback
  * - Latency measurement and monitoring
  * - Sub-100ms response time achievement
@@ -39,7 +39,7 @@
  * 
  * INTEGRATION NOTES:
  * =================
- * This file contains reusable components for the main PxFx system:
+ * This file contains reusable components for the main ParadoxFX system:
  * 
  * REUSABLE FUNCTIONS (for integration):
  * - createAudioArgs() - MPV argument configuration
@@ -47,7 +47,7 @@
  * - waitForSocket() - Socket ready detection
  * - measureAudioLatency() - Performance monitoring
  * 
- * AUDIO ARCHITECTURE (for PxFx integration):
+ * AUDIO ARCHITECTURE (for ParadoxFX integration):
  * - Multiple MPV instances for different audio purposes
  * - Background music instance with ducking capability
  * - Low-latency effects instance with pre-loading
@@ -73,7 +73,7 @@ const readline = require('readline');
 /**
  * Test audio file paths
  * 
- * INTEGRATION NOTE: In PxFx system, these will be dynamically resolved
+ * INTEGRATION NOTE: In ParadoxFX system, these will be dynamically resolved
  * from the media configuration system
  */
 const BACKGROUND_MUSIC = path.resolve(__dirname, '../fixtures/test-media/houdini_music.mp3');
@@ -84,7 +84,7 @@ const SHORT_AUDIO = path.resolve(__dirname, '../fixtures/test-media/default.wav'
 /**
  * MPV IPC socket paths for different audio purposes
  * 
- * INTEGRATION NOTE: In PxFx system, these will be managed by a central
+ * INTEGRATION NOTE: In ParadoxFX system, these will be managed by a central
  * socket manager to avoid conflicts with video sockets
  */
 const BACKGROUND_MUSIC_SOCKET = '/tmp/mpv-background-ipc.sock';
@@ -106,7 +106,7 @@ sockets.forEach(socket => {
  * MPV AUDIO CONFIGURATION STRATEGY
  * ================================
  * 
- * The PxFx system uses THREE DISTINCT AUDIO TYPES, each with different management strategies:
+ * The ParadoxFX system uses THREE DISTINCT AUDIO TYPES, each with different management strategies:
  * 
  * 1. BACKGROUND MUSIC INSTANCE:
  *    - Purpose: Continuous ambient music with looping capability
@@ -128,7 +128,7 @@ sockets.forEach(socket => {
  * 
  * 3. SPEECH/NARRATION INSTANCE:
  *    - Purpose: Spoken audio, hints, narration, voice instructions
- *    - Management: QUEUE-BASED system (implementation TBD in PxFx integration)
+ *    - Management: QUEUE-BASED system (implementation TBD in ParadoxFX integration)
  *    - Launch: Multiple approaches tested - queue system will use managed instances
  *    - Control: Speech queue will handle interruption, completion detection, priority
  *    - Settings: High volume, background music ducking coordination
@@ -146,7 +146,7 @@ sockets.forEach(socket => {
 /**
  * INTEGRATION FUNCTION: Create MPV arguments for different audio purposes
  * 
- * This function will be used in the main PxFx system to configure
+ * This function will be used in the main ParadoxFX system to configure
  * audio instances with appropriate settings for their purpose.
  * 
  * @param {string} socketPath - IPC socket path
@@ -367,14 +367,14 @@ function monitorProperty(socketPath, property, targetValue, callback) {
 // AUDIO TEST FUNCTIONS
 // 
 // INTEGRATION NOTE: These functions demonstrate the capabilities and can be
-// adapted for the main PxFx system. The core functionality (volume control,
+// adapted for the main ParadoxFX system. The core functionality (volume control,
 // loading, etc.) will be used in production.
 // ============================================================================
 
 /**
  * INTEGRATION REFERENCE: Test background music playback and volume control
  * 
- * Key features for PxFx integration:
+ * Key features for ParadoxFX integration:
  * - Background music loading and looping
  * - Real-time volume control (for ducking)
  * - Volume restoration after speech
@@ -427,7 +427,7 @@ async function testBackgroundMusic() {
 /**
  * INTEGRATION REFERENCE: Test low-latency sound effects
  * 
- * Key features for PxFx integration:
+ * Key features for ParadoxFX integration:
  * - Sound effect pre-loading for instant playback
  * - Latency measurement and monitoring
  * - Sub-100ms response time achievement
@@ -483,7 +483,7 @@ async function testSoundEffects() {
 
         await new Promise(resolve => setTimeout(resolve, 3000));
 
-        // Test 3: Direct spawn with low-latency settings (Method 3 - PREFERRED for PxFx)
+        // Test 3: Direct spawn with low-latency settings (Method 3 - PREFERRED for ParadoxFX)
         console.log('\nMethod 3: Direct spawn with low-latency settings (PREFERRED)...');
         console.log('Three second countdown:');
         for (let i = 3; i >= 1; i--) {
@@ -516,7 +516,7 @@ async function testSoundEffects() {
 /**
  * INTEGRATION REFERENCE: Test speech/narration with background music ducking
  * 
- * Key features for PxFx integration:
+ * Key features for ParadoxFX integration:
  * - Coordinated volume management between instances
  * - Automatic background music ducking during speech
  * - Speech audio loading and playback
@@ -578,7 +578,7 @@ async function testSpeechWithDucking() {
 /**
  * INTEGRATION REFERENCE: Test multiple simultaneous audio streams
  * 
- * Key features for PxFx integration:
+ * Key features for ParadoxFX integration:
  * - Multi-instance coordination
  * - Simultaneous playback capability
  * - Volume balancing between different audio types
@@ -638,7 +638,7 @@ async function testMultipleAudioStreams() {
 // MAIN EXECUTION LOGIC - AUDIO TESTING
 // 
 // INTEGRATION BLUEPRINT: This section demonstrates the complete audio system
-// initialization and management pattern for the PxFx system.
+// initialization and management pattern for the ParadoxFX system.
 // 
 // Key integration patterns:
 // 1. Multiple MPV instance management
@@ -717,7 +717,7 @@ async function testMultipleAudioStreams() {
         console.log(`\nOverall Result: ${allPassed ? '🎉 ALL TESTS PASSED' : '⚠️  SOME TESTS FAILED'}`);
 
         if (allPassed) {
-            console.log('\nMPV is suitable for all audio requirements in the PxFx system!');
+            console.log('\nMPV is suitable for all audio requirements in the ParadoxFX system!');
         } else {
             console.log('\nSome audio features may need alternative solutions or optimization.');
         }
@@ -751,10 +751,10 @@ async function testMultipleAudioStreams() {
 
 /**
  * =============================================================================
- * PXFX AUDIO INTEGRATION SUMMARY
+ * PFX AUDIO INTEGRATION SUMMARY
  * =============================================================================
  * 
- * This test script validates the complete MPV-based audio architecture for PxFx.
+ * This test script validates the complete MPV-based audio architecture for ParadoxFX.
  * All three audio types have been successfully tested and validated:
  * 
  * 1. BACKGROUND MUSIC: ✅ VALIDATED
@@ -771,7 +771,7 @@ async function testMultipleAudioStreams() {
  * 3. SPEECH/NARRATION: ✅ VALIDATED
  *    - Fire-and-forget spawn tested and working
  *    - Background music ducking coordination confirmed
- *    - Queue-based management ready for PxFx integration
+ *    - Queue-based management ready for ParadoxFX integration
  * 
  * KEY INTEGRATION RECOMMENDATIONS:
  * ================================
@@ -793,7 +793,7 @@ async function testMultipleAudioStreams() {
  * - Coordinate with background music for ducking
  * - Consider IPC for queue management and interruption
  * 
- * REUSABLE COMPONENTS FOR PXFX:
+ * REUSABLE COMPONENTS FOR PFX:
  * ==============================
  * - createAudioArgs() - MPV configuration function
  * - sendMpvCommand() - IPC communication utility
@@ -807,6 +807,6 @@ async function testMultipleAudioStreams() {
  * - Speech coordination: Smooth volume transitions
  * - Multiple streams: No conflicts or interference
  * 
- * STATUS: Ready for PxFx integration
+ * STATUS: Ready for ParadoxFX integration
  * =============================================================================
  */

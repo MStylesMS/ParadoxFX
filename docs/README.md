@@ -1,6 +1,6 @@
-# PxFx Documentation
+# ParadoxFX Documentation
 
-This directory contains the complete documentation for PxFx (Paradox Effects).
+This directory contains the complete documentation for ParadoxFX (Paradox Effects).
 
 ## Documentation Index
 

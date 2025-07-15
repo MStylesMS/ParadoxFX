@@ -1,10 +1,10 @@
-# PxFx - Paradox Effects
+# ParadoxFX - Paradox Effects
 
 A Node.js multi-modal media and effect controller for screens, lights, and relays via MQTT.
 
 ## Overview
 
-PxFx is a comprehensive system for controlling various devices through MQTT messaging. It supports:
+ParadoxFX is a comprehensive system for controlling various devices through MQTT messaging. It supports:
 
 - **Screens**: Video/audio playback via media players (mpv, vlc, fbi, etc.)
 - **Lights**: Individual and group lighting control (Hue, WiZ, Zigbee, Z-Wave)  
@@ -18,14 +18,14 @@ PxFx is a comprehensive system for controlling various devices through MQTT mess
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd pxfx
+cd pfx
 
 # Install dependencies
 npm install
 
 # Copy and edit configuration
-cp pxfx.ini.example pxfx.ini
-# Edit pxfx.ini with your settings
+cp pfx.ini.example pfx.ini
+# Edit pfx.ini with your settings
 
 # Run the application
 npm start
@@ -33,7 +33,7 @@ npm start
 
 ### Basic Configuration
 
-Edit `pxfx.ini` to configure your devices and MQTT connection:
+Edit `pfx.ini` to configure your devices and MQTT connection:
 
 ```ini
 [mqtt]

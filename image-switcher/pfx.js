@@ -1,4 +1,4 @@
-// pxfx.js - Example main application structure for Paradox-FX (pxfx)
+// pfx.js - Example main application structure for Paradox-FX (pfx)
 // This is a cleaned-up version of the original index.js, suitable as a reference for new projects.
 
 const { parseNumberOr } = require('../lib/utils');

@@ -58,7 +58,7 @@ logs
 *.log
 
 # Runtime configuration (copy from .example)
-pxfx.ini
+pfx.ini
 
 # IDE files
 .vscode/

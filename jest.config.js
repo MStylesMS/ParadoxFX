@@ -1,5 +1,5 @@
 /**
- * Jest Configuration for PxFx Tests
+ * Jest Configuration for ParadoxFX Tests
  */
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
     ],
     collectCoverageFrom: [
         'lib/**/*.js',
-        'pxfx.js',
+        'pfx.js',
         '!lib/**/*.test.js',
         '!lib/**/*.spec.js',
         '!**/node_modules/**'

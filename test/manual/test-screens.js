@@ -6,7 +6,7 @@
  * 
  * INTEGRATION NOTES:
  * =================
- * This file contains reusable components for the main PxFx system:
+ * This file contains reusable components for the main ParadoxFX system:
  * 
  * REUSABLE FUNCTIONS (for integration):
  * - sendMpvCommand() - IPC communication (shared with audio system)
@@ -14,7 +14,7 @@
  * - waitForVideoEnd() - Video completion monitoring
  * - pollForVideoEnd() - Fallback detection method
  * 
- * VIDEO ARCHITECTURE (for PxFx integration):
+ * VIDEO ARCHITECTURE (for ParadoxFX integration):
  * - Single MPV instance for seamless screen transitions
  * - Smart property observation for immediate end detection
  * - Fullscreen video display with last frame holding
@@ -41,7 +41,7 @@ const readline = require('readline');
 /**
  * Test media file paths
  * 
- * INTEGRATION NOTE: In PxFx system, these will be dynamically resolved
+ * INTEGRATION NOTE: In ParadoxFX system, these will be dynamically resolved
  * from the show configuration and media management system
  */
 const IMAGE_PATH = path.resolve(__dirname, '../fixtures/test-media/default.png');
@@ -50,7 +50,7 @@ const VIDEO_PATH = path.resolve(__dirname, '../fixtures/test-media/default.mp4')
 /**
  * MPV IPC socket path for screen control
  * 
- * INTEGRATION NOTE: In PxFx system, this will be managed by a central
+ * INTEGRATION NOTE: In ParadoxFX system, this will be managed by a central
  * socket manager alongside audio sockets
  */
 const SCREEN_MPV_SOCKET = '/tmp/mpv-screen-ipc.sock';
@@ -93,7 +93,7 @@ try {
  * MPV command line arguments for seamless screen display
  * 
  * INTEGRATION NOTE: These arguments are optimized for video display
- * and will be used in the main PxFx video player configuration
+ * and will be used in the main ParadoxFX video player configuration
  */
 const screenArgs = [
     '--idle=yes',
@@ -110,7 +110,7 @@ const screenArgs = [
  * INTEGRATION FUNCTION: Send IPC command to MPV instance
  * 
  * This function can be shared with the audio system - same pattern
- * for all MPV IPC communication in the PxFx system.
+ * for all MPV IPC communication in the ParadoxFX system.
  * 
  * @param {Object} cmdObj - Command object with 'command' array property
  * @returns {Promise<Object>} Promise resolving to MPV response
@@ -281,7 +281,7 @@ function createSmartPropertyObserver() {
 /**
  * INTEGRATION FUNCTION: Wait for video to reach its end using smart property observation
  * 
- * This function provides the main interface for video end detection in PxFx.
+ * This function provides the main interface for video end detection in ParadoxFX.
  * It uses the smart property observer with polling fallback for reliability.
  * 
  * @param {Promise} videoEndPromise - Optional pre-started smart property observer promise
@@ -307,7 +307,7 @@ async function waitForVideoEnd(videoEndPromise = null) {
  * INTEGRATION FUNCTION: Fallback polling method to detect video end
  * 
  * This provides a reliable backup method when property observation fails.
- * Used as secondary detection method in production PxFx system.
+ * Used as secondary detection method in production ParadoxFX system.
  * 
  * @returns {Promise<void>} Promise that resolves when video ends
  */
@@ -338,7 +338,7 @@ async function pollForVideoEnd() {
 // MAIN EXECUTION LOGIC - VIDEO TESTING
 // 
 // INTEGRATION BLUEPRINT: This section demonstrates the complete video system
-// initialization and control pattern for the PxFx system.
+// initialization and control pattern for the ParadoxFX system.
 // 
 // Key integration patterns:
 // 1. Single MPV instance for seamless video transitions

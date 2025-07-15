@@ -1,4 +1,4 @@
-# Raspberry Pi 4 Audio/Video Setup for PxFx System
+# Raspberry Pi 4 Audio/Video Setup for ParadoxFX System
 # Date: July 10, 2025
 # System: Raspberry Pi 4 with Bookworm OS
 
@@ -111,7 +111,7 @@ mpv --screen=1 --fullscreen video.mp4
   - Instance 1: Video on screen 0, audio on HDMI0
   - Instance 2: Video on screen 1, audio on HDMI1
   - Instance 3: Audio only on analog output (3.5mm jack)
-- **Implications**: Would enable independent control per "screen device" in PxFx
+- **Implications**: Would enable independent control per "screen device" in ParadoxFX
 
 #### 4. Comprehensive Setup Guide Creation
 - **Deliverable**: Complete setup script and documentation
@@ -123,9 +123,9 @@ mpv --screen=1 --fullscreen video.mp4
   - Automated detection and setup of audio devices
   - System service configuration for headless operation
 
-### Priority 3: PxFx Integration
+### Priority 3: ParadoxFX Integration
 
-#### 5. PxFx .ini Configuration Design
+#### 5. ParadoxFX .ini Configuration Design
 - **Requirement**: Support audio routing per screen device
 - **Design considerations**:
   - Screen device configuration options:
@@ -210,4 +210,4 @@ Current test uses these arguments (screen targeting broken):
 ---
 Generated: July 10, 2025
 System: Raspberry Pi 4, Bookworm OS
-Context: PxFx multi-modal media controller development
+Context: ParadoxFX multi-modal media controller development

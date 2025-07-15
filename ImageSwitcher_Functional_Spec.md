@@ -41,9 +41,9 @@ ImageSwitcher is a Node.js module designed to control the playback of images, vi
 - **Heartbeat:**
   - Periodically publishes a heartbeat message to a configured topic.
 
-### 4. Configuration (using single pxfx.ini file)
+### 4. Configuration (using single pfx.ini file)
 
-All device configurations are stored in a single `pxfx.ini` file using section-based format:
+All device configurations are stored in a single `pfx.ini` file using section-based format:
 
 - Single INI file contains all device types (screens, lights, relays)
 - Each device gets its own section in brackets
@@ -155,9 +155,9 @@ The application includes wrappers for multiple external media players:
 
 ## Proposed Scaffold Structure
 
-/opt/paradox/apps/pxfx/
-├── pxfx.js                 # Main application entry point
-├── pxfx.ini                # Single configuration file
+/opt/paradox/apps/pfx/
+├── pfx.js                 # Main application entry point
+├── pfx.ini                # Single configuration file
 ├── package.json
 ├── lib/
 │   ├── core/
