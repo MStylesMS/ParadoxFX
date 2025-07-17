@@ -345,6 +345,173 @@ Stop all audio effects playback.
 }
 ```
 
+#### playBackgroundMusic
+
+Play background music with seamless looping and volume control.
+
+**Format:**
+
+```json
+{
+  "Command": "playBackgroundMusic",
+  "Audio": "ambient/forest.mp3",
+  "Volume": 70
+}
+```
+
+**Parameters:**
+
+- `Audio` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `Volume` (optional): Volume level (0-100), defaults to device configuration
+
+**Features:**
+- Seamless looping for continuous playback
+- Real-time volume control for ducking during speech
+- Persistent playback instance for smooth audio experience
+
+**Examples:**
+
+```json
+{
+  "Command": "playBackgroundMusic",
+  "Audio": "ambient.mp3"
+}
+```
+
+```json
+{
+  "Command": "playBackgroundMusic",
+  "Audio": "music/mystical.mp3",
+  "Volume": 60
+}
+```
+
+#### stopBackgroundMusic
+
+Stop background music playback.
+
+**Format:**
+
+```json
+{
+  "Command": "stopBackgroundMusic"
+}
+```
+
+#### setBackgroundMusicVolume
+
+Set background music volume in real-time.
+
+**Format:**
+
+```json
+{
+  "Command": "setBackgroundMusicVolume",
+  "Volume": 40
+}
+```
+
+**Parameters:**
+
+- `Volume` (required): Volume level (0-100)
+
+**Use case:** Perfect for ducking background music during speech without stopping playback.
+
+#### playSpeech
+
+Play speech audio with automatic background music ducking.
+
+**Format:**
+
+```json
+{
+  "Command": "playSpeech",
+  "Audio": "voice/instructions.mp3",
+  "Volume": 90
+}
+```
+
+**Parameters:**
+
+- `Audio` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `Volume` (optional): Volume level (0-100), defaults to device configuration
+
+**Features:**
+- Automatic background music ducking during speech
+- Queue-based system for multiple speech items
+- Automatic volume restoration after speech completion
+
+**Examples:**
+
+```json
+{
+  "Command": "playSpeech",
+  "Audio": "hints/clue1.mp3"
+}
+```
+
+```json
+{
+  "Command": "playSpeech",
+  "Audio": "narration/intro.mp3",
+  "Volume": 95
+}
+```
+
+#### clearSpeechQueue
+
+Clear all queued speech audio and stop current speech.
+
+**Format:**
+
+```json
+{
+  "Command": "clearSpeechQueue"
+}
+```
+
+#### playSoundEffect
+
+Play sound effects with ultra-low latency and parallel playback.
+
+**Format:**
+
+```json
+{
+  "Command": "playSoundEffect",
+  "Audio": "effects/button_click.wav",
+  "Volume": 100
+}
+```
+
+**Parameters:**
+
+- `Audio` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `Volume` (optional): Volume level (0-100), defaults to device configuration
+
+**Features:**
+- Sub-50ms latency for instant feedback
+- Multiple effects can play simultaneously
+- Fire-and-forget operation for maximum performance
+- Optimized for button clicks, alerts, and UI feedback
+
+**Examples:**
+
+```json
+{
+  "Command": "playSoundEffect",
+  "Audio": "fx/click.wav"
+}
+```
+
+```json
+{
+  "Command": "playSoundEffect",
+  "Audio": "feedback/success.wav",
+  "Volume": 80
+}
+```
+
 ### Advanced Commands
 
 #### transition
