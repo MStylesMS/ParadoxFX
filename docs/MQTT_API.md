@@ -16,7 +16,7 @@ This document provides the complete MQTT API specification for ParadoxFX (Parado
 
 ## Overview
 
-ParadoxFX uses MQTT for all device communication. Each device subscribes to a command topic and publishes status updates and responses. The system also provides heartbeat messages and error reporting.
+PxFx uses MQTT for all device communication. Each device subscribes to a command topic and publishes status updates and responses. The system also provides heartbeat messages and error reporting.
 
 ### Base Architecture
 

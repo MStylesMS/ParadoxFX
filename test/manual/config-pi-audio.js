@@ -212,17 +212,31 @@ function testAudioPlayback(device, testFile, description) {
         console.log(`   Device: ${device}`);
         console.log(`   File: ${testFile}`);
 
-        const aplayProcess = spawn('aplay', ['-D', device, testFile], {
+        // Use mpv with ALSA output, force audio, no video, and set volume to 80%
+        // --ao=alsa --audio-device=alsa/<device> is the most direct, but device must be in mpv's format
+        // device can be e.g. "plughw:0" or "plughw:1"; mpv expects alsa/plughw:0
+        let alsaDevice = device.replace(/^plughw:/, 'plughw:');
+        let mpvDevice = `alsa/${alsaDevice}`;
+        const args = [
+            '--ao=alsa',
+            `--audio-device=${mpvDevice}`,
+            '--no-video',
+            '--volume=80',
+            '--really-quiet',
+            testFile
+        ];
+
+        const mpvProcess = spawn('mpv', args, {
             stdio: 'pipe'
         });
 
         let playbackError = '';
 
-        aplayProcess.stderr.on('data', (data) => {
+        mpvProcess.stderr.on('data', (data) => {
             playbackError += data.toString();
         });
 
-        aplayProcess.on('close', (code) => {
+        mpvProcess.on('close', (code) => {
             if (code !== 0) {
                 console.log(`❌ Playback failed: ${playbackError}`);
                 resolve(false);
@@ -232,7 +246,7 @@ function testAudioPlayback(device, testFile, description) {
             }
         });
 
-        aplayProcess.on('error', (error) => {
+        mpvProcess.on('error', (error) => {
             console.log(`❌ Playback error: ${error.message}`);
             resolve(false);
         });

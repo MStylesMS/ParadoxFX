@@ -31,7 +31,7 @@ function checkPi3Environment() {
 }
 
 function printUsage() {
-    console.log('🍓 ParadoxFX Pi3 - Raspberry Pi 3 Optimized Version');
+    console.log('🍓 PFX Pi3 - Raspberry Pi 3 Optimized Version');
     console.log('=============================================\n');
 
     if (!checkPi3Environment()) {
@@ -49,7 +49,7 @@ function printUsage() {
     console.log('  node pfx-pi3.js test-mqtt       # Test MQTT communication');
     console.log('');
     console.log('🚀 Running:');
-    console.log('  node pfx-pi3.js start [config]  # Start ParadoxFX with Pi3 optimizations');
+    console.log('  node pfx-pi3.js start [config]  # Start PFX with Pi3 optimizations');
     console.log('  node pfx-pi3.js start pfx-pi3.ini  # Use Pi3-specific config');
     console.log('');
     console.log('⚙️  Configuration:');
@@ -127,7 +127,7 @@ switch (command) {
 
     case 'start':
         const configFile = args[1] || 'pfx-pi3.ini';
-        console.log(`🚀 Starting ParadoxFX Pi3 with config: ${configFile}`);
+        console.log(`🚀 Starting PFX Pi3 with config: ${configFile}`);
         runCommand('../pfx.js', ['--config', configFile]);
         break;
 

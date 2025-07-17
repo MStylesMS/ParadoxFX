@@ -12,9 +12,9 @@ const ConfigLoader = require('./lib/core/config-loader');
 const MqttClient = require('./lib/core/mqtt-client');
 const Logger = require('./lib/utils/logger');
 
-class ParadoxFXApplication {
+class PxFxApplication {
     constructor() {
-        this.logger = new Logger('ParadoxFX');
+        this.logger = new Logger('PxFx');
         this.config = null;
         this.deviceManager = null;
         this.mqttClient = null;
@@ -83,8 +83,8 @@ class ParadoxFXApplication {
 
 // Start the application if this file is run directly
 if (require.main === module) {
-    const app = new ParadoxFXApplication();
+    const app = new PxFxApplication();
     app.start();
 }
 
-module.exports = ParadoxFXApplication;
+module.exports = PxFxApplication;
