@@ -37,7 +37,7 @@ async function testInitialization() {
 
     try {
         const audioManager = new AudioManager({
-            audioDevice: 'pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback',
+            audioDevice: 'pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo',
             backgroundMusicVolume: 70,
             effectsVolume: 100,
             speechVolume: 90,

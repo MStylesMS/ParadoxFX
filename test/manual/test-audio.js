@@ -506,7 +506,7 @@ async function testSoundEffects() {
             '--no-video',
             '--volume=100',
             '--audio-exclusive=yes',  // Request exclusive audio access
-            `--audio-device=pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback`,
+            `--audio-device=pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`,
             SOUND_EFFECT
         ], { detached: false });
 
@@ -536,7 +536,7 @@ async function testSoundEffects() {
             '--cache=no',               // Disable cache for immediate playback
             '--audio-exclusive=yes',    // Request exclusive audio access
             '--audio-fallback-to-null=no', // Don't fallback if audio fails
-            `--audio-device=pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback`,
+            `--audio-device=pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`,
             SOUND_EFFECT
         ], { detached: false });
 
@@ -657,7 +657,7 @@ async function testMultipleAudioStreams() {
             '--volume=100',
             '--audio-buffer=0.02',
             '--cache=no',
-            `--audio-device=pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback`,
+            `--audio-device=pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`,
             SOUND_EFFECT
         ], { detached: false });
 
@@ -669,7 +669,7 @@ async function testMultipleAudioStreams() {
             '--no-terminal',
             '--no-video',
             '--volume=100',
-            `--audio-device=pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback`,
+            `--audio-device=pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`,
             SPEECH_AUDIO
         ], { detached: false });
 
@@ -725,8 +725,8 @@ async function testMultipleAudioStreams() {
         // Launch MPV instances for different audio purposes
         console.log('\nLaunching MPV audio instances...');
 
-        // Use the specific PipeWire device identifiers for analog output
-        const analogDevice = 'pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback';
+        // Use the specific PipeWire device identifiers for Pi5 HDMI output
+        const analogDevice = 'pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo';
 
         const backgroundMpv = spawn('mpv', createAudioArgs(BACKGROUND_MUSIC_SOCKET, 'background', analogDevice), { detached: false });
         const effectsMpv = spawn('mpv', createAudioArgs(SOUND_EFFECTS_SOCKET, 'effects', analogDevice), { detached: false });
