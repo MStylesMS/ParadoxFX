@@ -7,6 +7,7 @@ This document provides the complete MQTT API specification for ParadoxFX (Parado
 - [Overview](#overview)
 - [Topic Structure](#topic-structure)
 - [Message Formats](#message-formats)
+- [Multi-Zone Audio](#multi-zone-audio)
 - [Screen/Media Commands](#screenmedia-commands)
 - [Light Commands](#light-commands)
 - [Relay Commands](#relay-commands)
@@ -105,6 +106,119 @@ System heartbeat messages:
 - `ip_address`: Current IP address of the system
 - `status`: System status ("online", "offline", "error")
 - `uptime`: System uptime in seconds
+
+## Multi-Zone Audio
+
+ParadoxFX supports independent audio content across multiple physical outputs, enabling true multi-zone audio experiences. Each zone can play different background music, sound effects, and speech simultaneously.
+
+### Audio Zone Architecture
+
+**Supported Zones:**
+- **screen0**: HDMI 1 output (alsa/plughw:0)
+- **screen1**: HDMI 2 output (alsa/plughw:1) 
+- **headphones**: Analog output (pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback)
+
+**Audio Types per Zone:**
+- **background**: Continuous music with looping and volume control
+- **effects**: Low-latency sound effects (<50ms response time)
+- **speech**: Voice/narration with automatic background music ducking
+
+### Multi-Zone Topic Structure
+
+Multi-zone audio uses a hierarchical topic structure:
+
+```
+pfx/{zone}/{audioType}/{action}
+```
+
+**Examples:**
+```
+pfx/screen0/background/play     # Play background music on Screen 0
+pfx/screen1/effects/trigger     # Trigger sound effect on Screen 1
+pfx/headphones/speech/say       # Play speech on headphones
+pfx/screen0/background/volume   # Adjust Screen 0 background volume
+```
+
+### Multi-Zone Commands
+
+#### Background Music Control
+
+**Play Background Music:**
+```json
+Topic: pfx/{zone}/background/play
+Payload: {
+  "file": "/path/to/background_music.mp3"
+}
+```
+
+**Adjust Background Volume:**
+```json
+Topic: pfx/{zone}/background/volume
+Payload: {
+  "level": 70
+}
+```
+
+**Stop Background Music:**
+```json
+Topic: pfx/{zone}/background/stop
+Payload: {}
+```
+
+#### Sound Effects
+
+**Trigger Sound Effect:**
+```json
+Topic: pfx/{zone}/effects/trigger
+Payload: {
+  "file": "/path/to/sound_effect.wav"
+}
+```
+
+#### Speech/Narration
+
+**Play Speech:**
+```json
+Topic: pfx/{zone}/speech/say
+Payload: {
+  "file": "/path/to/speech.mp3",
+  "duckBackground": true,
+  "duckLevel": 40
+}
+```
+
+### Multi-Zone Examples
+
+**Independent Background Music:**
+```bash
+# Different music on each zone
+mosquitto_pub -t "pfx/screen0/background/play" -m '{"file": "/media/classical.mp3"}'
+mosquitto_pub -t "pfx/screen1/background/play" -m '{"file": "/media/jazz.mp3"}'
+mosquitto_pub -t "pfx/headphones/background/play" -m '{"file": "/media/ambient.mp3"}'
+
+# Different volumes per zone
+mosquitto_pub -t "pfx/screen0/background/volume" -m '{"level": 100}'
+mosquitto_pub -t "pfx/screen1/background/volume" -m '{"level": 60}'
+mosquitto_pub -t "pfx/headphones/background/volume" -m '{"level": 30}'
+```
+
+**Zone-Specific Sound Effects:**
+```bash
+# Button click on Screen 0
+mosquitto_pub -t "pfx/screen0/effects/trigger" -m '{"file": "/media/button_click.wav"}'
+
+# Alert sound on Screen 1
+mosquitto_pub -t "pfx/screen1/effects/trigger" -m '{"file": "/media/alert.wav"}'
+
+# Notification on headphones
+mosquitto_pub -t "pfx/headphones/effects/trigger" -m '{"file": "/media/notification.wav"}'
+```
+
+**Speech with Background Ducking:**
+```bash
+# Speech on Screen 0 with background music ducking
+mosquitto_pub -t "pfx/screen0/speech/say" -m '{"file": "/media/instructions.mp3", "duckBackground": true, "duckLevel": 20}'
+```
 
 ## Screen/Media Commands
 

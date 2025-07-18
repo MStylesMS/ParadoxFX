@@ -442,6 +442,15 @@ async function testSoundEffects() {
     console.log('\n=== Testing Low-Latency Sound Effects ===');
 
     try {
+        // STOP background music completely during sound effects testing to eliminate all audio conflicts
+        console.log('Stopping background music for isolated sound effect testing...');
+        await sendMpvCommand(BACKGROUND_MUSIC_SOCKET, {
+            command: ['stop']
+        });
+
+        // Wait for background music to fully stop
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         // Pre-load sound effect and pause it for instant playback
         console.log('Pre-loading sound effect...');
         await sendMpvCommand(SOUND_EFFECTS_SOCKET, {
@@ -455,7 +464,7 @@ async function testSoundEffects() {
 
         console.log('✓ Sound effect pre-loaded and paused');
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // Test 1: IPC-based sound effect (Method 1 - IPC trigger)
         console.log('\nMethod 1: IPC-triggered sound effect...');
@@ -490,12 +499,13 @@ async function testSoundEffects() {
         }
 
         console.log('  Playing sound effect now!');
-        // Measure latency for Method 2
+        // Measure latency for Method 2 - USE EXCLUSIVE AUDIO ACCESS
         const method2StartTime = Date.now();
         const effectsMpv2 = spawn('mpv', [
             '--no-terminal',
             '--no-video',
             '--volume=100',
+            '--audio-exclusive=yes',  // Request exclusive audio access
             `--audio-device=pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback`,
             SOUND_EFFECT
         ], { detached: false });
@@ -504,7 +514,8 @@ async function testSoundEffects() {
         const method2SpawnTime = Date.now() - method2StartTime;
         console.log(`  (Method 2 spawn time: ~${method2SpawnTime}ms)`);
 
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Wait for effect to complete before next test
+        await new Promise(resolve => setTimeout(resolve, 4000));
 
         // Test 3: Direct spawn with low-latency settings (Method 3 - PREFERRED for ParadoxFX)
         console.log('\nMethod 3: Direct spawn with low-latency settings (PREFERRED)...');
@@ -515,14 +526,16 @@ async function testSoundEffects() {
         }
 
         console.log('  Playing sound effect now!');
-        // Measure latency for Method 3
+        // Measure latency for Method 3 - USE EXCLUSIVE AUDIO + OPTIMIZED SETTINGS
         const method3StartTime = Date.now();
         const effectsMpv3 = spawn('mpv', [
             '--no-terminal',
             '--no-video',
             '--volume=100',
-            '--audio-buffer=0.02',  // Minimize audio buffer for low latency
-            '--cache=no',           // Disable cache for immediate playback
+            '--audio-buffer=0.02',      // Minimize audio buffer for low latency
+            '--cache=no',               // Disable cache for immediate playback
+            '--audio-exclusive=yes',    // Request exclusive audio access
+            '--audio-fallback-to-null=no', // Don't fallback if audio fails
             `--audio-device=pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback`,
             SOUND_EFFECT
         ], { detached: false });
@@ -531,7 +544,8 @@ async function testSoundEffects() {
         const method3SpawnTime = Date.now() - method3StartTime;
         console.log(`  (Method 3 spawn time: ~${method3SpawnTime}ms)`);
 
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Wait for effect to complete
+        await new Promise(resolve => setTimeout(resolve, 4000));
 
         // Summary of methods
         console.log('\n📊 Method Comparison Summary:');
@@ -539,7 +553,13 @@ async function testSoundEffects() {
         console.log(`  Method 2 (Basic spawn): ~${method2SpawnTime}ms process startup`);
         console.log(`  Method 3 (Low-latency spawn): ~${method3SpawnTime}ms process startup + optimized playback`);
 
-        console.log('✓ Sound effects testing completed');
+        // RESTART background music after sound effects testing
+        console.log('\n✓ Sound effects testing completed');
+        console.log('Restarting background music...');
+        await sendMpvCommand(BACKGROUND_MUSIC_SOCKET, {
+            command: ['loadfile', BACKGROUND_MUSIC, 'replace']
+        });
+
         return true;
 
     } catch (error) {

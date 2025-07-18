@@ -120,6 +120,32 @@ npm run test:ci         # Unit tests only (faster, no external dependencies)
 npm run test:manual     # Real media playback tests
 ```
 
+### Audio Testing
+
+ParadoxFX includes comprehensive audio testing capabilities:
+
+```bash
+# Standard audio testing (single device)
+node test/manual/test-audio.js
+
+# Multi-zone audio testing (3 independent physical outputs)
+node test/manual/test-audio-3devices.js
+
+# Raspberry Pi audio configuration
+node test/manual/config-pi-audio.js
+```
+
+**Multi-Zone Audio Architecture:**
+- **Zone 'screen0'**: HDMI 1 output (alsa/plughw:0)
+- **Zone 'screen1'**: HDMI 2 output (alsa/plughw:1)
+- **Zone 'headphones'**: Analog output (pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback)
+
+Each zone supports independent:
+- Background music with looping and volume control
+- Low-latency sound effects (<50ms)
+- Speech/narration with background music ducking
+- MQTT topic routing (pfx/{zone}/{type}/{action})
+
 ### Project Structure
 
 - **lib/core/**: System initialization, configuration, MQTT, and device management

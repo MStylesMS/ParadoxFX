@@ -25,6 +25,20 @@
   - MPV Player: Video/audio playback
   - CVLC Player: VLC media player
 
+### ✅ Multi-Zone Audio Architecture
+
+- **Zone-Based Audio Management**: Independent audio content per physical output
+  - **Zone 'screen0'**: HDMI 1 output (alsa/plughw:0)
+  - **Zone 'screen1'**: HDMI 2 output (alsa/plughw:1)
+  - **Zone 'headphones'**: Analog output (pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback)
+- **Audio Type Separation**: Each zone supports 3 independent audio types:
+  - **Background Music**: Persistent MPV instances with volume control and ducking
+  - **Sound Effects**: Fire-and-forget spawn method with <50ms latency
+  - **Speech/Narration**: Queue-based system with background music coordination
+- **MQTT Integration Pattern**: Topic routing structure (pfx/{zone}/{type}/{action})
+- **Parallel Audio Streams**: Simultaneous multi-zone audio without interference
+- **Performance Validated**: 9 MPV instances (3 zones × 3 audio types) running concurrently
+
 ### ✅ External Controllers
 
 - **Hue Controller**: Philips Hue integration (placeholder)
@@ -47,6 +61,12 @@
 - **Integration Tests**: MQTT integration and media playback test structure
 - **Media Tests**: Comprehensive media file format testing (images, video, audio)
 - **Transition Tests**: Media type switching and player selection validation
+- **Audio Testing Suite**: 
+  - Standard audio testing with background music, sound effects, and speech
+  - Multi-zone audio testing across 3 independent physical outputs
+  - Raspberry Pi audio configuration and device testing
+  - Low-latency audio validation (<50ms for sound effects)
+  - MQTT topic routing simulation for zone-specific audio control
 - **Coverage**: Jest configuration with coverage reporting
 - **Mocking**: Comprehensive mock setup for testing
 - **Test Media**: Structured test media files for realistic testing
@@ -96,6 +116,12 @@ pfx/
     ├── integration/        # Integration tests
     │   ├── mqtt-integration.test.js    # MQTT broker tests
     │   └── media-playback.test.js      # Media player tests
+    ├── manual/             # Manual testing scripts
+    │   ├── test-audio.js           # Standard audio testing
+    │   ├── test-audio-3devices.js  # Multi-zone audio testing
+    │   ├── config-pi-audio.js      # Raspberry Pi audio config
+    │   ├── test-mqtt.js            # MQTT communication tests
+    │   └── real-playback.test.js   # Real media playback tests
     └── fixtures/           # Test data
         └── test-media/     # Media files for testing
             ├── README.md   # Media file documentation

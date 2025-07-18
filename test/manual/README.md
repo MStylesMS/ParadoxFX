@@ -130,6 +130,48 @@ Test actual media playback with real files:
 npm run test:manual
 ```
 
+### Audio Testing Suite
+
+ParadoxFX includes comprehensive audio testing with multiple scenarios:
+
+```bash
+# Standard audio testing (single device/zone)
+node test/manual/test-audio.js
+
+# Multi-zone audio testing (independent 3-device audio)
+node test/manual/test-audio-3devices.js
+
+# Raspberry Pi audio configuration and testing
+node test/manual/config-pi-audio.js
+```
+
+**Standard Audio Tests (`test-audio.js`):**
+- Background music playback and volume control
+- Low-latency sound effects (<50ms)
+- Speech/narration with background music ducking
+- Multiple simultaneous audio streams
+- IPC vs spawn method comparison
+
+**Multi-Zone Audio Tests (`test-audio-3devices.js`):**
+- **Zone 'screen0'**: HDMI 1 output (alsa/plughw:0)
+- **Zone 'screen1'**: HDMI 2 output (alsa/plughw:1)
+- **Zone 'headphones'**: Analog output (pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback)
+
+Each zone supports independent:
+- Background music with zone-specific volume control
+- Low-latency sound effects per zone
+- Speech with zone-specific background ducking
+- MQTT topic routing simulation (pfx/{zone}/{type}/{action})
+- Simultaneous multi-zone audio streams
+
+**What Multi-Zone Tests Validate:**
+1. **Independent audio content** across 3 physical outputs
+2. **Zone-specific volume control** and background music ducking
+3. **MQTT topic routing** patterns for production integration
+4. **Parallel audio streams** without cross-zone interference
+5. **Fire-and-forget sound effects** per zone
+6. **Simultaneous multi-zone coordination**
+
 ### Run Specific Test Categories
 
 ```bash
