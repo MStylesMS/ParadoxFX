@@ -6,13 +6,14 @@
 
 1. **Added Terminology Section** - Clarified physical device vs. soft device (zone) terminology
 2. **Updated Media Playback** - Changed to MPV-only for all media types (images, video, audio)
-3. **Updated Audio System Support** - PipeWire (default) and PulseAudio support, removed ALSA references
-4. **Updated Seamless Transitions** - Described IPC-based approach with single MPV instance per zone
-5. **Updated Transition Behavior** - Videos pause on last frame unless media queued
-6. **Updated Status/Error Reporting** - Clarified soft device vs. physical device MQTT topics and heartbeat
-7. **Updated Media Player Support** - MPV-only approach documented
-8. **Moved Project Structure** - Relocated to Appendix B with reference in main content
-9. **Updated File Extensions** - Removed .example from configuration file names
+3. **Updated Audio System Support** - Default to PipeWire (dropped ALSA), retains PulseAudio support
+4. **Updated Display System Support** - Default to Wayland for rendering (with X11/XWayland fallback), removed X11-only assumptions
+5. **Updated Seamless Transitions** - Described IPC-based approach with single MPV instance per zone
+6. **Updated Transition Behavior** - Videos pause on last frame unless media queued
+7. **Updated Status/Error Reporting** - Clarified soft device vs. physical device MQTT topics and heartbeat
+8. **Updated Media Player Support** - MPV-only approach documented
+9. **Moved Project Structure** - Relocated to Appendix B with reference in main content
+10. **Updated File Extensions** - Removed .example from configuration file names
 
 ## Actual Code Implementation Status
 

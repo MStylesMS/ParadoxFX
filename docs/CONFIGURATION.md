@@ -2,9 +2,11 @@
 
 This document provides detailed configuration instructions for ParadoxFX (Paradox Effects).
 
+**See Also:** For a comprehensive settings reference, see [INI Configuration Reference](INI_REFERENCE.md).
+
 ## Configuration File Structure
 
-ParadoxFX uses INI format configuration files. Copy `pfx.ini.example` to `pfx.ini` and customize for your setup.
+ParadoxFX uses INI format configuration files. Choose one of the provided configs in the `config/` folder (e.g. `config/pfx-pi4-hha.ini`), copy it to `pfx.ini`, and customize as needed.
 
 ## Global Configuration
 
@@ -48,8 +50,9 @@ media_dir = /opt/media/room
 volume = 80
 player_type = mpv
 audio_device = default
+# Display target: X11 display (e.g., ":0") or Wayland (uses $WAYLAND_DISPLAY)
 display = :0
-xinerama_screen = 0
+xinerama_screen = 0      # Only for X11/XWayland multi-monitor setups
 ```
 
 **Parameters:**
@@ -60,9 +63,9 @@ xinerama_screen = 0
 - `media_dir`: Directory containing media files for this device (replaces media_path)
 - `volume`: Base volume level (0-100) for audio and video playback
 - `player_type`: Media player preference (mpv, vlc, fbi, auto)
-- `audio_device`: ALSA audio device name
-- `display`: X11 display target
-- `xinerama_screen`: Xinerama screen index for multi-monitor
+- `audio_device`: PipeWire/PulseAudio device name (e.g., 'pulse' or PipeWire node)
+- `display`: Display server target; X11 (":" + display number, e.g. ":0") or Wayland (uses $WAYLAND_DISPLAY)
+- `xinerama_screen`: Xinerama screen index for multi-monitor (only for X11/XWayland)
 
 **Media File Handling:**
 

@@ -5,9 +5,9 @@
  */
 
 const mqtt = require('mqtt');
-const MqttClient = require('../../lib/core/mqtt-client');
-const ScreenDevice = require('../../lib/devices/screen-device');
-const Logger = require('../../lib/utils/logger');
+const MqttClient = require('../lib/core/mqtt-client');
+const ScreenDevice = require('../lib/devices/screen-device');
+const Logger = require('../lib/utils/logger');
 
 // Test configuration
 const testConfig = {
