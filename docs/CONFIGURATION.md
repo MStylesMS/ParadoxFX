@@ -184,6 +184,12 @@ audio_device = plughw:1,0          # Hardware device 1 with format conversion
 audio_device = pulse               # PulseAudio
 ```
 
+**Raspberry Pi 5 ALSA Devices:**
+```ini
+audio_device = alsa/hdmi:CARD=vc4hdmi0,DEV=0    # HDMI0 output
+audio_device = alsa/hdmi:CARD=vc4hdmi1,DEV=0    # HDMI1 output
+```
+
 ### Multi-Channel Audio
 
 For systems with multiple audio outputs:
@@ -194,6 +200,15 @@ audio_device = hw:0,3              # HDMI output 1
 
 [screen:hdmi2]
 audio_device = hw:0,7              # HDMI output 2
+```
+
+**Pi5 Dual HDMI Example:**
+```ini
+[screen:zone1]
+audio_device = alsa/hdmi:CARD=vc4hdmi0,DEV=0    # Left monitor audio
+
+[screen:zone2]
+audio_device = alsa/hdmi:CARD=vc4hdmi1,DEV=0    # Right monitor audio
 ```
 
 ## Display Configuration
@@ -216,6 +231,8 @@ xinerama_screen = 0               # Left monitor
 display = :0
 xinerama_screen = 1               # Right monitor
 ```
+
+**Important for Pi5**: Multi-monitor video routing requires X11. Wayland (the Pi5 default) has limitations that prevent reliable dual-screen video targeting. Use `sudo raspi-config` to switch to X11.
 
 ### Custom Geometry
 
@@ -242,6 +259,117 @@ preferred_image_player = fbi       # For framebuffer systems
 preferred_image_player = feh       # For X11 systems
 preferred_image_player = auto      # Automatic selection
 ```
+
+## Platform-Specific Configuration
+
+### Raspberry Pi 5 Setup
+
+The Raspberry Pi 5 requires specific configuration for optimal dual-HDMI performance with video and audio routing.
+
+#### System Requirements
+
+**Display System**: Pi5 requires **X11** for reliable dual-screen video routing. The default Wayland compositor has limitations that prevent proper `--screen` parameter functionality in MPV.
+
+**Audio System**: Use **ALSA** directly rather than PulseAudio/PipeWire for maximum compatibility and performance.
+
+#### Required Boot Configuration
+
+Add these settings to `/boot/firmware/config.txt`:
+
+```bash
+# Pi5 optimized dual-HDMI configuration
+hdmi_enable_4kp60=1
+gpu_mem=256
+
+# Force HDMI0 to 1920x1080@60Hz (optional - prevents 4K auto-detection)
+hdmi_group:0=1
+hdmi_mode:0=16
+
+# HDMI audio settings for better compatibility
+hdmi_drive=2
+hdmi_force_hotplug=1
+config_hdmi_boost=7
+
+# Enable DRM VC4 V3D driver
+dtoverlay=vc4-kms-v3d
+max_framebuffers=2
+```
+
+#### Switch to X11 (Required for Dual-Screen)
+
+```bash
+sudo raspi-config
+# Advanced Options -> Wayland -> X11
+sudo reboot
+```
+
+#### Pi5 Single HDMI Configuration
+
+```ini
+[mqtt]
+broker = localhost
+port = 1883
+client_id = pfx-pi5-h
+
+[global]
+device_name = pi5-single
+log_level = info
+heartbeat_interval = 10000
+
+[screen:zone1]
+type = screen
+topic = paradox/zone1/screen
+media_dir = /opt/paradox/media/zone1
+volume = 80
+player_type = mpv
+audio_device = alsa/hdmi:CARD=vc4hdmi0,DEV=0
+display = :0
+xinerama_screen = 0
+```
+
+#### Pi5 Dual HDMI Configuration
+
+```ini
+[mqtt]
+broker = localhost
+port = 1883
+client_id = pfx-pi5-hh
+
+[global]
+device_name = pi5-dual
+log_level = info
+heartbeat_interval = 10000
+
+[screen:zone1-hdmi0]
+type = screen
+topic = paradox/zone1/screen
+media_dir = /opt/paradox/media/zone1
+volume = 80
+player_type = mpv
+audio_device = alsa/hdmi:CARD=vc4hdmi0,DEV=0
+display = :0
+xinerama_screen = 0
+
+[screen:zone2-hdmi1]
+type = screen
+topic = paradox/zone2/screen
+media_dir = /opt/paradox/media/zone2
+volume = 80
+player_type = mpv
+audio_device = alsa/hdmi:CARD=vc4hdmi1,DEV=0
+display = :0
+xinerama_screen = 1
+```
+
+**Pi5 Audio Device Names:**
+- HDMI0: `alsa/hdmi:CARD=vc4hdmi0,DEV=0`
+- HDMI1: `alsa/hdmi:CARD=vc4hdmi1,DEV=0`
+
+#### Pi5 Performance Notes
+
+- **Resolution**: Both HDMI outputs support up to 4K@60Hz, but 1920x1080 provides better performance for multimedia applications
+- **MPV Optimization**: The system automatically uses optimized MPV parameters (`--vo=xv --framedrop=vo --cache=yes`) for smooth playback
+- **Memory**: 256MB GPU memory allocation provides optimal balance for dual-screen video
 
 ## Example Configurations
 
@@ -359,6 +487,32 @@ display = /dev/fb0
 - Verify X11 display is accessible
 - Check Xinerama configuration for multi-monitor
 - Ensure proper graphics drivers are installed
+
+**Pi5 Specific Issues:**
+
+- **Dual-screen video routing fails**: Switch from Wayland to X11 using `sudo raspi-config`
+- **Audio plays but video goes to wrong screen**: Ensure using ALSA device names (`alsa/hdmi:CARD=vc4hdmi0,DEV=0`)
+- **Poor video performance**: Check `/boot/firmware/config.txt` has `gpu_mem=256` and consider forcing 1080p resolution
+- **Video appears on screen but no audio**: Verify ALSA device names match your Pi5 configuration
+
+### Pi5 Validation Commands
+
+Test Pi5-specific configuration:
+
+```bash
+# Verify X11 is active (not Wayland)
+echo $XDG_SESSION_TYPE  # Should show: x11
+
+# Check display configuration
+xrandr --query
+
+# Test ALSA audio devices
+aplay -l | grep vc4hdmi
+
+# Test MPV video routing
+timeout 3s mpv --screen=0 --audio-device=alsa/hdmi:CARD=vc4hdmi0,DEV=0 test.mp4
+timeout 3s mpv --screen=1 --audio-device=alsa/hdmi:CARD=vc4hdmi1,DEV=0 test.mp4
+```
 
 ### Validation
 

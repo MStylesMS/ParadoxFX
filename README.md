@@ -36,6 +36,21 @@ cp pfx.ini.example pfx.ini
 npm start
 ```
 
+### Raspberry Pi 5 Installation
+
+**Pi5 requires specific setup for dual-HDMI functionality:**
+
+```bash
+# See detailed Pi5 setup guide
+cat docs/PI5_SETUP_GUIDE.md
+
+# Quick setup for Pi5 dual-HDMI:
+cp config/pfx-pi5-hh.ini pfx.ini
+# Edit pfx.ini for your MQTT broker and media paths
+```
+
+**Important**: Pi5 dual-screen requires X11 (not Wayland). Use `sudo raspi-config` to switch display systems.
+
 ### Raspberry Pi 3 Installation
 
 ```bash

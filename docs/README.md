@@ -8,11 +8,13 @@ This directory contains the complete documentation for ParadoxFX (Paradox Effect
 
 - **[MQTT API Reference](MQTT_API.md)** - Complete MQTT command reference, message formats, and examples
 - **[Configuration Guide](CONFIGURATION.md)** - Detailed setup and configuration instructions
+- **[Pi5 Setup Guide](PI5_SETUP_GUIDE.md)** - Step-by-step Raspberry Pi 5 installation and optimization
 
 ### Technical Documentation
 
 - **[Project Architecture](SCAFFOLD_SUMMARY.md)** - Technical implementation details, test results, and development status
 - **[Media Format Testing](MEDIA_FORMAT_TEST_SUMMARY.md)** - Supported media formats and testing results
+- **[Pi5 Wayland Issue Report](pi5-wayland-mpv-issue.md)** - Technical analysis of dual-HDMI limitations under Wayland
 
 ### Historical Documentation
 
@@ -24,8 +26,9 @@ This directory contains the complete documentation for ParadoxFX (Paradox Effect
 ### Getting Started
 
 1. [Installation](../README.md#installation) - Basic setup
-2. [Configuration Guide](CONFIGURATION.md) - Configure devices and MQTT
-3. [MQTT API Reference](MQTT_API.md) - Send commands to devices
+2. **[Pi5 Setup Guide](PI5_SETUP_GUIDE.md) - Complete Raspberry Pi 5 installation**
+3. [Configuration Guide](CONFIGURATION.md) - Configure devices and MQTT
+4. [MQTT API Reference](MQTT_API.md) - Send commands to devices
 
 ### Development
 

@@ -12,7 +12,7 @@
 
 - **Hardware**: Raspberry Pi 5 (8GB)
 - **OS**: Raspberry Pi OS (64-bit, Bookworm)
-- **Display System**: Wayland (Labwc compositor) with Xwayland
+- **Display System**: Wayland (tested both Labwc and Wayfire compositors) with Xwayland
 - **MPV Version**: 0.35.1
 - **Displays**: Dual 1920x1080 HDMI monitors
 - **Testing Environment**: Local console (no SSH X11 forwarding)
@@ -54,6 +54,7 @@ card 1: vc4hdmi1 [vc4-hdmi-1], device 0: MAI PCM i2s-hifi-0
 - `DISPLAY=:0.1 mpv` (X11 display targeting)
 - `mpv --vo=wayland` (Wayland video output)
 - `mpv --vo=x11` (X11 video output under Xwayland)
+- **Multiple Wayland compositors**: Tested both Labwc and Wayfire - same issue persists
 
 ## 📊 Key Observations
 
@@ -146,8 +147,22 @@ This issue affects:
 
 ## 🏁 Resolution
 
-**Immediate**: Switch to X11 for reliable dual-screen video routing
-**Long-term**: Wayland compositor improvements for application-controlled display targeting
+**✅ SOLVED: Switch Pi5 from Wayland to X11**
+
+After switching to X11, dual-screen video routing works correctly:
+```bash
+# Both commands now work perfectly under X11:
+mpv --screen=0 --audio-device=alsa/hdmi:CARD=vc4hdmi0,DEV=0 video.mp4  # Screen 0 ✅
+mpv --screen=1 --audio-device=alsa/hdmi:CARD=vc4hdmi1,DEV=0 video.mp4  # Screen 1 ✅
+```
+
+**Performance Optimization**: For smooth playback with minimal dropped frames:
+```bash
+mpv --screen=N --vo=xv --hwdec=no --framedrop=vo --cache=yes --cache-secs=10 \
+    --audio-device=alsa/hdmi:CARD=vc4hdmiN,DEV=0 [video.mp4]
+```
+
+**Long-term**: This issue demonstrates Wayland compositor limitations for application-controlled display targeting on Pi5 dual-HDMI configurations.
 
 ---
 
