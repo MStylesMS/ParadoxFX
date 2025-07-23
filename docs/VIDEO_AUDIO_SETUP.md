@@ -243,7 +243,71 @@ xinerama_screen = 1
 
 ---
 
-## 🚨 Common Issues and Solutions
+## � System Management and Troubleshooting
+
+### **Proper PFX Shutdown Process**
+
+ParadoxFX creates multiple MPV processes and IPC socket files during operation. Here's how to properly shut down the system:
+
+#### **Method 1: Graceful Shutdown (Recommended)**
+```bash
+# If PFX is running in foreground terminal:
+# Press Ctrl+C
+
+# If PFX is running in background:
+pkill -SIGINT -f "node pfx.js"
+```
+
+#### **Method 2: Force Shutdown (If Graceful Fails)**
+```bash
+# Terminate PFX process
+pkill -SIGTERM -f "node pfx.js"
+
+# If still running, force kill
+pkill -SIGKILL -f "node pfx.js"
+```
+
+#### **Method 3: Complete System Cleanup**
+```bash
+# Kill all MPV processes
+pkill -f mpv
+
+# Remove IPC socket files
+rm -f /tmp/pfx-*.sock /tmp/mpv-*.sock
+
+# Clean up any combined audio sinks (if using dual output)
+pactl list modules short | grep combine | awk '{print $1}' | xargs -r pactl unload-module
+
+# Verify cleanup
+ps aux | grep -E "(pfx|mpv)" | grep -v grep
+```
+
+#### **Method 4: Emergency Reset Script**
+For convenience, create a reset script:
+```bash
+#!/bin/bash
+# File: scripts/pfx-reset.sh
+echo "🛑 Stopping ParadoxFX..."
+pkill -SIGTERM -f "node pfx.js"
+sleep 2
+
+echo "🧹 Cleaning up MPV processes..."
+pkill -f mpv
+
+echo "🧹 Removing socket files..."
+rm -f /tmp/pfx-*.sock /tmp/mpv-*.sock
+
+echo "🧹 Cleaning up audio sinks..."
+pactl list modules short | grep combine | awk '{print $1}' | xargs -r pactl unload-module
+
+echo "✅ ParadoxFX reset complete"
+```
+
+**⚠️ Important:** Always use graceful shutdown (Method 1) first to allow proper cleanup of resources.
+
+---
+
+## �🚨 Common Issues and Solutions
 
 ### **Issue 1: ✅ RESOLVED - Audio Device Session Conflict**
 **Symptoms**: 
@@ -378,6 +442,56 @@ const SPEECH_SOCKET = '/tmp/mpv-speech.sock';
 - **Critical Finding**: `--audio-exclusive=yes` causes muted audio in spawn methods
 - **Working Commit**: `f8c26d3` - All audio methods functional
 - **Broken Commit**: `6394bb1` - Methods 2 & 3 muted due to exclusive audio
+
+---
+
+## 🛑 System Management
+
+### **Proper PFX Shutdown**
+
+**Method 1: Graceful Shutdown (Recommended)**
+```bash
+# If PFX is running in foreground terminal
+# Press Ctrl+C in the terminal where PFX is running
+
+# If PFX is running in background
+pkill -SIGINT -f "node pfx.js"
+```
+
+**Method 2: Force Shutdown (if graceful fails)**
+```bash
+pkill -SIGTERM -f "node pfx.js"  # Terminate signal
+# OR if that fails:
+pkill -SIGKILL -f "node pfx.js"  # Force kill (nuclear option)
+```
+
+**Method 3: Complete Cleanup (after shutdown)**
+```bash
+# Kill any remaining MPV processes
+pkill -f mpv
+
+# Remove leftover IPC socket files  
+rm -f /tmp/pfx-*.sock /tmp/mpv-*.sock
+
+# Check for remaining processes
+ps aux | grep -E "(pfx|mpv)" | grep -v grep
+
+# Remove any combined audio sinks (if using dual output)
+pactl list modules short | grep combine  # Check for modules
+# pactl unload-module [MODULE_ID]        # Unload if needed
+```
+
+**Method 4: Verify Clean State**
+```bash
+# Check processes
+ps aux | grep -E "(pfx|mpv)" | grep -v grep
+
+# Check sockets
+ls -la /tmp/*pfx* /tmp/*mpv* 2>/dev/null
+
+# Check audio sinks
+pactl list sinks short
+```
 
 ---
 
