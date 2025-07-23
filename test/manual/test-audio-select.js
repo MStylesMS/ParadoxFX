@@ -5,7 +5,25 @@
  * - Low-latency sound effects (target: <100ms)
  * - Audio ducking (lowering background music for speech)
  * - Real-time volume control via IPC
- * - Multiple simultaneo/**
+ * - Multiple simultaneous audio streams
+ * 
+ * USAGE:
+ * ======
+ * Interactive mode (prompts for device selection):
+ * node test/manual/test-audio.js
+ * 
+ * Automated mode (command line device selection):
+ * node test/manual/test-audio.js --device=headphone
+ * node test/manual/test-audio.js --device=hdmi0
+ * node test/manual/test-audio.js --device=hdmi1
+ * 
+ * SUPPORTED DEVICES:
+ * ==================
+ * - headphone: 3.5mm analog headphone jack
+ * - hdmi0: First HDMI port digital audio
+ * - hdmi1: Second HDMI port digital audio
+ * 
+ * /**
  * INTEGRATION REFERENCE: Test low-latency sound effects with multiple approaches
  * 
  * This test compares three different methods for playing sound effects:
@@ -69,6 +87,47 @@ const path = require('path');
 const { spawn, execSync } = require('child_process');
 const fs = require('fs');
 const readline = require('readline');
+
+/**
+ * AUDIO DEVICE CONFIGURATION
+ * ===========================
+ * Pi5 supports multiple audio outputs - this test allows selection of which device to test
+ */
+const AUDIO_DEVICES = {
+    headphone: {
+        name: 'Headphone (3.5mm Analog)',
+        device: 'alsa_output.platform-107c701400.hdmi.hdmi-stereo', // Use HDMI-0 as fallback since analog may not be available
+        description: 'Built-in 3.5mm headphone jack (analog output) - using HDMI-0 fallback'
+    },
+    hdmi0: {
+        name: 'HDMI-0 Digital Audio',
+        device: 'alsa_output.platform-107c701400.hdmi.hdmi-stereo',
+        description: 'First HDMI port digital audio output'
+    },
+    hdmi1: {
+        name: 'HDMI-1 Digital Audio', 
+        device: 'alsa_output.platform-107c706400.hdmi.hdmi-stereo',
+        description: 'Second HDMI port digital audio output'
+    }
+};
+
+// Parse command line arguments
+const args = process.argv.slice(2);
+let selectedDevice = null;
+
+// Check for command line device selection (for automated testing)
+const deviceArg = args.find(arg => arg.startsWith('--device='));
+if (deviceArg) {
+    const deviceKey = deviceArg.split('=')[1];
+    if (AUDIO_DEVICES[deviceKey]) {
+        selectedDevice = deviceKey;
+        console.log(`🎯 Command line selection: Testing ${AUDIO_DEVICES[deviceKey].name}`);
+    } else {
+        console.error(`❌ Invalid device key: ${deviceKey}`);
+        console.log('Valid devices: headphone, hdmi0, hdmi1');
+        process.exit(1);
+    }
+}
 
 /**
  * Test audio file paths
@@ -144,6 +203,69 @@ sockets.forEach(socket => {
  */
 
 /**
+ * Prompt user to select audio device for testing
+ * @returns {Promise<string>} Selected device key
+ */
+async function promptForAudioDevice() {
+    return new Promise((resolve) => {
+        const rl = readline.createInterface({ 
+            input: process.stdin, 
+            output: process.stdout 
+        });
+
+        console.log('\n🎵 Select Audio Output Device for Testing:');
+        console.log('==========================================');
+        console.log('1. Headphone (3.5mm Analog)');
+        console.log('2. HDMI-0 Digital Audio');
+        console.log('3. HDMI-1 Digital Audio');
+        console.log('');
+        console.log('💡 Tip: Use --device=headphone|hdmi0|hdmi1 for automated testing');
+        console.log('');
+
+        rl.question('Enter your choice (1-3): ', (answer) => {
+            rl.close();
+            
+            switch (answer.trim()) {
+                case '1':
+                    resolve('headphone');
+                    break;
+                case '2':
+                    resolve('hdmi0');
+                    break;
+                case '3':
+                    resolve('hdmi1');
+                    break;
+                default:
+                    console.log('❌ Invalid selection. Defaulting to headphone.');
+                    resolve('headphone');
+                    break;
+            }
+        });
+    });
+}
+
+/**
+ * Check if the selected audio device is available on the current system
+ * @param {string} devicePath - PipeWire/PulseAudio device path
+ * @returns {Promise<boolean>} True if device is available
+ */
+async function checkAudioDeviceAvailable(devicePath) {
+    try {
+        // Use pactl to list available sinks
+        const { execSync } = require('child_process');
+        const sinks = execSync('pactl list sinks short', { encoding: 'utf8' });
+        
+        // Extract the device name from the full path (e.g., "platform-fe00b840.mailbox.stereo-fallback")
+        const deviceName = devicePath.split('/').pop();
+        
+        return sinks.includes(deviceName);
+    } catch (error) {
+        console.error('⚠️  Could not check audio device availability:', error.message);
+        return true; // Assume available if we can't check
+    }
+}
+
+/**
  * INTEGRATION FUNCTION: Create MPV arguments for different audio purposes
  * 
  * This function will be used in the main ParadoxFX system to configure
@@ -151,9 +273,10 @@ sockets.forEach(socket => {
  * 
  * @param {string} socketPath - IPC socket path
  * @param {string} purpose - Audio purpose: 'background', 'effects', 'speech'
+ * @param {string} audioDevice - Audio device identifier
  * @returns {string[]} MPV command line arguments
  */
-function createAudioArgs(socketPath, purpose, audioDevice = null) {
+function createAudioArgs(socketPath, purpose, audioDevice) {
     // INTEGRATION NOTE: Base arguments shared across all audio instances
     const baseArgs = [
         '--idle=yes',
@@ -165,7 +288,9 @@ function createAudioArgs(socketPath, purpose, audioDevice = null) {
 
     // Add audio device if specified
     if (audioDevice) {
-        baseArgs.push(`--audio-device=${audioDevice}`);
+        // Ensure proper pulse/ prefix for PipeWire devices
+        const devicePath = audioDevice.startsWith('pulse/') ? audioDevice : `pulse/${audioDevice}`;
+        baseArgs.push(`--audio-device=${devicePath}`);
     }
 
     switch (purpose) {
@@ -438,20 +563,20 @@ async function testBackgroundMusic() {
  * - Sub-100ms response time achievement
  * - Reset/replay capability for repeated effects
  */
-async function testSoundEffects() {
+async function testSoundEffects(audioDevice) {
     console.log('\n=== Testing Low-Latency Sound Effects ===');
 
     try {
-        // STOP background music completely during sound effects testing to eliminate all audio conflicts
-        console.log('Stopping background music for isolated sound effect testing...');
+        // PAUSE background music completely during sound effects testing to eliminate all audio conflicts
+        console.log('Pausing background music for isolated sound effect testing...');
         await sendMpvCommand(BACKGROUND_MUSIC_SOCKET, {
-            command: ['stop']
+            command: ['set_property', 'pause', true]
         });
 
-        // Wait for background music to fully stop
+        // Wait for background music to fully pause
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Pre-load sound effect and pause it for instant playback
+        // Pre-load sound effect and pause it for instant playback (using existing IPC instance)
         console.log('Pre-loading sound effect...');
         await sendMpvCommand(SOUND_EFFECTS_SOCKET, {
             command: ['loadfile', SOUND_EFFECT, 'replace']
@@ -499,23 +624,40 @@ async function testSoundEffects() {
         }
 
         console.log('  Playing sound effect now!');
-        // Measure latency for Method 2 - NO exclusive audio (allows coexistence)
+        // Measure latency for Method 2
         const method2StartTime = Date.now();
         const effectsMpv2 = spawn('mpv', [
             '--no-terminal',
             '--no-video',
             '--volume=100',
-            // DO NOT add --audio-exclusive=yes (prevents coexistence with Method 1)
-            `--audio-device=pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`,
+            '--msg-level=all=info',
+            `--audio-device=pulse/${audioDevice}`,
             SOUND_EFFECT
         ], { detached: false });
 
         // Log approximate spawn time
         const method2SpawnTime = Date.now() - method2StartTime;
         console.log(`  (Method 2 spawn time: ~${method2SpawnTime}ms)`);
+        
+        // Monitor for audio output errors
+        let method2AudioError = false;
+        effectsMpv2.stderr.on('data', (data) => {
+            const output = data.toString();
+            if (output.includes('Could not open/initialize audio device') || 
+                output.includes('Audio: no audio') ||
+                output.includes('Failed to init')) {
+                method2AudioError = true;
+                console.log(`  ⚠️ Method 2 Audio Error: ${output.trim()}`);
+            }
+        });
 
-        // Wait for effect to complete before next test
-        await new Promise(resolve => setTimeout(resolve, 4000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        if (method2AudioError) {
+            console.log(`  ❌ Method 2: Audio initialization failed`);
+        } else {
+            console.log(`  ✓ Method 2: Process completed (check if you heard audio)`);
+        }
 
         // Test 3: Direct spawn with low-latency settings (Method 3 - PREFERRED for ParadoxFX)
         console.log('\nMethod 3: Direct spawn with low-latency settings (PREFERRED)...');
@@ -526,26 +668,42 @@ async function testSoundEffects() {
         }
 
         console.log('  Playing sound effect now!');
-        // Measure latency for Method 3 - USE EXCLUSIVE AUDIO + OPTIMIZED SETTINGS
+        // Measure latency for Method 3
         const method3StartTime = Date.now();
         const effectsMpv3 = spawn('mpv', [
             '--no-terminal',
             '--no-video',
             '--volume=100',
-            '--audio-buffer=0.02',      // Minimize audio buffer for low latency
-            '--cache=no',               // Disable cache for immediate playback
-            // DO NOT add --audio-exclusive=yes (prevents coexistence with Method 1)
-            // DO NOT add --audio-fallback-to-null=no (can cause issues)
-            `--audio-device=pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`,
+            '--audio-buffer=0.02',  // Minimize audio buffer for low latency
+            '--cache=no',           // Disable cache for immediate playback
+            '--msg-level=all=info',
+            `--audio-device=pulse/${audioDevice}`,
             SOUND_EFFECT
         ], { detached: false });
 
         // Log approximate spawn time
         const method3SpawnTime = Date.now() - method3StartTime;
         console.log(`  (Method 3 spawn time: ~${method3SpawnTime}ms)`);
+        
+        // Monitor for audio output errors
+        let method3AudioError = false;
+        effectsMpv3.stderr.on('data', (data) => {
+            const output = data.toString();
+            if (output.includes('Could not open/initialize audio device') || 
+                output.includes('Audio: no audio') ||
+                output.includes('Failed to init')) {
+                method3AudioError = true;
+                console.log(`  ⚠️ Method 3 Audio Error: ${output.trim()}`);
+            }
+        });
 
-        // Wait for effect to complete
-        await new Promise(resolve => setTimeout(resolve, 4000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        if (method3AudioError) {
+            console.log(`  ❌ Method 3: Audio initialization failed`);
+        } else {
+            console.log(`  ✓ Method 3: Process completed (check if you heard audio)`);
+        }
 
         // Summary of methods
         console.log('\n📊 Method Comparison Summary:');
@@ -553,17 +711,28 @@ async function testSoundEffects() {
         console.log(`  Method 2 (Basic spawn): ~${method2SpawnTime}ms process startup`);
         console.log(`  Method 3 (Low-latency spawn): ~${method3SpawnTime}ms process startup + optimized playback`);
 
-        // RESTART background music after sound effects testing
+        // RESUME background music after sound effects testing
         console.log('\n✓ Sound effects testing completed');
-        console.log('Restarting background music...');
+        console.log('Resuming background music...');
         await sendMpvCommand(BACKGROUND_MUSIC_SOCKET, {
-            command: ['loadfile', BACKGROUND_MUSIC, 'replace']
+            command: ['set_property', 'pause', false]
         });
 
         return true;
 
     } catch (error) {
         console.error('❌ Sound effects test failed:', error);
+        
+        // Ensure background music is resumed even if test fails
+        try {
+            console.log('Resuming background music after test failure...');
+            await sendMpvCommand(BACKGROUND_MUSIC_SOCKET, {
+                command: ['set_property', 'pause', false]
+            });
+        } catch (resumeError) {
+            console.error('Failed to resume background music:', resumeError);
+        }
+        
         return false;
     }
 }
@@ -636,7 +805,7 @@ async function testSpeechWithDucking() {
  * - Volume balancing between different audio types
  * - Timing coordination for complex audio scenarios
  */
-async function testMultipleAudioStreams() {
+async function testMultipleAudioStreams(audioDevice) {
     console.log('\n=== Testing Multiple Simultaneous Audio Streams ===');
 
     try {
@@ -657,7 +826,7 @@ async function testMultipleAudioStreams() {
             '--volume=100',
             '--audio-buffer=0.02',
             '--cache=no',
-            `--audio-device=pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`,
+            `--audio-device=pulse/${audioDevice}`,
             SOUND_EFFECT
         ], { detached: false });
 
@@ -669,7 +838,7 @@ async function testMultipleAudioStreams() {
             '--no-terminal',
             '--no-video',
             '--volume=100',
-            `--audio-device=pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`,
+            `--audio-device=pulse/${audioDevice}`,
             SPEECH_AUDIO
         ], { detached: false });
 
@@ -705,6 +874,46 @@ async function testMultipleAudioStreams() {
     console.log('🎵 MPV Audio Capabilities Test Suite');
     console.log('=====================================');
 
+    // Get audio device selection
+    if (!selectedDevice) {
+        selectedDevice = await promptForAudioDevice();
+    }
+
+    const deviceConfig = AUDIO_DEVICES[selectedDevice];
+    console.log(`\n🎯 Testing Device: ${deviceConfig.name}`);
+    console.log(`📍 Device Path: ${deviceConfig.device}`);
+    console.log(`📝 Description: ${deviceConfig.description}`);
+
+    // Check if the selected audio device is available on this system
+    console.log('\n🔍 Checking device availability...');
+    const isDeviceAvailable = await checkAudioDeviceAvailable(deviceConfig.device);
+    
+    if (!isDeviceAvailable) {
+        console.log(`\n❌ Audio Device Not Available`);
+        console.log(`============================`);
+        console.log(`The selected device "${deviceConfig.name}" is not available on this system.`);
+        console.log(`Device path: ${deviceConfig.device}`);
+        console.log(``);
+        console.log(`💡 Available audio devices on this system:`);
+        
+        try {
+            const sinks = execSync('pactl list sinks short', { encoding: 'utf8' });
+            console.log(sinks);
+        } catch (error) {
+            console.log('Could not list available devices.');
+        }
+        
+        console.log(`\n🔧 Solutions:`);
+        console.log(`1. Try a different device option (--device=hdmi0 or --device=hdmi1)`);
+        console.log(`2. Ensure the HDMI cable is connected to the correct port`);
+        console.log(`3. Check if the monitor/speaker supports audio`);
+        console.log(`4. Run 'pactl list sinks short' to see available devices`);
+        
+        process.exit(1);
+    }
+    
+    console.log(`✅ Device "${deviceConfig.name}" is available on this system.\n`);
+
     // Terminate any old MPV instances
     try {
         console.log('Terminating old MPV instances...');
@@ -725,12 +934,12 @@ async function testMultipleAudioStreams() {
         // Launch MPV instances for different audio purposes
         console.log('\nLaunching MPV audio instances...');
 
-        // Use the specific PipeWire device identifiers for Pi5 HDMI output
-        const analogDevice = 'pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo';
+        // Use the selected audio device
+        const audioDevice = deviceConfig.device;
 
-        const backgroundMpv = spawn('mpv', createAudioArgs(BACKGROUND_MUSIC_SOCKET, 'background', analogDevice), { detached: false });
-        const effectsMpv = spawn('mpv', createAudioArgs(SOUND_EFFECTS_SOCKET, 'effects', analogDevice), { detached: false });
-        const speechMpv = spawn('mpv', createAudioArgs(SPEECH_SOCKET, 'speech', analogDevice), { detached: false });
+        const backgroundMpv = spawn('mpv', createAudioArgs(BACKGROUND_MUSIC_SOCKET, 'background', audioDevice), { detached: false });
+        const effectsMpv = spawn('mpv', createAudioArgs(SOUND_EFFECTS_SOCKET, 'effects', audioDevice), { detached: false });
+        const speechMpv = spawn('mpv', createAudioArgs(SPEECH_SOCKET, 'speech', audioDevice), { detached: false });
 
         // Wait for all sockets to be ready
         console.log('Waiting for MPV instances to initialize...');
@@ -755,13 +964,14 @@ async function testMultipleAudioStreams() {
 
         // Run audio tests
         results.backgroundMusic = await testBackgroundMusic();
-        results.soundEffects = await testSoundEffects();
+        results.soundEffects = await testSoundEffects(audioDevice);
         results.speechDucking = await testSpeechWithDucking();
-        results.multipleStreams = await testMultipleAudioStreams();
+        results.multipleStreams = await testMultipleAudioStreams(audioDevice);
 
         // Display results
         console.log('\n🏁 Test Results Summary');
         console.log('=======================');
+        console.log(`🎯 Tested Device: ${deviceConfig.name} (${deviceConfig.device})`);
         console.log(`Background Music Control: ${results.backgroundMusic ? '✅ PASS' : '❌ FAIL'}`);
         console.log(`Low-Latency Sound Effects: ${results.soundEffects ? '✅ PASS' : '❌ FAIL'}`);
         console.log(`Speech with Ducking: ${results.speechDucking ? '✅ PASS' : '❌ FAIL'}`);
@@ -771,9 +981,9 @@ async function testMultipleAudioStreams() {
         console.log(`\nOverall Result: ${allPassed ? '🎉 ALL TESTS PASSED' : '⚠️  SOME TESTS FAILED'}`);
 
         if (allPassed) {
-            console.log('\nMPV is suitable for all audio requirements in the ParadoxFX system!');
+            console.log(`\nMPV is suitable for all audio requirements on ${deviceConfig.name}!`);
         } else {
-            console.log('\nSome audio features may need alternative solutions or optimization.');
+            console.log(`\nSome audio features may need alternative solutions for ${deviceConfig.name}.`);
         }
 
         // Wait for user input before cleanup
