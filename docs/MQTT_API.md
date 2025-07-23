@@ -353,6 +353,76 @@ Skip to next video in queue.
 }
 ```
 
+### Screen Power Management Commands
+
+ParadoxFX provides intelligent screen power management that balances energy efficiency with responsive operation.
+
+#### sleepScreen
+
+Put all connected displays into low-power sleep mode using DPMS (Display Power Management Signaling).
+
+**Format:**
+
+```json
+{
+  "Command": "sleepScreen"
+}
+```
+
+**Behavior:**
+- Sends DPMS sleep signal to all connected displays
+- Maintains system state and media queues
+- Displays will show "No Signal" or enter standby mode
+- All connected displays (HDMI-0, HDMI-1, etc.) are affected simultaneously
+
+**Examples:**
+
+```json
+{
+  "Command": "sleepScreen"
+}
+```
+
+#### wakeScreen
+
+Wake all connected displays from sleep mode and restore default display state.
+
+**Format:**
+
+```json
+{
+  "Command": "wakeScreen"
+}
+```
+
+**Behavior:**
+- Sends DPMS wake signal to all connected displays
+- Displays return to active state immediately
+- If no media is currently playing, displays show the configured default image
+- All connected displays wake simultaneously
+
+**Examples:**
+
+```json
+{
+  "Command": "wakeScreen"
+}
+```
+
+**Note:** Most media commands (`setImage`, `playVideo`) and HDMI audio commands automatically wake sleeping displays, making explicit `wakeScreen` commands typically unnecessary during normal operation.
+
+#### skip
+
+Skip to next video in queue.
+
+**Format:**
+
+```json
+{
+  "Command": "skip"
+}
+```
+
 ### Audio Commands
 
 #### playAudio

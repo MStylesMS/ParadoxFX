@@ -103,6 +103,32 @@ ParadoxFX provides professional-grade seamless transitions using a single MPV in
   - Duplicate media (by name) is not added to the queue. Audio effects (FX) are played immediately.
 - **Stop Commands:**
   - `stopVideo`, `stopAudio`, `stopAllAudioFx`, and `stopAll` commands immediately stop playback and clear queues as appropriate.
+  - `sleepScreen` and `wakeScreen` commands control display power management
+
+### 4.1. Intelligent Screen Power Management
+
+ParadoxFX implements intelligent screen power management that balances energy efficiency with responsive user experience:
+
+#### **Default State**
+- **Power On**: All connected displays remain powered on by default when ParadoxFX starts
+- **Default Image**: Optional configurable default image displayed on startup (default: `default.png`)
+- **Stay Active**: Displays remain active indefinitely without automatic blanking or sleep
+
+#### **Sleep Commands**
+- **Manual Sleep**: `sleepScreen` command puts displays into low-power sleep mode
+- **DPMS Control**: Uses X11 DPMS (Display Power Management Signaling) to communicate with displays
+- **State Persistence**: System remembers sleep state and maintains it until explicitly woken
+
+#### **Automatic Wake Behavior**
+- **Media Triggers**: Any media command (`setImage`, `playVideo`) automatically wakes sleeping displays
+- **Audio Triggers**: Audio commands that route to HDMI (not analog) also wake displays
+- **Instant Response**: Wake occurs before media playback begins for seamless user experience
+- **Smart Detection**: System distinguishes between HDMI audio (triggers wake) and analog audio (no wake)
+
+#### **Wake Commands**
+- **Manual Wake**: `wakeScreen` command explicitly wakes sleeping displays
+- **Default Image Restore**: After wake, displays return to configured default image if no other media is playing
+- **State Synchronization**: Wake command synchronizes all connected displays
 - **Transition Behavior:**
   - Videos automatically pause on the last frame using MPV's `--keep-open=yes` option
   - If no additional media is queued, video remains paused on final frame

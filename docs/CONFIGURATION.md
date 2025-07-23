@@ -53,6 +53,7 @@ audio_device = default
 # Display target: X11 display (e.g., ":0") or Wayland (uses $WAYLAND_DISPLAY)
 display = :0
 xinerama_screen = 0      # Only for X11/XWayland multi-monitor setups
+default_image = default.png  # Image displayed on startup and after wake (optional)
 ```
 
 **Parameters:**
@@ -66,6 +67,7 @@ xinerama_screen = 0      # Only for X11/XWayland multi-monitor setups
 - `audio_device`: PipeWire/PulseAudio device name (e.g., 'pulse' or PipeWire node)
 - `display`: Display server target; X11 (":" + display number, e.g. ":0") or Wayland (uses $WAYLAND_DISPLAY)
 - `xinerama_screen`: Xinerama screen index for multi-monitor (only for X11/XWayland)
+- `default_image`: Image file displayed on startup and after wake commands (defaults to "default.png" if not specified)
 
 **Media File Handling:**
 
