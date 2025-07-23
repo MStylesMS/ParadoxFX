@@ -7,9 +7,17 @@ A Node.js multi-modal media and effect controller for screens, lights, and relay
 ParadoxFX is a comprehensive system for controlling various devices through MQTT messaging. It supports:
 
 - **Screens**: Video/audio playback via media players (mpv, vlc, fbi, etc.)
+- **Multi-Zone Audio**: Advanced audio management with background music, speech, and sound effects
 - **Lights**: Individual and group lighting control (Hue, WiZ, Zigbee, Z-Wave)  
 - **Relays**: Switch and outlet control
 - **Effects**: Coordinated device sequences and macros
+
+### Key Features
+
+- **Multi-Zone Audio System**: Supports background music with automatic ducking, queued speech/narration, and fire-and-forget sound effects
+- **Cross-Platform Audio**: Automatic device discovery across Pi0, Pi4, Pi5, and desktop Linux systems
+- **Device Abstraction**: Simplified audio device aliases (hdmi, analog, etc.) that auto-resolve to hardware
+- **Multi-Output Support**: Individual zones can output to multiple audio devices simultaneously
 
 ### Platform Variants
 
@@ -72,7 +80,13 @@ port = 1883
 [screen:living-room]
 type = screen
 topic = paradox/living-room/screen
-media_path = /opt/media
+media_dir = /opt/media
+audio_device = hdmi
+
+[audio:zone1]
+type = audio
+devices = analog
+background_music_dir = /opt/media/music
 
 [light:living-room-hue]
 type = light
@@ -94,6 +108,18 @@ mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
 # Control lights
 mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
   -m '{"Command": "setColor", "Color": "#FF6400", "Brightness": 75}'
+
+# Play background music
+mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
+  -m '{"Command": "playMusic", "File": "ambient.mp3", "Volume": 60}'
+
+# Play speech with automatic background music ducking
+mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
+  -m '{"Command": "playSpeech", "File": "hint1.wav"}'
+
+# Fire sound effect immediately
+mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
+  -m '{"Command": "playEffect", "File": "click.wav"}'
 ```
 
 ## Documentation
@@ -108,7 +134,8 @@ mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
 - Node.js 16+ and npm
 - MQTT broker accessible on network
 - Media players: mpv, vlc, fbi (for respective media types)
-- Audio system: ALSA or PulseAudio
+- Audio system: PulseAudio/PipeWire or ALSA
+- For Raspberry Pi: Pi0 (analog), Pi4 (analog + dual HDMI), Pi5 (HDMI-only)
 
 ## Development
 
@@ -124,7 +151,7 @@ npm run test:manual     # Real media playback tests
 
 - **lib/core/**: System initialization, configuration, MQTT, and device management
 - **lib/devices/**: Device-specific implementations for screens, lights, and relays
-- **lib/media/**: Media player framework with support for multiple player types
+- **lib/media/**: Media player framework with multi-zone audio management and device discovery
 - **lib/controllers/**: Integration with external systems (Hue, WiZ, Zigbee, Z-Wave)
 - **lib/effects/**: Macro system for complex device sequences
 - **test/**: Comprehensive test suite with unit, integration, and manual tests

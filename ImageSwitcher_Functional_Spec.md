@@ -13,9 +13,11 @@ ImageSwitcher is a Node.js module designed to control the playback of images, vi
 - **Video Playback:**
   - Play video files full-screen using external players (e.g., `mov`, `cvlc`, `omxplayer`).
 - **Audio Playback:**
-  - Play audio files using external players (e.g., `mpv`, `cvlc`, `omxplayer`).
+  - Play audio files using external players (e.g., `mpv`, `vlc`).
+  - Support for multi-zone audio with background music, speech/narration, and sound effects.
 - **Audio FX:**
   - Play short audio effects (FX) immediately, possibly overlapping with other audio.
+  - Fire-and-forget sound effects with low-latency settings.
 
 #### Special notes on video transitions
 
@@ -99,8 +101,47 @@ STATUS_TOPIC=Paradox/Room/Relay1/Status
 - **Single Application**: All device types run in one Node.js process
 - **Shared MQTT Broker**: All devices use the same MQTT broker connection
 - **Device Routing**: Commands are automatically routed to correct device handlers based on MQTT topic
-- **Audio Integration**: Audio effects are tied to specific screen devices
+- **Multi-Zone Audio**: Advanced audio management supporting background music, speech/narration, and sound effects across multiple zones
+- **Audio Device Discovery**: Automatic detection and alias mapping for audio devices across Pi0, Pi4, Pi5, and general Linux platforms
 - **External API Placeholders**: Framework includes placeholders for Hue, WiZ, Zigbee, and Z-Wave controllers
+
+### 6. Multi-Zone Audio System
+
+ParadoxFX implements a sophisticated audio management system supporting three distinct audio types:
+
+1. **Background Music**: Continuous ambient music with automatic volume ducking during speech
+2. **Speech/Narration**: Queued audio hints with automatic background music volume reduction
+3. **Sound Effects**: Fire-and-forget low-latency effects that can overlap with other audio
+
+#### Audio Device Management
+
+- **Automatic Discovery**: System auto-detects available audio devices using PulseAudio/PipeWire, ALSA, and MPV enumeration
+- **Device Aliases**: Simplified device naming (hdmi, analog, hdmi0, hdmi1) that resolves to actual hardware devices
+- **Multi-Output Support**: Individual zones can output to multiple devices simultaneously (e.g., "hdmi,analog")
+- **Platform Compatibility**: Works across Pi0 (analog-only), Pi4 (analog + dual HDMI), Pi5 (HDMI-only), and desktop Linux
+
+#### Zone Configuration Examples
+
+```ini
+[audio:zone1]
+type = audio
+devices = analog
+background_music_dir = /opt/media/music
+speech_dir = /opt/media/speech
+
+[audio:zone2]
+type = audio
+devices = hdmi0
+background_music_dir = /opt/media/music
+
+[audio:zone3]
+type = audio
+devices = hdmi1
+
+[audio:zone4]
+type = audio
+devices = hdmi1,analog
+```
 
 ### 6. Status and Error Reporting
 

@@ -33,6 +33,86 @@ preferred_image_player = auto      # Image player preference
 require_video_group = false       # Require video group membership
 ```
 
+## Multi-Zone Audio Configuration
+
+ParadoxFX supports multi-zone audio with automatic device discovery and simple alias mapping. This system works across Pi0, Pi4, Pi5, and general Linux platforms.
+
+### [audio] Section
+
+The audio section defines available audio devices and zone configurations:
+
+```ini
+[audio]
+# Device aliases (auto-discovered, but can be overridden)
+hdmi_device = pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo
+hdmi1_device = pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo
+analog_device = pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback
+
+# Zone definitions
+[audio_zone:zone1]
+devices = hdmi                    # Simple alias or device string
+background_music = true           # Supports background music
+speech = true                     # Supports speech/narration
+sound_effects = true              # Supports sound effects
+volume = 80                       # Default volume level
+
+[audio_zone:zone2]
+devices = analog                  # Analog output zone
+background_music = true
+speech = false
+sound_effects = true
+volume = 70
+
+[audio_zone:zone3]
+devices = hdmi1                   # Second HDMI output
+background_music = false
+speech = true
+sound_effects = true
+volume = 85
+
+[audio_zone:multi_zone]
+devices = hdmi,analog             # Multiple devices (comma-separated)
+background_music = true           # Background music to both outputs
+speech = false
+sound_effects = false
+volume = 75
+```
+
+### Audio Device Discovery
+
+ParadoxFX automatically discovers available audio devices using:
+
+1. **PulseAudio/PipeWire** (primary method for modern systems)
+2. **ALSA** (fallback for older systems)
+3. **MPV device enumeration** (last resort)
+
+### Audio Device Aliases
+
+The system creates these aliases automatically:
+
+- `hdmi` - Primary HDMI output
+- `hdmi0` - First HDMI output (same as hdmi)
+- `hdmi1` - Second HDMI output (if available)
+- `hdmi2` - Third HDMI output (if available)
+- `analog` - Analog/headphone output
+- `headphones` - Same as analog
+- `default` - System default (usually HDMI if available)
+
+### Audio Types
+
+ParadoxFX manages three distinct audio types:
+
+1. **Background Music**: Continuous ambient music with volume ducking during speech
+2. **Speech/Narration**: Queued audio hints with automatic background music ducking
+3. **Sound Effects**: Fire-and-forget low-latency effects that can overlap
+
+### Platform-Specific Notes
+
+- **Pi5**: No analog output, HDMI-only configuration
+- **Pi4**: Both analog and dual HDMI available
+- **Pi0**: Usually analog-only or single HDMI
+- **Desktop Linux**: Varies by hardware and audio system
+
 ## Device Configuration
 
 ### Screen Devices
@@ -60,9 +140,30 @@ xinerama_screen = 0
 - `media_dir`: Directory containing media files for this device (replaces media_path)
 - `volume`: Base volume level (0-100) for audio and video playback
 - `player_type`: Media player preference (mpv, vlc, fbi, auto)
-- `audio_device`: ALSA audio device name
+- `audio_device`: Audio output alias (hdmi, analog, hdmi0, hdmi1, etc.)
 - `display`: X11 display target
 - `xinerama_screen`: Xinerama screen index for multi-monitor
+- `audio_zone`: Multi-zone audio zone assignment (optional)
+
+**Audio Configuration:**
+
+The `audio_device` parameter accepts both traditional ALSA device names and the new audio aliases:
+
+- Traditional: `audio_device = plughw:CARD=HDMI,DEV=0`
+- Alias: `audio_device = hdmi` (automatically resolved to correct device)
+- Multi-output: `audio_device = hdmi,analog` (plays on both outputs)
+
+For multi-zone audio systems, use `audio_zone` to assign devices to specific zones:
+
+```ini
+[screen:chamber1]
+audio_zone = zone1
+audio_device = hdmi
+
+[screen:chamber2]
+audio_zone = zone2
+audio_device = analog
+```
 
 **Media File Handling:**
 

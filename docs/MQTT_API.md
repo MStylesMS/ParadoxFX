@@ -8,6 +8,7 @@ This document provides the complete MQTT API specification for ParadoxFX (Parado
 - [Topic Structure](#topic-structure)
 - [Message Formats](#message-formats)
 - [Screen/Media Commands](#screenmedia-commands)
+- [Multi-Zone Audio Commands](#multi-zone-audio-commands)
 - [Light Commands](#light-commands)
 - [Relay Commands](#relay-commands)
 - [System Messages](#system-messages)
@@ -319,6 +320,170 @@ Play audio effects (supports polyphonic playback).
   "Type": "loop",
   "VolumeAdjust": -30
 }
+```
+
+## Multi-Zone Audio Commands
+
+Multi-zone audio devices support three distinct audio types with advanced management capabilities. Audio zones are configured with device aliases (hdmi, analog, etc.) and can output to multiple devices simultaneously.
+
+### Topic Structure for Audio Zones
+
+```
+paradox/zone1/audio/command    # Commands to audio zone 1
+paradox/zone1/audio/status     # Status from audio zone 1
+```
+
+### Background Music Commands
+
+#### playMusic
+
+Start background music with automatic volume ducking during speech.
+
+**Format:**
+
+```json
+{
+  "Command": "playMusic",
+  "File": "ambient.mp3",
+  "Volume": 60,
+  "Loop": true
+}
+```
+
+**Parameters:**
+
+- `File` (required): Music file relative to zone's background_music_dir
+- `Volume` (optional): Volume level 0-100, default: 70
+- `Loop` (optional): Whether to loop the music, default: true
+- `FadeIn` (optional): Fade-in duration in seconds, default: 2
+
+#### stopMusic
+
+Stop background music with optional fade-out.
+
+**Format:**
+
+```json
+{
+  "Command": "stopMusic",
+  "FadeOut": 3
+}
+```
+
+**Parameters:**
+
+- `FadeOut` (optional): Fade-out duration in seconds, default: 2
+
+### Speech/Narration Commands
+
+#### playSpeech
+
+Play speech audio with automatic background music ducking.
+
+**Format:**
+
+```json
+{
+  "Command": "playSpeech",
+  "File": "hint1.wav",
+  "Volume": 85,
+  "Priority": "high"
+}
+```
+
+**Parameters:**
+
+- `File` (required): Speech file relative to zone's speech_dir
+- `Volume` (optional): Volume level 0-100, default: 80
+- `Priority` (optional): Queue priority ("low", "normal", "high"), default: "normal"
+- `DuckLevel` (optional): Background music duck level 0-100, default: 30
+
+#### clearSpeechQueue
+
+Clear all queued speech audio.
+
+**Format:**
+
+```json
+{
+  "Command": "clearSpeechQueue"
+}
+```
+
+### Sound Effects Commands
+
+#### playEffect
+
+Play fire-and-forget sound effect with low latency.
+
+**Format:**
+
+```json
+{
+  "Command": "playEffect",
+  "File": "click.wav",
+  "Volume": 75,
+  "Preload": true
+}
+```
+
+**Parameters:**
+
+- `File` (required): Effect file relative to any configured media directory
+- `Volume` (optional): Volume level 0-100, default: 80
+- `Preload` (optional): Whether to use preloaded effect, default: false
+- `Overlap` (optional): Allow overlapping with other effects, default: true
+
+#### stopAllEffects
+
+Stop all currently playing sound effects.
+
+**Format:**
+
+```json
+{
+  "Command": "stopAllEffects"
+}
+```
+
+### Zone Management Commands
+
+#### setZoneVolume
+
+Set master volume for the entire audio zone.
+
+**Format:**
+
+```json
+{
+  "Command": "setZoneVolume",
+  "Volume": 70
+}
+```
+
+**Parameters:**
+
+- `Volume` (required): Master volume level 0-100
+
+#### getZoneStatus
+
+Request current status of the audio zone.
+
+**Format:**
+
+```json
+{
+  "Command": "getZoneStatus"
+}
+```
+
+**Response includes:**
+
+- Background music status and current file
+- Speech queue length and current item
+- Active sound effects count
+- Zone volume and device status
+- Audio device availability and aliases
 ```
 
 #### stopAudio

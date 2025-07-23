@@ -20,10 +20,23 @@
 
 - **Media Player Factory**: Dynamic player creation based on file type
 - **Process Manager**: Subprocess lifecycle management
+- **Multi-Zone Audio Manager**: Orchestrates background music, speech, and sound effects
+- **Audio Device Manager**: Cross-platform device discovery and alias mapping
+- **MPV Utilities**: Shared IPC communication utilities for MPV players
 - **Player Implementations**:
   - FBI Player: Framebuffer image display
-  - MPV Player: Video/audio playback
+  - MPV Player: Video/audio playback with IPC control
   - CVLC Player: VLC media player
+
+### ✅ Multi-Zone Audio System
+
+- **Background Music**: Continuous ambient music with automatic volume ducking
+- **Speech/Narration**: Queued audio with background music volume reduction
+- **Sound Effects**: Fire-and-forget low-latency overlapping effects
+- **Device Discovery**: Auto-detection via PulseAudio/PipeWire, ALSA, and MPV
+- **Device Aliases**: Simplified naming (hdmi, analog, hdmi0, hdmi1)
+- **Multi-Output Support**: Simultaneous output to multiple devices per zone
+- **Cross-Platform**: Pi0, Pi4, Pi5, and desktop Linux compatibility
 
 ### ✅ External Controllers
 
@@ -87,6 +100,11 @@ pfx/
 │   ├── core/               # Core system components
 │   ├── devices/            # Device implementations
 │   ├── media/              # Media player framework
+│   │   ├── audio-manager.js           # Audio system management
+│   │   ├── audio-device-manager.js    # Cross-platform device discovery
+│   │   ├── multi-zone-audio-manager.js # Multi-zone audio orchestration
+│   │   ├── mpv-utils.js               # Shared MPV IPC utilities
+│   │   └── players/                   # Media player implementations
 │   ├── controllers/        # External system integrations
 │   ├── effects/            # Effect macro system
 │   └── utils/              # Shared utilities
