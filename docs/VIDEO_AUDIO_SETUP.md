@@ -1,5 +1,13 @@
 # ParadoxFX Video & Audio Setup Guide
-## Critical Configuration Se### **Audio Architecture Summary**
+## Critical Configuration Settings and Troubleshooting
+
+This document contains the essential findings and configurations for video and audio systems in ParadoxFX, distilled from extensive testing and troubleshooting sessions. **Follow these settings exactly** to avoid audio/video issues.
+
+---
+
+## 🎵 Audio System Configuration
+
+### **Audio Architecture Summary**
 
 1. **Method 1 (IPC - Background Music)**: Uses persistent MPV instance with IPC socket
    - ✅ Works with any audio settings
