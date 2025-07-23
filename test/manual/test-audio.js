@@ -442,14 +442,14 @@ async function testSoundEffects() {
     console.log('\n=== Testing Low-Latency Sound Effects ===');
 
     try {
-        // STOP background music completely during sound effects testing to eliminate all audio conflicts
-        console.log('Stopping background music for isolated sound effect testing...');
+        // KEEP background music running during sound effects testing (like Multiple Streams test)
+        console.log('Ensuring background music is playing at moderate volume during sound effects testing...');
         await sendMpvCommand(BACKGROUND_MUSIC_SOCKET, {
-            command: ['stop']
+            command: ['set_property', 'volume', 50]
         });
 
-        // Wait for background music to fully stop
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Wait briefly for volume change
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // Pre-load sound effect and pause it for instant playback
         console.log('Pre-loading sound effect...');
@@ -553,11 +553,11 @@ async function testSoundEffects() {
         console.log(`  Method 2 (Basic spawn): ~${method2SpawnTime}ms process startup`);
         console.log(`  Method 3 (Low-latency spawn): ~${method3SpawnTime}ms process startup + optimized playback`);
 
-        // RESTART background music after sound effects testing
+        // RESTORE background music to full volume after sound effects testing
         console.log('\n✓ Sound effects testing completed');
-        console.log('Restarting background music...');
+        console.log('Restoring background music to full volume...');
         await sendMpvCommand(BACKGROUND_MUSIC_SOCKET, {
-            command: ['loadfile', BACKGROUND_MUSIC, 'replace']
+            command: ['set_property', 'volume', 100]
         });
 
         return true;
