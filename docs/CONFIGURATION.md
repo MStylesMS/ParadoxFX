@@ -64,7 +64,7 @@ default_image = default.png  # Image displayed on startup and after wake (option
 - `media_dir`: Directory containing media files for this device (replaces media_path)
 - `volume`: Base volume level (0-100) for audio and video playback
 - `player_type`: Media player preference (mpv, vlc, fbi, auto)
-- `audio_device`: PipeWire/PulseAudio device name (e.g., 'pulse' or PipeWire node)
+- `audio_device`: Audio device identifier for PipeWire/PulseAudio (e.g., 'pulse/device_name') or ALSA direct (e.g., 'alsa/hdmi:CARD=...')
 - `display`: Display server target; X11 (":" + display number, e.g. ":0") or Wayland (uses $WAYLAND_DISPLAY)
 - `xinerama_screen`: Xinerama screen index for multi-monitor (only for X11/XWayland)
 - `default_image`: Image file displayed on startup and after wake commands (defaults to "default.png" if not specified)
@@ -186,10 +186,10 @@ audio_device = plughw:1,0          # Hardware device 1 with format conversion
 audio_device = pulse               # PulseAudio
 ```
 
-**Raspberry Pi 5 ALSA Devices:**
+**Raspberry Pi 5 PipeWire Devices:**
 ```ini
-audio_device = alsa/hdmi:CARD=vc4hdmi0,DEV=0    # HDMI0 output
-audio_device = alsa/hdmi:CARD=vc4hdmi1,DEV=0    # HDMI1 output
+audio_device = pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo    # HDMI0 output
+audio_device = pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo    # HDMI1 output
 ```
 
 ### Multi-Channel Audio
@@ -207,10 +207,10 @@ audio_device = hw:0,7              # HDMI output 2
 **Pi5 Dual HDMI Example:**
 ```ini
 [screen:zone1]
-audio_device = alsa/hdmi:CARD=vc4hdmi0,DEV=0    # Left monitor audio
+audio_device = pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo    # Left monitor audio
 
 [screen:zone2]
-audio_device = alsa/hdmi:CARD=vc4hdmi1,DEV=0    # Right monitor audio
+audio_device = pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo    # Right monitor audio
 ```
 
 ## Display Configuration
@@ -272,7 +272,7 @@ The Raspberry Pi 5 requires specific configuration for optimal dual-HDMI perform
 
 **Display System**: Pi5 requires **X11** for reliable dual-screen video routing. The default Wayland compositor has limitations that prevent proper `--screen` parameter functionality in MPV.
 
-**Audio System**: Use **ALSA** directly rather than PulseAudio/PipeWire for maximum compatibility and performance.
+**Audio System**: Use **PipeWire** for maximum compatibility and robust multi-format support. PipeWire provides better format handling and more reliable audio routing than ALSA direct access.
 
 #### Required Boot Configuration
 
@@ -324,9 +324,14 @@ topic = paradox/zone1/screen
 media_dir = /opt/paradox/media/zone1
 volume = 80
 player_type = mpv
-audio_device = alsa/hdmi:CARD=vc4hdmi0,DEV=0
+audio_device = pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo
 display = :0
 xinerama_screen = 0
+```
+
+**Pi5 Audio Device Names:**
+- HDMI0: `pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`
+- HDMI1: `pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo`
 ```
 
 #### Pi5 Dual HDMI Configuration
@@ -348,7 +353,7 @@ topic = paradox/zone1/screen
 media_dir = /opt/paradox/media/zone1
 volume = 80
 player_type = mpv
-audio_device = alsa/hdmi:CARD=vc4hdmi0,DEV=0
+audio_device = pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo
 display = :0
 xinerama_screen = 0
 
@@ -358,7 +363,7 @@ topic = paradox/zone2/screen
 media_dir = /opt/paradox/media/zone2
 volume = 80
 player_type = mpv
-audio_device = alsa/hdmi:CARD=vc4hdmi1,DEV=0
+audio_device = pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo
 display = :0
 xinerama_screen = 1
 ```

@@ -451,7 +451,7 @@ async function testSoundEffects() {
         // Wait for background music to fully stop
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Pre-load sound effect and pause it for instant playback
+        // Pre-load sound effect and pause it for instant playback (using existing IPC instance)
         console.log('Pre-loading sound effect...');
         await sendMpvCommand(SOUND_EFFECTS_SOCKET, {
             command: ['loadfile', SOUND_EFFECT, 'replace']
@@ -499,16 +499,25 @@ async function testSoundEffects() {
         }
 
         console.log('  Playing sound effect now!');
-        // Measure latency for Method 2 - USE EXCLUSIVE AUDIO ACCESS
+        // Measure latency for Method 2 - RESTORE EXCLUSIVE AUDIO ACCESS (Pi4 solution)
         const method2StartTime = Date.now();
         const effectsMpv2 = spawn('mpv', [
             '--no-terminal',
             '--no-video',
             '--volume=100',
-            '--audio-exclusive=yes',  // Request exclusive audio access
-            `--audio-device=pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`,
+            '--audio-exclusive=yes',  // Restore exclusive audio access
+            '--msg-level=all=info',   // Reduce debug spam but keep important info
+            `--audio-device=pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback`,
             SOUND_EFFECT
-        ], { detached: false });
+        ], { 
+            detached: false,
+            stdio: ['ignore', 'pipe', 'pipe']  // Capture stdout and stderr
+        });
+
+        // Log MPV output for debugging
+        effectsMpv2.stderr.on('data', (data) => {
+            console.log('Method 2 MPV:', data.toString().trim());
+        });
 
         // Log approximate spawn time
         const method2SpawnTime = Date.now() - method2StartTime;
@@ -526,7 +535,7 @@ async function testSoundEffects() {
         }
 
         console.log('  Playing sound effect now!');
-        // Measure latency for Method 3 - USE EXCLUSIVE AUDIO + OPTIMIZED SETTINGS
+        // Measure latency for Method 3 - RESTORE EXCLUSIVE AUDIO + OPTIMIZED SETTINGS (Pi4 solution)
         const method3StartTime = Date.now();
         const effectsMpv3 = spawn('mpv', [
             '--no-terminal',
@@ -534,11 +543,20 @@ async function testSoundEffects() {
             '--volume=100',
             '--audio-buffer=0.02',      // Minimize audio buffer for low latency
             '--cache=no',               // Disable cache for immediate playback
-            '--audio-exclusive=yes',    // Request exclusive audio access
+            '--audio-exclusive=yes',    // Restore exclusive audio access (Pi4 solution)
             '--audio-fallback-to-null=no', // Don't fallback if audio fails
-            `--audio-device=pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`,
+            '--msg-level=all=info',     // Reduce debug spam but keep important info
+            `--audio-device=pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback`,
             SOUND_EFFECT
-        ], { detached: false });
+        ], { 
+            detached: false,
+            stdio: ['ignore', 'pipe', 'pipe']  // Capture stdout and stderr
+        });
+
+        // Log MPV output for debugging
+        effectsMpv3.stderr.on('data', (data) => {
+            console.log('Method 3 MPV:', data.toString().trim());
+        });
 
         // Log approximate spawn time
         const method3SpawnTime = Date.now() - method3StartTime;
@@ -657,7 +675,7 @@ async function testMultipleAudioStreams() {
             '--volume=100',
             '--audio-buffer=0.02',
             '--cache=no',
-            `--audio-device=pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`,
+            `--audio-device=pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback`,
             SOUND_EFFECT
         ], { detached: false });
 
@@ -669,7 +687,7 @@ async function testMultipleAudioStreams() {
             '--no-terminal',
             '--no-video',
             '--volume=100',
-            `--audio-device=pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`,
+            `--audio-device=pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback`,
             SPEECH_AUDIO
         ], { detached: false });
 
@@ -705,14 +723,33 @@ async function testMultipleAudioStreams() {
     console.log('🎵 MPV Audio Capabilities Test Suite');
     console.log('=====================================');
 
-    // Terminate any old MPV instances
+    // Terminate any old MPV instances - COMPREHENSIVE CLEANUP
+    console.log('Performing comprehensive MPV cleanup...');
     try {
-        console.log('Terminating old MPV instances...');
-        execSync('pkill -f "mpv.*ipc"');
-        console.log('Old MPV instances terminated.');
+        // Kill all MPV processes (not just IPC ones)
+        console.log('Killing all existing MPV processes...');
+        execSync('pkill -f mpv', { stdio: 'ignore' });
+        console.log('✓ All MPV processes terminated.');
     } catch (err) {
-        console.log('No old MPV instances found.');
+        console.log('✓ No existing MPV processes found.');
     }
+
+    // Wait a moment for processes to fully terminate
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Also clean up any lingering socket files
+    console.log('Cleaning up socket files...');
+    const socketsToClean = [BACKGROUND_MUSIC_SOCKET, SOUND_EFFECTS_SOCKET, SPEECH_SOCKET];
+    socketsToClean.forEach(socket => {
+        try {
+            fs.unlinkSync(socket);
+            console.log(`✓ Removed socket: ${socket}`);
+        } catch (e) {
+            // Socket doesn't exist, which is fine
+        }
+    });
+
+    console.log('✓ Cleanup completed.\n');
 
     const results = {
         backgroundMusic: false,
@@ -725,8 +762,8 @@ async function testMultipleAudioStreams() {
         // Launch MPV instances for different audio purposes
         console.log('\nLaunching MPV audio instances...');
 
-        // Use the specific PipeWire device identifiers for Pi5 HDMI output
-        const analogDevice = 'pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo';
+        // Use the specific PipeWire device identifiers for analog output
+        const analogDevice = 'pulse/alsa_output.platform-fe00b840.mailbox.stereo-fallback';
 
         const backgroundMpv = spawn('mpv', createAudioArgs(BACKGROUND_MUSIC_SOCKET, 'background', analogDevice), { detached: false });
         const effectsMpv = spawn('mpv', createAudioArgs(SOUND_EFFECTS_SOCKET, 'effects', analogDevice), { detached: false });
