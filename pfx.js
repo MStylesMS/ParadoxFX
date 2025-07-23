@@ -7,7 +7,7 @@
  * Supports screens, lights, and relays via MQTT commands.
  */
 
-const DeviceManager = require('./lib/core/device-manager');
+const ZoneManager = require('./lib/core/zone-manager');
 const ConfigLoader = require('./lib/core/config-loader');
 const MqttClient = require('./lib/core/mqtt-client');
 const Logger = require('./lib/utils/logger');
@@ -16,7 +16,7 @@ class PxFxApplication {
     constructor() {
         this.logger = new Logger('PxFx');
         this.config = null;
-        this.deviceManager = null;
+        this.zoneManager = null;
         this.mqttClient = null;
     }
 
@@ -37,9 +37,9 @@ class PxFxApplication {
             this.mqttClient = new MqttClient(this.config.global);
             await this.mqttClient.connect();
 
-            // Initialize device manager
-            this.deviceManager = new DeviceManager(this.config, this.mqttClient);
-            await this.deviceManager.initialize();
+            // Initialize zone manager
+            this.zoneManager = new ZoneManager(this.config, this.mqttClient);
+            await this.zoneManager.initialize();
 
             // Setup graceful shutdown
             this.setupShutdownHandlers();
@@ -55,8 +55,8 @@ class PxFxApplication {
     async shutdown() {
         this.logger.info('Shutting down Paradox Effects application...');
 
-        if (this.deviceManager) {
-            await this.deviceManager.shutdown();
+        if (this.zoneManager) {
+            await this.zoneManager.shutdown();
         }
 
         if (this.mqttClient) {
