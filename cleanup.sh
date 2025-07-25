@@ -1,24 +1,26 @@
 #!/bin/bash
 
 # ParadoxFX Cleanup Script
-# Cleans up leftover MPV processes and socket files
+# ========================
+# Cleans up MPV processes, socket files, and PulseAudio sinks
+# Use this before restarting PFX or for troubleshooting
 
 echo "🧹 ParadoxFX Cleanup Script"
 echo "=========================="
 
-# Kill all MPV processes
+# Kill MPV processes
 echo "🔪 Killing MPV processes..."
-MPV_PIDS=$(pgrep mpv)
-if [ -n "$MPV_PIDS" ]; then
-    echo "Found MPV processes: $MPV_PIDS"
-    pkill -SIGTERM mpv
+mpv_pids=$(pgrep mpv)
+if [ -n "$mpv_pids" ]; then
+    echo "   Found MPV processes: $mpv_pids"
+    pkill mpv
     sleep 2
     
     # Force kill if still running
-    REMAINING_PIDS=$(pgrep mpv)
-    if [ -n "$REMAINING_PIDS" ]; then
-        echo "Force killing remaining MPV processes: $REMAINING_PIDS"
-        pkill -SIGKILL mpv
+    remaining_pids=$(pgrep mpv)
+    if [ -n "$remaining_pids" ]; then
+        echo "   Force killing remaining MPV processes: $remaining_pids"
+        pkill -9 mpv
     fi
     echo "✅ MPV processes terminated"
 else
@@ -27,49 +29,56 @@ fi
 
 # Clean up socket files
 echo "🧽 Cleaning up socket files..."
-SOCKET_COUNT=0
-
-# Remove zone-specific sockets
-for socket in /tmp/mpv-screen:zone*-*.sock /tmp/mpv-audio:zone*-*.sock; do
+socket_count=0
+for socket in /tmp/mpv-*.sock /tmp/pfx-*.sock; do
     if [ -e "$socket" ]; then
-        echo "Removing: $socket"
         rm -f "$socket"
-        ((SOCKET_COUNT++))
+        socket_count=$((socket_count + 1))
     fi
 done
 
-# Remove any other MPV sockets that might be left over
-for socket in /tmp/mpv-*.sock; do
-    if [ -e "$socket" ]; then
-        echo "Removing: $socket"
-        rm -f "$socket"
-        ((SOCKET_COUNT++))
-    fi
-done
-
-if [ $SOCKET_COUNT -gt 0 ]; then
-    echo "✅ Removed $SOCKET_COUNT socket files"
+if [ $socket_count -gt 0 ]; then
+    echo "✅ Removed $socket_count socket files"
 else
     echo "ℹ️  No socket files found"
 fi
 
-# Clean up any PulseAudio combined sinks
+# Clean up PulseAudio combined sinks
 echo "🔊 Cleaning up PulseAudio combined sinks..."
-COMBINED_SINK=$(pactl list sinks short | grep paradox_dual_output | cut -f1)
-if [ -n "$COMBINED_SINK" ]; then
-    echo "Removing combined sink: paradox_dual_output (ID: $COMBINED_SINK)"
-    pactl unload-module module-combine-sink 2>/dev/null || true
-    echo "✅ Combined sink removed"
+if command -v pactl >/dev/null 2>&1; then
+    # Check if paradox_dual_output sink exists
+    if pactl list short sinks | grep -q "paradox_dual_output"; then
+        echo "   Removing combined sink: paradox_dual_output"
+        # Find the module ID for the combined sink
+        module_id=$(pactl list short modules | grep "module-combine-sink.*paradox_dual_output" | cut -f1)
+        if [ -n "$module_id" ]; then
+            pactl unload-module "$module_id"
+            echo "✅ Combined sink removed"
+        else
+            echo "⚠️  Could not find module ID for combined sink"
+        fi
+    else
+        echo "ℹ️  No combined sink found"
+    fi
 else
-    echo "ℹ️  No combined sink found"
+    echo "⚠️  PulseAudio not available"
 fi
 
-# Check for any remaining Node.js processes running pfx
+# Check for Node.js processes
 echo "🔍 Checking for Node.js processes..."
-PFX_PIDS=$(pgrep -f "node.*pfx.js")
-if [ -n "$PFX_PIDS" ]; then
-    echo "⚠️  Found PFX processes still running: $PFX_PIDS"
-    echo "Use 'kill $PFX_PIDS' to terminate them if needed"
+pfx_pids=$(pgrep -f "node.*pfx")
+if [ -n "$pfx_pids" ]; then
+    echo "   Found PFX processes: $pfx_pids"
+    pkill -f "node.*pfx"
+    sleep 2
+    
+    # Force kill if still running
+    remaining_pids=$(pgrep -f "node.*pfx")
+    if [ -n "$remaining_pids" ]; then
+        echo "   Force killing remaining PFX processes: $remaining_pids"
+        pkill -9 -f "node.*pfx"
+    fi
+    echo "✅ PFX processes terminated"
 else
     echo "ℹ️  No PFX processes found"
 fi
