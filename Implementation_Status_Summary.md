@@ -132,6 +132,35 @@
    - Update comments and documentation
    - Standardize logging and error handling
 
+## Lib Directory Cleanup (Completed)
+
+### **Files Removed (Unused Legacy Code)**
+- ✅ `lib/media.js` - Old MPV media player using node-mpv library (replaced by unified architecture)
+- ✅ `lib/media_players.js` - Basic audio player with spawn-based VLC (replaced by AudioManager)
+- ✅ `lib/core/device-manager.js` - Old device-centric architecture (replaced by ZoneManager)
+- ✅ `lib/core/message-router.js` - Message routing for device-manager (part of old architecture)
+- ✅ `lib/zones/combined-audio-zone.js` - Stub implementation (consolidated into AudioZone)
+
+### **Audio Architecture Analysis**
+- **`lib/audio/audio-device-manager.js` vs `lib/audio/multi-zone-audio-manager.js`**: ⚠️ **OVERLAP IDENTIFIED** - Both manage audio device configuration and multi-zone audio. The multi-zone-audio-manager imports audio-device-manager but provides higher-level orchestration. This relationship is functional but could be optimized.
+
+### **Media Player Framework Analysis**
+- **`lib/media/players/` directory**: ⚠️ **INCOMPLETE FRAMEWORK** - Contains base-player.js, mpv-player.js, fbi-player.js, cvlc-player.js but only base-player.js and mpv-player.js have implementations. Associated with process-manager.js which is marked "TODO: Implement".
+- **`lib/media/process-manager.js`**: ❌ **INCOMPLETE** - Framework exists but core functionality marked as "TODO: Implement" with empty methods.
+- **`lib/media/video-player.js`**: ⚠️ **POTENTIAL REDUNDANCY** - May be redundant with MPV zone manager handling all media types.
+
+### **Effects System Analysis**
+- **`lib/effects/effect-engine.js`**: ❓ **UNKNOWN USAGE** - Only imports logger, functionality and active usage unclear. Requires investigation before removal.
+
+### **Utils Organization**
+- **`lib/utils/utils.js` vs `lib/utils/mpv-utils.js`**: ✅ **WELL SEPARATED** - utils.js contains general utilities (file operations), mpv-utils.js contains MPV-specific IPC functions. Current separation is appropriate and maintained.
+
+### **Impact Summary**
+- **Removed**: 5 unused/legacy files
+- **Lib directory reduced**: From 36 to 31 JavaScript files
+- **Architecture cleaned**: Removed old device-centric architecture artifacts
+- **Zone system simplified**: Combined audio zone functionality consolidated
+
 ## Code Quality Assessment
 
 ### **Strengths**
@@ -140,6 +169,7 @@
 - ✅ Solid MQTT integration framework
 - ✅ Platform-specific optimizations already considered
 - ✅ Comprehensive audio device detection and validation
+- ✅ **NEW**: Cleaned lib directory with unused legacy code removed
 
 ### **Gaps**
 - ❌ Media player system not aligned with specification (multi-player vs. MPV-only)
@@ -148,6 +178,9 @@
 - ❌ Physical device heartbeat system needs implementation
 - ❌ Physical device setup validation and automated configuration missing
 - ❌ Testing procedures need consolidation and standardization
+- ⚠️ **NEW**: Audio manager architecture has overlap that could be optimized
+- ⚠️ **NEW**: Incomplete media player framework needs evaluation/removal
+- ❓ **NEW**: Effects system usage unclear and needs investigation
 
 ## Next Development Phase Recommendations
 
@@ -158,10 +191,12 @@
 5. **Consolidate Testing Infrastructure** - Ensures quality and reduces maintenance overhead
 6. **Enhance Heartbeat** - Improves monitoring and debugging
 7. **Create Remaining Configs** - Enables multi-platform deployment
+8. **NEW**: **Evaluate Media Player Framework** - Remove incomplete process-manager and player framework files
+9. **NEW**: **Investigate Effects System** - Determine if effect-engine.js is actively used or can be removed
 
 ### **Immediate Next Steps Priority:**
-- **Phase 1**: Media player refactoring and IPC implementation (core functionality)
+- **Phase 1**: Media player refactoring and IPC implementation (core functionality) + framework cleanup
 - **Phase 2**: Physical device setup enhancement and testing consolidation (deployment quality)
 - **Phase 3**: Audio subsystem completion and heartbeat enhancement (feature completion)
 
-The codebase has a solid foundation with excellent testing, but needs significant refactoring to align with the updated MPV-only, IPC-based architecture described in the functional specification. Adding robust physical device setup and consolidated testing will greatly improve deployment reliability and maintainability.
+The codebase has a solid foundation with excellent testing and **recently completed lib directory cleanup removing 5 unused legacy files**. The system still needs significant refactoring to align with the updated MPV-only, IPC-based architecture described in the functional specification. Adding robust physical device setup and consolidated testing will greatly improve deployment reliability and maintainability.
