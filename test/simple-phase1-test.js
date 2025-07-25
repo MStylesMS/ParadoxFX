@@ -25,7 +25,7 @@ const testConfig = {
     display: ':0',
     xineramaScreen: 0,
     audioDevice: 'hw:0,0',
-    mediaDir: '/opt/paradox/apps/pfx/test/fixtures/test-media',
+    mediaDir: '/opt/paradox/apps/pfx/media/test',
     baseTopic: 'test/screen',
     statusTopic: 'test/screen/status',
     videoQueueMax: 3,
@@ -61,8 +61,8 @@ async function testScreenDeviceCommands() {
     // Instead, we'll test the command structure
 
     const testCommands = [
-        { Command: 'setImage', Image: '/opt/paradox/apps/pfx/test/fixtures/test-media/default.jpg' },
-        { Command: 'playAudio', Audio: '/opt/paradox/apps/pfx/test/fixtures/test-media/default.mp3', Channel: 'main' },
+        { Command: 'setImage', Image: '/opt/paradox/apps/pfx/media/test/defaults/default.jpg' },
+        { Command: 'playAudio', Audio: '/opt/paradox/apps/pfx/media/test/defaults/default.mp3', Channel: 'main' },
         { Command: 'setVolume', Volume: 85 },
         { Command: 'getStatus' }
     ];
@@ -97,7 +97,7 @@ async function testActualAudio() {
                 // Test basic MPV audio playback
                 console.log('🎵 Testing basic MPV audio playback...');
                 const mpv = spawn('mpv', [
-                    '/opt/paradox/apps/pfx/test/fixtures/test-media/default.mp3',
+                    '/opt/paradox/apps/pfx/media/test/defaults/default.mp3',
                     '--no-video',
                     '--length=2',  // Play for 2 seconds only
                     '--volume=50'

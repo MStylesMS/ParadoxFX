@@ -17,8 +17,8 @@ const fs = require('fs');
 const readline = require('readline');
 
 // Test media files
-const BACKGROUND_MUSIC = path.resolve(__dirname, '../fixtures/test-media/houdini_music.mp3');
-const SOUND_EFFECT = path.resolve(__dirname, '../fixtures/test-media/default_fx.wav');
+const BACKGROUND_MUSIC = path.resolve(__dirname, '../../media/test/defaults/houdini_music.mp3');
+const SOUND_EFFECT = path.resolve(__dirname, '../../media/test/defaults/default_fx.wav');
 
 // Pi5 HDMI audio devices
 const HDMI_0_DEVICE = 'pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo';

@@ -122,21 +122,23 @@ pfx/
     │   ├── config-pi-audio.js      # Raspberry Pi audio config
     │   ├── test-mqtt.js            # MQTT communication tests
     │   └── real-playback.test.js   # Real media playback tests
-    └── fixtures/           # Test data
-        └── test-media/     # Media files for testing
-            ├── README.md   # Media file documentation
-            ├── default.jpg # Test image files
-            ├── default.png # (Copy from /opt/paradox/media/)
-            ├── houdini_picture_24bit.png
-            ├── intro_short.mp4  # Test video files
-            └── default.*   # Additional media formats
+    └── utils/              # Test utilities
+        └── loadTestConfig.js # Test configuration management
+├── media/                  # Media files organized by category
+│   └── test/               # Test media files
+│       ├── defaults/       # Default test media (png, mp4, mp3, wav, etc.)
+│       ├── fx/             # Sound effects library  
+│       ├── music/          # Background music tracks
+│       ├── general/        # Speech and voice prompts
+│       ├── devices/        # Device identification audio
+│       └── surround/       # Multi-channel audio test files
 ```
 
 ## Next Steps
 
 ### High Priority
 
-1. **Copy Test Media Files**: Copy media files to test/fixtures/test-media/
+1. **Media Library Complete**: Comprehensive media files now available in media/test/ directory
 2. **Fix MQTT Client Unit Test**: Update test to work with private properties  
 3. **Implement Device Placeholders**: Add actual logic for light and relay devices
 4. **Media Player Integration**: Complete process management and error handling

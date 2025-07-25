@@ -135,10 +135,10 @@ if (deviceArg) {
  * INTEGRATION NOTE: In ParadoxFX system, these will be dynamically resolved
  * from the media configuration system
  */
-const BACKGROUND_MUSIC = path.resolve(__dirname, '../fixtures/test-media/houdini_music.mp3');
-const SOUND_EFFECT = path.resolve(__dirname, '../fixtures/test-media/default_fx.wav');
-const SPEECH_AUDIO = path.resolve(__dirname, '../fixtures/test-media/stuff_to_do.mp3');
-const SHORT_AUDIO = path.resolve(__dirname, '../fixtures/test-media/default.wav');
+const BACKGROUND_MUSIC = path.resolve(__dirname, '../../media/test/defaults/houdini_music.mp3');
+const SOUND_EFFECT = path.resolve(__dirname, '../../media/test/defaults/default_fx.wav');
+const SPEECH_AUDIO = path.resolve(__dirname, '../../media/test/defaults/stuff_to_do.mp3');
+const SHORT_AUDIO = path.resolve(__dirname, '../../media/test/defaults/default.wav');
 
 /**
  * MPV IPC socket paths for different audio purposes

@@ -24,35 +24,35 @@ const readline = require('readline');
 const TEST_AUDIO_PATHS = {
     subwoofer: [
         '/usr/share/sounds/alsa/Noise.wav',
-        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/media/test/defaults/default.wav'
     ],
     leftChannel: [
         '/usr/share/sounds/alsa/Side_Left.wav',
-        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/media/test/defaults/default.wav'
     ],
     rightChannel: [
         '/usr/share/sounds/alsa/Side_Right.wav',
-        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/media/test/defaults/default.wav'
     ],
     frontLeft: [
         '/usr/share/sounds/alsa/Front_Left.wav',
-        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/media/test/defaults/default.wav'
     ],
     frontRight: [
         '/usr/share/sounds/alsa/Front_Right.wav',
-        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/media/test/defaults/default.wav'
     ],
     rearLeft: [
         '/usr/share/sounds/alsa/Rear_Left.wav',
-        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/media/test/defaults/default.wav'
     ],
     rearRight: [
         '/usr/share/sounds/alsa/Rear_Right.wav',
-        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/media/test/defaults/default.wav'
     ],
     center: [
         '/usr/share/sounds/alsa/Front_Center.wav',
-        '/opt/paradox/apps/pfx/test/fixtures/test-media/default.wav'
+        '/opt/paradox/apps/pfx/media/test/defaults/default.wav'
     ]
 };
 

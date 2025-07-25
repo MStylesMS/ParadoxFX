@@ -48,7 +48,7 @@ global.testUtils = {
                 display: ':0',
                 baseTopic: 'test/screen',
                 statusTopic: 'test/screen/status',
-                mediaDir: '/tmp/test-media',
+                mediaDir: '/opt/paradox/apps/pfx/media/test',
                 videoQueueMax: 5,
                 audioQueueMax: 5
             }

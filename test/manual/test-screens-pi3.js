@@ -81,7 +81,7 @@ const path = require('path');
 class Pi3ScreenTester {
     constructor() {
         this.testResults = [];
-        this.mediaDir = '/opt/paradox/apps/pfx/test/fixtures/test-media';
+        this.mediaDir = '/opt/paradox/apps/pfx/media/test/defaults';
 
         // Pi3-optimized player configurations
         this.playerConfigs = {

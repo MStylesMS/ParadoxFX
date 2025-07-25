@@ -166,9 +166,9 @@ echo "========================"
 
 TEST_VIDEO=""
 VIDEO_PATHS=(
-    "/opt/paradox/apps/pfx/test/fixtures/test-media/default.mp4"
-    "/opt/paradox/apps/pfx/test/fixtures/test-media/default.avi"
-    "/opt/paradox/apps/pfx/test/fixtures/test-media/default.mkv"
+    "/opt/paradox/apps/pfx/media/test/defaults/default.mp4"
+    "/opt/paradox/apps/pfx/media/test/defaults/default.avi"
+    "/opt/paradox/apps/pfx/media/test/defaults/default.mkv"
     "/usr/share/pixmaps/test.mp4"
     "/home/pi/test.mp4"
 )

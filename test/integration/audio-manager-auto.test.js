@@ -16,9 +16,9 @@ const path = require('path');
 const fs = require('fs');
 
 // Test media files
-const BACKGROUND_MUSIC = path.resolve(__dirname, '../fixtures/test-media/houdini_music.mp3');
-const SOUND_EFFECT = path.resolve(__dirname, '../fixtures/test-media/default_fx.wav');
-const SPEECH_AUDIO = path.resolve(__dirname, '../fixtures/test-media/stuff_to_do.mp3');
+const BACKGROUND_MUSIC = path.resolve(__dirname, '../../media/test/defaults/houdini_music.mp3');
+const SOUND_EFFECT = path.resolve(__dirname, '../../media/test/defaults/default_fx.wav');
+const SPEECH_AUDIO = path.resolve(__dirname, '../../media/test/defaults/stuff_to_do.mp3');
 
 console.log('🎵 Enhanced Audio System Automated Test');
 console.log('=======================================');
@@ -259,7 +259,7 @@ const missingFiles = testFiles.filter(file => !fs.existsSync(file));
 if (missingFiles.length > 0) {
     console.error('❌ Missing test media files:');
     missingFiles.forEach(file => console.error(`   - ${file}`));
-    console.error('\nPlease ensure test media files are available in test/fixtures/test-media/');
+    console.error('\nPlease ensure test media files are available in media/test/defaults/');
     process.exit(1);
 }
 

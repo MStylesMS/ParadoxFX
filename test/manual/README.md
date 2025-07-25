@@ -66,7 +66,7 @@ Hardware-specific tests optimized for Raspberry Pi 3 with Bullseye (Legacy).
 
 ### Media Files
 
-The test media files must be present in `test/fixtures/test-media/`. If they're missing, follow the instructions in `test/fixtures/test-media/README.md` to generate them.
+The test media files must be present in `media/test/defaults/`. All required media files are included in the comprehensive media library.
 
 ## Usage
 
@@ -111,7 +111,7 @@ node test/manual/test-screens-pi3.js
 - Raspberry Pi 3 with Raspberry Pi OS Bullseye (Legacy)
 - GPU memory split configured (gpu_mem=128 or higher)
 - Hardware acceleration packages (mpv, vlc, fbi)
-- Test media files in test/fixtures/test-media/
+- Test media files in media/test/defaults/
 
 **What the test does:**
 

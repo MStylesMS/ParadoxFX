@@ -21,7 +21,7 @@ const { spawn } = require('child_process');
 const REAL_PLAYBACK_ENABLED = process.env.ENABLE_REAL_PLAYBACK === 'true';
 
 describe('Real Media Playback Tests', () => {
-    const testMediaPath = path.join(__dirname, '../fixtures/test-media');
+    const testMediaPath = path.join(__dirname, '../../media/test/defaults');
     const DISPLAY_TIME = 3000; // 3 seconds per media file
 
     beforeAll(() => {

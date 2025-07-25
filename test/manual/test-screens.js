@@ -44,8 +44,8 @@ const readline = require('readline');
  * INTEGRATION NOTE: In ParadoxFX system, these will be dynamically resolved
  * from the show configuration and media management system
  */
-const IMAGE_PATH = path.resolve(__dirname, '../fixtures/test-media/default.png');
-const VIDEO_PATH = path.resolve(__dirname, '../fixtures/test-media/default.mp4');
+const IMAGE_PATH = path.resolve(__dirname, '../../media/test/defaults/default.png');
+const VIDEO_PATH = path.resolve(__dirname, '../../media/test/defaults/default.mp4');
 
 /**
  * MPV IPC socket path for screen control

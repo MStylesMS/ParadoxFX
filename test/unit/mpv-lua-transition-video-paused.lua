@@ -3,10 +3,10 @@
 -- Use the MPV Lua API to control video playback
 -- and handle events for a seamless transition effect.
 
--- DISPLAY=:1 mpv --fullscreen --keep-open=always --force-window=immediate --msg-level=all=info --script=/opt/paradox/apps/pfx/test/unit/mpv-lua-transition-video-paused.lua /opt/paradox/apps/pfx/test/fixtures/test-media/transition_video.mp4
+-- DISPLAY=:1 mpv --fullscreen --keep-open=always --force-window=immediate --msg-level=all=info --script=/opt/paradox/apps/pfx/test/unit/mpv-lua-transition-video-paused.lua /opt/paradox/apps/pfx/media/test/defaults/transition_video.mp4
 
 
-local media_dir = "/opt/paradox/apps/pfx/test/fixtures/test-media/"
+local media_dir = "/opt/paradox/apps/pfx/media/test/defaults/"
 local video_file = media_dir .. "transition_video.mp4"
 
 local paused_on_first = false

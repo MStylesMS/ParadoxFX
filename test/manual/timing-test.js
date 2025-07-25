@@ -5,7 +5,7 @@ const net = require('net');
 const path = require('path');
 const { spawn } = require('child_process');
 
-const SOUND_EFFECT = path.resolve(__dirname, '../fixtures/test-media/default_fx.wav');
+const SOUND_EFFECT = path.resolve(__dirname, '../../media/test/defaults/default_fx.wav');
 const TEST_SOCKET = '/tmp/mpv-timing-test.sock';
 
 // Clean up socket

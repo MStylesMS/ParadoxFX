@@ -2,7 +2,7 @@
 const MPV = require('node-mpv');
 const path = require('path');
 
-const mediaDir = '/opt/paradox/apps/pfx/test/fixtures/test-media/';
+const mediaDir = '/opt/paradox/apps/pfx/media/test/defaults/';
 const videoFile = path.join(mediaDir, 'transition_video.mp4');
 
 const mpv = new MPV({

@@ -21,7 +21,7 @@ const testConfig = {
     display: ':0',
     xineramaScreen: 0,
     audioDevice: 'hw:0,0', // Adjust for your system
-    mediaDir: '/opt/paradox/apps/pfx/test/fixtures/test-media',
+    mediaDir: '/opt/paradox/apps/pfx/media/test',
 
     // Topics
     baseTopic: 'test/phase1/screen',

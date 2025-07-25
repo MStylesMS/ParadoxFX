@@ -2,7 +2,7 @@
  * Media Player Integration Tests
  * 
  * Tests actual media playback functionality using real media files.
- * Requires test media files to be present in test/fixtures/test-media/
+ * Requires test media files to be present in media/test/defaults/
  */
 
 const path = require('path');
@@ -13,7 +13,7 @@ const ProcessManager = require('../../lib/media/process-manager');
 describe('MediaPlayerFactory Integration Tests', () => {
     let factory;
     let processManager;
-    const testMediaPath = path.join(__dirname, '../fixtures/test-media');
+    const testMediaPath = path.join(__dirname, '../../media/test/defaults');
 
     beforeAll(() => {
         // Check if test media files exist
@@ -344,8 +344,8 @@ describe('MediaPlayerFactory Integration Tests', () => {
 
             if (missingFiles.length > 0) {
                 console.warn(`Missing test media files: ${missingFiles.join(', ')}`);
-                console.warn('Run: cp /opt/paradox/media/{default.*,houdini_picture_24bit.png,intro_short.mp4} test/fixtures/test-media/');
-                console.warn('Or run the media generation scripts from test/fixtures/test-media/README.md');
+                console.warn('Media files should be present in media/test/defaults/');
+                console.warn('All required media files are included in the media/test directory structure');
             }
 
             // This test always passes but logs missing files
