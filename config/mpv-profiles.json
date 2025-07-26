@@ -1,5 +1,23 @@
 {
   "profiles": {
+    "basic": {
+      "name": "Basic MPV Profile",
+      "description": "Simple MPV configuration without hardware acceleration for reliable display",
+      "tested": true,
+      "baseArgs": [
+        "--no-terminal"
+      ],
+      "displayArgs": {
+        "wayland": [],
+        "x11": []
+      },
+      "performance": {
+        "profile": null,
+        "extraArgs": []
+      },
+      "notes": "Simple, reliable profile for testing display functionality"
+    },
+
     "pi5": {
       "name": "Raspberry Pi 5",
       "description": "Optimized settings for Pi5 with dual HDMI and hardware acceleration",

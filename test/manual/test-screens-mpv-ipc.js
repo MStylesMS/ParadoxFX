@@ -1,8 +1,9 @@
 /**
- * @fileoverview MPV Screen Test Script - Seamless Video/Image Transition Demo
- * @description This script demonstrates seamless media transitions using a single MPV instance
- * for screen display. It showcases how to display an image, wait, then transition to a video
- * without any flicker or interruption.
+ * @fileoverview MPV Screen Test Script - IPC Experimentation Version
+ * @description EXPERIMENTAL VERSION: Testing ParadoxFX IPC patterns
+ * 
+ * CURRENT EXPERIMENT: #1 - Connection Pattern (Persistent vs New)
+ * Testing persistent connection pattern like ParadoxFX uses instead of new connections per command
  * 
  * INTEGRATION NOTES:
  * =================
@@ -52,8 +53,13 @@ const VIDEO_PATH = path.resolve(__dirname, '../../media/test/defaults/default.mp
  * 
  * INTEGRATION NOTE: In ParadoxFX system, this will be managed by a central
  * socket manager alongside audio sockets
+ * 
+ * EXPERIMENT #4: Testing timestamped socket path like ParadoxFX
  */
-const SCREEN_MPV_SOCKET = '/tmp/mpv-screen-ipc.sock';
+const SCREEN_MPV_SOCKET = `/tmp/mpv-screen-test-${Date.now()}.sock`;
+
+// EXPERIMENT #2: Add request ID tracking like ParadoxFX
+let commandIdCounter = 1;
 
 // INTEGRATION FUNCTION: Socket cleanup utility (reusable)
 // Clean up old socket file before starting
@@ -99,73 +105,133 @@ const screenArgs = [
     '--idle=yes',
     '--input-ipc-server=' + SCREEN_MPV_SOCKET,
     '--no-terminal',
-    '--fs-screen=0',  // Target primary monitor (HDMI-1)
+    '--fs-screen=2',
     '--fullscreen',
     '--keep-open=yes',
     '--no-osd-bar',
     '--msg-level=all=info'
 ];
 
+// Global IPC connection tracking for persistent connection experiment
+let persistentConnection = null;
+let pendingCommands = new Map();
+let responseBuffer = '';
+
 /**
  * INTEGRATION FUNCTION: Send IPC command to MPV instance
  * 
- * This function can be shared with the audio system - same pattern
- * for all MPV IPC communication in the ParadoxFX system.
+ * EXPERIMENT #1: Using persistent connection pattern like ParadoxFX
+ * Instead of creating new connection per command, maintain single persistent connection
  * 
  * @param {Object} cmdObj - Command object with 'command' array property
  * @returns {Promise<Object>} Promise resolving to MPV response
  * @throws {Error} If command times out or connection fails
  */
 function sendMpvCommand(cmdObj) {
-    return new Promise((resolve, reject) => {
-        const client = net.createConnection(SCREEN_MPV_SOCKET, () => {
-            const cmdString = JSON.stringify(cmdObj) + '\n';
-            client.write(cmdString);
-        });
+    return new Promise(async (resolve, reject) => {
+        // Ensure persistent connection exists
+        if (!persistentConnection) {
+            await initializePersistentConnection();
+        }
 
-        let buffer = '';
+        // Add request ID
+        const requestId = commandIdCounter++;
+        const commandWithId = {
+            ...cmdObj,
+            request_id: requestId
+        };
+
+        console.log(`Sending command with request_id ${requestId}:`, commandWithId);
+
+        // Store pending command for response matching
         const timeout = setTimeout(() => {
-            client.destroy();
-            reject(new Error(`Command timed out after 5s: ${JSON.stringify(cmdObj)}`));
+            pendingCommands.delete(requestId);
+            reject(new Error(`Command timed out after 5s: ${JSON.stringify(commandWithId)}`));
         }, 5000);
 
-        client.on('data', (chunk) => {
-            buffer += chunk.toString();
+        pendingCommands.set(requestId, {
+            resolve: (data) => {
+                clearTimeout(timeout);
+                resolve({ data, request_id: requestId, error: 'success' });
+            },
+            reject: (error) => {
+                clearTimeout(timeout);
+                reject(error);
+            }
+        });
+
+        // Send command through persistent connection
+        try {
+            const cmdString = JSON.stringify(commandWithId) + '\n';
+            persistentConnection.write(cmdString);
+        } catch (error) {
+            pendingCommands.delete(requestId);
+            clearTimeout(timeout);
+            reject(error);
+        }
+    });
+}
+
+/**
+ * Initialize persistent IPC connection like ParadoxFX
+ */
+function initializePersistentConnection() {
+    return new Promise((resolve, reject) => {
+        console.log('Initializing persistent IPC connection...');
+        
+        persistentConnection = net.createConnection(SCREEN_MPV_SOCKET, () => {
+            console.log('✅ Persistent connection established');
+            resolve();
+        });
+
+        persistentConnection.on('error', (error) => {
+            console.error('❌ Persistent connection error:', error);
+            persistentConnection = null;
+            reject(error);
+        });
+
+        persistentConnection.on('data', (chunk) => {
+            responseBuffer += chunk.toString();
 
             // Process buffer line by line
             let newlineIndex;
-            while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
-                const line = buffer.substring(0, newlineIndex);
-                buffer = buffer.substring(newlineIndex + 1);
+            while ((newlineIndex = responseBuffer.indexOf('\n')) !== -1) {
+                const line = responseBuffer.substring(0, newlineIndex);
+                responseBuffer = responseBuffer.substring(newlineIndex + 1);
 
                 if (line.trim() === '') continue;
 
                 try {
                     const responseJson = JSON.parse(line);
-                    // The first non-event response is the command confirmation
-                    if (responseJson.error !== undefined) {
-                        clearTimeout(timeout);
-                        client.end();
-                        resolve(responseJson);
-                        return;
+                    console.log(`Received response:`, responseJson);
+                    
+                    // Handle command responses by request_id
+                    if (responseJson.request_id && pendingCommands.has(responseJson.request_id)) {
+                        const { resolve, reject } = pendingCommands.get(responseJson.request_id);
+                        pendingCommands.delete(responseJson.request_id);
+
+                        if (responseJson.error !== 'success') {
+                            reject(new Error(`MPV command failed: ${responseJson.error}`));
+                        } else {
+                            resolve(responseJson.data);
+                        }
                     }
+                    // Ignore events and non-matching responses
                 } catch (e) {
                     // Ignore parsing errors for events
                 }
             }
         });
 
-        client.on('end', () => {
-            clearTimeout(timeout);
-        });
-
-        client.on('close', (hadError) => {
-            clearTimeout(timeout);
-        });
-
-        client.on('error', (err) => {
-            clearTimeout(timeout);
-            reject(err);
+        persistentConnection.on('close', () => {
+            console.log('⚠️ Persistent connection closed');
+            persistentConnection = null;
+            responseBuffer = '';
+            // Reject all pending commands
+            for (const [requestId, { reject }] of pendingCommands) {
+                reject(new Error('Connection closed'));
+            }
+            pendingCommands.clear();
         });
     });
 }
@@ -190,13 +256,15 @@ function createSmartPropertyObserver() {
         console.log('Setting up video end detection...');
         const client = net.createConnection(SCREEN_MPV_SOCKET, () => {
             // Set up property observations for video end detection
+            // EXPERIMENT #2: Add request IDs to property observations too
             const setupCommands = [
-                { command: ['observe_property', 1, 'eof-reached'] },
-                { command: ['observe_property', 2, 'playback-time'] },
-                { command: ['observe_property', 3, 'duration'] }
+                { command: ['observe_property', 1, 'eof-reached'], request_id: commandIdCounter++ },
+                { command: ['observe_property', 2, 'playback-time'], request_id: commandIdCounter++ },
+                { command: ['observe_property', 3, 'duration'], request_id: commandIdCounter++ }
             ];
 
             setupCommands.forEach(cmd => {
+                console.log(`Setting up property observer with request_id ${cmd.request_id}`);
                 const cmdString = JSON.stringify(cmd) + '\n';
                 client.write(cmdString);
             });
@@ -379,7 +447,7 @@ async function pollForVideoEnd() {
     // Terminate any old MPV instances to ensure a clean start.
     try {
         console.log('Terminating old MPV instances...');
-        execSync('pkill -f "mpv --input-ipc-server=/tmp/mpv-screen-ipc.sock"');
+        execSync('pkill -f "mpv.*--input-ipc-server=/tmp/mpv-screen-test"');
         console.log('Old MPV instances terminated.');
     } catch (err) {
         // This is expected if no old processes are running.
@@ -461,6 +529,12 @@ async function pollForVideoEnd() {
     } catch (error) {
         console.error('An error occurred during the playback sequence:', error);
     } finally {
+        // Clean up persistent connection
+        if (persistentConnection) {
+            persistentConnection.end();
+            persistentConnection = null;
+        }
+        
         // Ensure the mpv process is killed on exit.
         screenMpv.kill();
         console.log('Test finished.');
