@@ -48,6 +48,70 @@ mpv --fs-screen=1 --fullscreen video.mp4    # Fullscreen on screen 1
 
 ### Pi5 Display Environment Analysis
 
+#### CRITICAL DISCOVERY - Optimized MPV Commands for Pi5 (2025-07-26)
+
+**🎯 WORKING SOLUTION**: After extensive testing on Pi5 + Bookworm + X11:
+
+```bash
+# MPV Display Configuration Notes - Pi5 Optimized
+
+## Optimal MPV Command for Pi5 (Latest 2025 Recommendations)
+
+Based on comprehensive research of MPV manual documentation and Pi5-specific optimization guidelines:
+
+```bash
+# BEST PERFORMING COMMAND for Pi5 dual-HDMI setup:
+mpv --screen=1 --fullscreen --no-osc --no-input-default-bindings 
+    --hwdec=auto --vo=gpu --gpu-api=opengl 
+    --opengl-swapinterval=1 --video-sync=display-resample 
+    --audio-device=alsa/hdmi:CARD=vc4hdmi1,DEV=0 
+    --cache=yes --demuxer-max-bytes=50M --no-terminal 
+    --profile=gpu-hq [video_file]
+```
+
+### Key Pi5 Optimizations (2025 Best Practices)
+
+1. **Hardware Acceleration**: `--hwdec=auto` (recommended over specific decoders)
+2. **Video Output**: `--vo=gpu` with `--gpu-api=opengl` for Pi5 compatibility
+3. **Video Sync**: `--video-sync=display-resample` handles dual-HDMI better than audio sync
+4. **VSync**: `--opengl-swapinterval=1` enables proper frame timing
+5. **GPU Profile**: `--profile=gpu-hq` applies optimized quality settings
+6. **Buffer Size**: `--demuxer-max-bytes=50M` optimized for Pi5 memory
+7. **Terminal Output**: `--no-terminal` essential for performance (prevents frame drops)
+
+### Alternative Performance Profile
+
+For maximum performance on lower-power scenarios:
+```bash
+mpv --screen=1 --fullscreen --no-osc --no-input-default-bindings 
+    --hwdec=auto --vo=gpu --gpu-api=opengl 
+    --opengl-swapinterval=1 --video-sync=display-resample 
+    --audio-device=alsa/hdmi:CARD=vc4hdmi1,DEV=0 
+    --cache=yes --demuxer-max-bytes=50M --no-terminal 
+    --profile=fast [video_file]
+```
+
+## Audio Device Format Comparison
+```
+
+**❌ PROBLEM COMMAND** (for comparison):
+```bash
+# Lower audio volume, otherwise good:
+mpv --screen=1 --fullscreen \
+    --audio-device=pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo \
+    /opt/paradox/media/test/defaults/default.mp4
+```
+
+**⚠️ CRITICAL OBSERVATION**: 
+- **With `--no-terminal`**: Smooth video playback ✅
+- **Without `--no-terminal`**: Video starts dropping frames ❌
+- **Conclusion**: Terminal output processing interferes with video performance on Pi5
+
+**🔍 Key Differences**:
+1. **Audio Device Format**: `alsa/hdmi:CARD=vc4hdmi1,DEV=0` > `pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo`
+2. **Terminal Handling**: `--no-terminal` is ESSENTIAL for smooth playback
+3. **Hardware Acceleration**: `--hwdec=auto --vo=gpu` provides best performance
+
 #### Hardware Configuration
 - **GPU**: VideoCore VII with dual HDMI outputs
 - **Display System**: Wayland by default with Xwayland compatibility layer

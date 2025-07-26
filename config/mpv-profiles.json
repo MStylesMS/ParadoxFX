@@ -1,0 +1,215 @@
+{
+  "profiles": {
+    "pi5": {
+      "name": "Raspberry Pi 5",
+      "description": "Optimized settings for Pi5 with dual HDMI and hardware acceleration",
+      "tested": true,
+      "baseArgs": [
+        "--hwdec=auto",
+        "--vo=gpu",
+        "--cache=yes",
+        "--demuxer-max-bytes=50M",
+        "--no-terminal",
+        "--no-osc",
+        "--no-input-default-bindings"
+      ],
+      "displayArgs": {
+        "wayland": ["--vo=gpu"],
+        "x11": ["--vo=gpu", "--gpu-context=drm"]
+      },
+      "performance": {
+        "profile": null,
+        "extraArgs": []
+      },
+      "notes": "Tested and working on Pi5 + Bookworm. Hardware acceleration available but may fallback to software."
+    },
+    
+    "pi4": {
+      "name": "Raspberry Pi 4",
+      "description": "Optimized settings for Pi4 with hardware acceleration",
+      "tested": false,
+      "baseArgs": [
+        "--hwdec=auto",
+        "--vo=gpu",
+        "--cache=yes",
+        "--demuxer-max-bytes=32M",
+        "--no-terminal",
+        "--no-osc",
+        "--no-input-default-bindings"
+      ],
+      "displayArgs": {
+        "wayland": ["--vo=gpu"],
+        "x11": ["--vo=gpu", "--gpu-context=drm"]
+      },
+      "performance": {
+        "profile": "fast",
+        "extraArgs": ["--video-sync=audio"]
+      },
+      "notes": "Pi4 has less GPU memory, reduced buffer size. May need profile=fast for performance."
+    },
+    
+    "pi3": {
+      "name": "Raspberry Pi 3",
+      "description": "Conservative settings for Pi3 with limited hardware acceleration",
+      "tested": false,
+      "baseArgs": [
+        "--hwdec=auto",
+        "--vo=gpu",
+        "--cache=yes",
+        "--demuxer-max-bytes=16M",
+        "--no-terminal",
+        "--no-osc",
+        "--no-input-default-bindings"
+      ],
+      "displayArgs": {
+        "wayland": ["--vo=gpu"],
+        "x11": ["--vo=gpu"]
+      },
+      "performance": {
+        "profile": "fast",
+        "extraArgs": [
+          "--video-sync=audio",
+          "--opengl-swapinterval=0"
+        ]
+      },
+      "notes": "Pi3 has limited GPU capabilities. Smaller buffers and aggressive performance settings."
+    },
+    
+    "pi-zero": {
+      "name": "Raspberry Pi Zero/Zero W",
+      "description": "Minimal settings for Pi Zero with software decoding",
+      "tested": false,
+      "baseArgs": [
+        "--hwdec=no",
+        "--vo=gpu",
+        "--cache=yes",
+        "--demuxer-max-bytes=8M",
+        "--no-terminal",
+        "--no-osc",
+        "--no-input-default-bindings"
+      ],
+      "displayArgs": {
+        "wayland": ["--vo=x11"],
+        "x11": ["--vo=x11"]
+      },
+      "performance": {
+        "profile": "fast",
+        "extraArgs": [
+          "--video-sync=audio",
+          "--framedrop=vo",
+          "--opengl-swapinterval=0",
+          "--vd-lavc-threads=1"
+        ]
+      },
+      "notes": "Pi Zero has very limited CPU/GPU. Software decoding only, aggressive frame dropping."
+    },
+    
+    "generic-linux": {
+      "name": "Generic Linux Desktop",
+      "description": "Standard settings for typical Linux desktop with modern GPU",
+      "tested": false,
+      "baseArgs": [
+        "--hwdec=auto",
+        "--vo=gpu",
+        "--cache=yes",
+        "--demuxer-max-bytes=100M",
+        "--no-terminal",
+        "--no-osc",
+        "--no-input-default-bindings"
+      ],
+      "displayArgs": {
+        "wayland": ["--vo=gpu", "--gpu-context=wayland"],
+        "x11": ["--vo=gpu", "--gpu-context=x11"]
+      },
+      "performance": {
+        "profile": "gpu-hq",
+        "extraArgs": [
+          "--video-sync=display-resample",
+          "--interpolation"
+        ]
+      },
+      "notes": "Assumes modern hardware with good GPU and plenty of memory. High quality settings."
+    },
+    
+    "generic-minimal": {
+      "name": "Generic Minimal",
+      "description": "Fallback settings for older or resource-constrained systems",
+      "tested": false,
+      "baseArgs": [
+        "--hwdec=no",
+        "--vo=x11",
+        "--cache=yes",
+        "--demuxer-max-bytes=16M",
+        "--no-terminal",
+        "--no-osc",
+        "--no-input-default-bindings"
+      ],
+      "displayArgs": {
+        "wayland": ["--vo=x11"],
+        "x11": ["--vo=x11"]
+      },
+      "performance": {
+        "profile": "fast",
+        "extraArgs": [
+          "--video-sync=audio",
+          "--framedrop=vo"
+        ]
+      },
+      "notes": "Software-only fallback for systems without GPU acceleration or when all else fails."
+    }
+  },
+  
+  "autoDetection": {
+    "rules": [
+      {
+        "description": "Raspberry Pi 5 detection",
+        "conditions": {
+          "cpuInfo": ["BCM2712"],
+          "deviceTree": ["/proc/device-tree/model"],
+          "deviceTreeContent": ["Raspberry Pi 5"]
+        },
+        "profile": "pi5"
+      },
+      {
+        "description": "Raspberry Pi 4 detection", 
+        "conditions": {
+          "cpuInfo": ["BCM2711"],
+          "deviceTree": ["/proc/device-tree/model"],
+          "deviceTreeContent": ["Raspberry Pi 4"]
+        },
+        "profile": "pi4"
+      },
+      {
+        "description": "Raspberry Pi 3 detection",
+        "conditions": {
+          "cpuInfo": ["BCM2837", "BCM2836"],
+          "deviceTree": ["/proc/device-tree/model"],
+          "deviceTreeContent": ["Raspberry Pi 3"]
+        },
+        "profile": "pi3"
+      },
+      {
+        "description": "Raspberry Pi Zero detection",
+        "conditions": {
+          "cpuInfo": ["BCM2835"],
+          "deviceTree": ["/proc/device-tree/model"],
+          "deviceTreeContent": ["Raspberry Pi Zero"]
+        },
+        "profile": "pi-zero"
+      }
+    ],
+    "fallback": "generic-minimal"
+  },
+  
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-07-26",
+    "description": "MPV configuration profiles for different hardware platforms",
+    "notes": [
+      "Pi5 profile is tested and confirmed working",
+      "Other profiles are educated guesses based on hardware capabilities",
+      "Test each profile on target hardware and adjust as needed",
+      "Hardware detection is automatic but can be overridden in pfx.ini"
+    ]
+  }
+}
