@@ -8,9 +8,17 @@ wait_input() {
     read -n 1 response
     echo
     case $response in
-        [Nn]) echo "✗ Failed" ;;
-        [Kk]) echo "~ Kinda works" ;;
-        *) echo "✓ Works" ;;
+        [Nn])
+            echo "✗ Failed"
+            ;;
+        [Kk])
+            echo -n "~ Kinda works. Please enter details: "
+            read details
+            echo "  Details: $details"
+            ;;
+        *)
+            echo "✓ Works"
+            ;;
     esac
 }
 
