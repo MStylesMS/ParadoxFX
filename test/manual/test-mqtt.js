@@ -179,122 +179,122 @@ class MqttTester {
             {
                 name: 'setImage (minimal)',
                 description: 'Display an image file',
-                command: { Command: 'setImage', Image: 'test-image.jpg' }
+                command: { command: 'setImage', image: 'test-image.jpg' }
             },
             {
                 name: 'setImage (with subdirectory)',
                 description: 'Display an image from subdirectory',
-                command: { Command: 'setImage', Image: 'backgrounds/lobby.jpg' }
+                command: { command: 'setImage', image: 'backgrounds/lobby.jpg' }
             },
 
             // Video Commands
             {
                 name: 'playVideo (minimal)',
                 description: 'Play a video file',
-                command: { Command: 'playVideo', Video: 'intro.mp4' }
+                command: { command: 'playVideo', video: 'intro.mp4' }
             },
             {
                 name: 'playVideo (full options)',
                 description: 'Play a video with volume adjustment and channel',
-                command: { Command: 'playVideo', Video: 'videos/intro.mp4', VolumeAdjust: -10, Channel: 'default' }
+                command: { command: 'playVideo', video: 'videos/intro.mp4', volumeAdjust: -10, channel: 'default' }
             },
             {
                 name: 'stopVideo',
                 description: 'Stop current video playback',
-                command: { Command: 'stopVideo' }
+                command: { command: 'stopVideo' }
             },
             {
                 name: 'pause',
                 description: 'Pause current video',
-                command: { Command: 'pause' }
+                command: { command: 'pause' }
             },
             {
                 name: 'resume',
                 description: 'Resume paused video',
-                command: { Command: 'resume' }
+                command: { command: 'resume' }
             },
             {
                 name: 'skip',
                 description: 'Skip to next video in queue',
-                command: { Command: 'skip' }
+                command: { command: 'skip' }
             },
 
             // Audio Commands
             {
                 name: 'playAudio (minimal)',
                 description: 'Play an audio file',
-                command: { Command: 'playAudio', Audio: 'background.mp3' }
+                command: { command: 'playAudio', audio: 'background.mp3' }
             },
             {
                 name: 'playAudio (full options)',
                 description: 'Play audio with volume adjustment and channel',
-                command: { Command: 'playAudio', Audio: 'music/background.mp3', VolumeAdjust: 20, Channel: 'default' }
+                command: { command: 'playAudio', audio: 'music/background.mp3', volumeAdjust: 20, channel: 'default' }
             },
             {
                 name: 'playAudioFx (minimal)',
                 description: 'Play an audio effect',
-                command: { Command: 'playAudioFx', Audio: 'doorbell.wav' }
+                command: { command: 'playAudioFx', audio: 'doorbell.wav' }
             },
             {
                 name: 'playAudioFx (full options)',
                 description: 'Play audio effect with all options',
-                command: { Command: 'playAudioFx', Audio: 'effects/explosion.wav', Type: 'one-shot', VolumeAdjust: 10 }
+                command: { command: 'playAudioFx', audio: 'effects/explosion.wav', type: 'one-shot', volumeAdjust: 10 }
             },
             {
                 name: 'playAudioFx (loop)',
                 description: 'Play looping audio effect',
-                command: { Command: 'playAudioFx', Audio: 'effects/ambient.wav', Type: 'loop', VolumeAdjust: -30 }
+                command: { command: 'playAudioFx', audio: 'effects/ambient.wav', type: 'loop', volumeAdjust: -30 }
             },
             {
                 name: 'stopAudio',
                 description: 'Stop current audio playback',
-                command: { Command: 'stopAudio' }
+                command: { command: 'stopAudio' }
             },
             {
                 name: 'stopAllAudioFx',
                 description: 'Stop all audio effects',
-                command: { Command: 'stopAllAudioFx' }
+                command: { command: 'stopAllAudioFx' }
             },
 
             // Advanced Commands
             {
                 name: 'transition (minimal)',
                 description: 'Play video then show image',
-                command: { Command: 'transition', Video: 'intro.mp4', Image: 'final.jpg' }
+                command: { command: 'transition', video: 'intro.mp4', image: 'final.jpg' }
             },
             {
                 name: 'transition (with channel)',
                 description: 'Play video then show image with channel routing',
-                command: { Command: 'transition', Video: 'transitions/intro.mp4', Image: 'backgrounds/final.jpg', Channel: 'default' }
+                command: { command: 'transition', video: 'transitions/intro.mp4', image: 'backgrounds/final.jpg', channel: 'default' }
             },
             {
                 name: 'stopAll',
                 description: 'Stop all media playback',
-                command: { Command: 'stopAll' }
+                command: { command: 'stopAll' }
             },
 
             // Queue Management
             {
                 name: 'videoQueue',
                 description: 'Get video queue status',
-                command: { Command: 'videoQueue' }
+                command: { command: 'videoQueue' }
             },
             {
                 name: 'audioQueue',
                 description: 'Get audio queue status',
-                command: { Command: 'audioQueue' }
+                command: { command: 'audioQueue' }
             },
             {
                 name: 'clearQueue',
                 description: 'Clear media queue',
-                command: { Command: 'clearQueue' }
+                command: { command: 'clearQueue' }
             },
 
             // Configuration
             {
                 name: 'getConfig',
                 description: 'Get device configuration',
-                command: { Command: 'getConfig' }
+                command: { command: 'getConfig' }
             }
         ];
 
@@ -306,27 +306,27 @@ class MqttTester {
             {
                 name: 'on (minimal)',
                 description: 'Turn light on',
-                command: { Command: 'on' }
+                command: { command: 'on' }
             },
             {
                 name: 'on (with brightness)',
                 description: 'Turn light on with specific brightness',
-                command: { Command: 'on', Brightness: 80 }
+                command: { command: 'on', brightness: 80 }
             },
             {
                 name: 'off',
                 description: 'Turn light off',
-                command: { Command: 'off' }
+                command: { command: 'off' }
             },
             {
                 name: 'setColor (hex)',
                 description: 'Set light color using hex code',
-                command: { Command: 'setColor', Color: '#FF6400', Brightness: 75 }
+                command: { command: 'setColor', color: '#FF6400', brightness: 75 }
             },
             {
                 name: 'setColor (RGB)',
                 description: 'Set light color using RGB values',
-                command: { Command: 'setColor', Color: { r: 255, g: 100, b: 0 }, Brightness: 90 }
+                command: { command: 'setColor', color: { r: 255, g: 100, b: 0 }, brightness: 90 }
             }
         ];
 
@@ -338,22 +338,22 @@ class MqttTester {
             {
                 name: 'on (group)',
                 description: 'Turn all lights in group on',
-                command: { Command: 'on', Brightness: 100 }
+                command: { command: 'on', brightness: 100 }
             },
             {
                 name: 'off (group)',
                 description: 'Turn all lights in group off',
-                command: { Command: 'off' }
+                command: { command: 'off' }
             },
             {
                 name: 'setGroupColor',
                 description: 'Set color for all lights in group',
-                command: { Command: 'setGroupColor', Color: { r: 255, g: 100, b: 0 }, Brightness: 80, Lights: ['light1', 'light2'] }
+                command: { command: 'setGroupColor', color: { r: 255, g: 100, b: 0 }, brightness: 80, lights: ['light1', 'light2'] }
             },
             {
                 name: 'fade',
                 description: 'Fade lights to target brightness',
-                command: { Command: 'fade', Brightness: 50, Duration: 10000 }
+                command: { command: 'fade', brightness: 50, duration: 10000 }
             }
         ];
 
@@ -365,27 +365,27 @@ class MqttTester {
             {
                 name: 'on',
                 description: 'Turn relay on',
-                command: { Command: 'on' }
+                command: { command: 'on' }
             },
             {
                 name: 'off',
                 description: 'Turn relay off',
-                command: { Command: 'off' }
+                command: { command: 'off' }
             },
             {
                 name: 'toggle',
                 description: 'Toggle relay state',
-                command: { Command: 'toggle' }
+                command: { command: 'toggle' }
             },
             {
                 name: 'pulse (minimal)',
                 description: 'Pulse relay with default duration',
-                command: { Command: 'pulse' }
+                command: { command: 'pulse' }
             },
             {
                 name: 'pulse (with duration)',
                 description: 'Pulse relay with custom duration',
-                command: { Command: 'pulse', Duration: 5000 }
+                command: { command: 'pulse', duration: 5000 }
             }
         ];
 
@@ -394,7 +394,7 @@ class MqttTester {
 
     async executeCommands(commands, commandTopic, deviceName) {
         for (const cmd of commands) {
-            console.log(`\n📝 Command: ${cmd.name}`);
+            console.log(`\n📝 command: ${cmd.name}`);
             console.log(`   Description: ${cmd.description}`);
             console.log(`   Topic: ${commandTopic}`);
             console.log(`   JSON: ${JSON.stringify(cmd.command, null, 2)}`);

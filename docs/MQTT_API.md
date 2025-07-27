@@ -57,13 +57,13 @@ paradox/devices                       # Global heartbeat topic
 
 ### Command Message Format
 
-All commands must be valid JSON with a required `Command` field:
+All commands must be valid JSON with a required `command` field:
 
 ```json
 {
-  "Command": "commandName",
-  "Parameter1": "value1",
-  "Parameter2": "value2"
+  "command": "commandName",
+  "parameter1": "value1",
+  "parameter2": "value2"
 }
 ```
 
@@ -235,8 +235,8 @@ Display an image on the screen.
 
 ```json
 {
-  "Command": "setImage",
-  "Image": "image.jpg"
+  "command": "setImage",
+  "image": "image.jpg"
 }
 ```
 
@@ -249,15 +249,15 @@ Display an image on the screen.
 
 ```json
 {
-  "Command": "setImage",
-  "Image": "lobby.jpg"
+  "command": "setImage",
+  "image": "lobby.jpg"
 }
 ```
 
 ```json
 {
-  "Command": "setImage",
-  "Image": "backgrounds/lobby.jpg"
+  "command": "setImage",
+  "image": "backgrounds/lobby.jpg"
 }
 ```
 
@@ -273,9 +273,9 @@ Play a video file with optional volume control.
 
 ```json
 {
-  "Command": "playVideo",
-  "Video": "intro.mp4",
-  "VolumeAdjust": -10
+  "command": "playVideo",
+  "video": "intro.mp4",
+  "volumeAdjust": -10
 }
 ```
 
@@ -291,16 +291,16 @@ Play a video file with optional volume control.
 
 ```json
 {
-  "Command": "playVideo",
-  "Video": "intro.mp4"
+  "command": "playVideo",
+  "video": "intro.mp4"
 }
 ```
 
 ```json
 {
-  "Command": "playVideo",
-  "Video": "room1/intro.mp4",
-  "VolumeAdjust": 20
+  "command": "playVideo",
+  "video": "room1/intro.mp4",
+  "volumeAdjust": 20
 }
 ```
 
@@ -314,7 +314,7 @@ Stop current video playback.
 
 ```json
 {
-  "Command": "stopVideo"
+  "command": "stopVideo"
 }
 ```
 
@@ -326,7 +326,7 @@ Pause current video playback.
 
 ```json
 {
-  "Command": "pause"
+  "command": "pause"
 }
 ```
 
@@ -338,7 +338,7 @@ Resume paused video playback.
 
 ```json
 {
-  "Command": "resume"
+  "command": "resume"
 }
 ```
 
@@ -350,7 +350,7 @@ Skip to next video in queue.
 
 ```json
 {
-  "Command": "skip"
+  "command": "skip"
 }
 ```
 
@@ -366,7 +366,7 @@ Put all connected displays into low-power sleep mode using DPMS (Display Power M
 
 ```json
 {
-  "Command": "sleepScreen"
+  "command": "sleepScreen"
 }
 ```
 
@@ -380,7 +380,7 @@ Put all connected displays into low-power sleep mode using DPMS (Display Power M
 
 ```json
 {
-  "Command": "sleepScreen"
+  "command": "sleepScreen"
 }
 ```
 
@@ -392,7 +392,7 @@ Wake all connected displays from sleep mode and restore default display state.
 
 ```json
 {
-  "Command": "wakeScreen"
+  "command": "wakeScreen"
 }
 ```
 
@@ -406,7 +406,7 @@ Wake all connected displays from sleep mode and restore default display state.
 
 ```json
 {
-  "Command": "wakeScreen"
+  "command": "wakeScreen"
 }
 ```
 
@@ -420,7 +420,7 @@ Skip to next video in queue.
 
 ```json
 {
-  "Command": "skip"
+  "command": "skip"
 }
 ```
 
@@ -434,9 +434,9 @@ Play an audio file with optional volume control.
 
 ```json
 {
-  "Command": "playAudio",
-  "Audio": "background.mp3",
-  "VolumeAdjust": -20
+  "command": "playAudio",
+  "audio": "background.mp3",
+  "volumeAdjust": -20
 }
 ```
 
@@ -452,16 +452,16 @@ Play an audio file with optional volume control.
 
 ```json
 {
-  "Command": "playAudio",
-  "Audio": "ambient.mp3"
+  "command": "playAudio",
+  "audio": "ambient.mp3"
 }
 ```
 
 ```json
 {
-  "Command": "playAudio",
-  "Audio": "music/background.mp3",
-  "VolumeAdjust": 15
+  "command": "playAudio",
+  "audio": "music/background.mp3",
+  "volumeAdjust": 15
 }
 ```
 
@@ -475,10 +475,10 @@ Play audio effects (supports polyphonic playback).
 
 ```json
 {
-  "Command": "playAudioFx",
-  "Audio": "effects/explosion.wav",
-  "Type": "one-shot",
-  "VolumeAdjust": 10
+  "command": "playAudioFx",
+  "audio": "effects/explosion.wav",
+  "type": "one-shot",
+  "volumeAdjust": 10
 }
 ```
 
@@ -492,17 +492,17 @@ Play audio effects (supports polyphonic playback).
 
 ```json
 {
-  "Command": "playAudioFx",
-  "Audio": "doorbell.wav"
+  "command": "playAudioFx",
+  "audio": "doorbell.wav"
 }
 ```
 
 ```json
 {
-  "Command": "playAudioFx",
-  "Audio": "fx/ambient_loop.wav",
-  "Type": "loop",
-  "VolumeAdjust": -30
+  "command": "playAudioFx",
+  "audio": "fx/ambient_loop.wav",
+  "type": "loop",
+  "volumeAdjust": -30
 }
 ```
 
@@ -527,10 +527,10 @@ Start background music with automatic volume ducking during speech.
 
 ```json
 {
-  "Command": "playMusic",
-  "File": "ambient.mp3",
-  "Volume": 60,
-  "Loop": true
+  "command": "playMusic",
+  "file": "ambient.mp3",
+  "volume": 60,
+  "loop": true
 }
 ```
 
@@ -549,7 +549,7 @@ Stop background music with optional fade-out.
 
 ```json
 {
-  "Command": "stopMusic",
+  "command": "stopMusic",
   "FadeOut": 3
 }
 ```
@@ -568,9 +568,9 @@ Play speech audio with automatic background music ducking.
 
 ```json
 {
-  "Command": "playSpeech",
-  "File": "hint1.wav",
-  "Volume": 85,
+  "command": "playSpeech",
+  "file": "hint1.wav",
+  "volume": 85,
   "Priority": "high"
 }
 ```
@@ -590,7 +590,7 @@ Clear all queued speech audio.
 
 ```json
 {
-  "Command": "clearSpeechQueue"
+  "command": "clearSpeechQueue"
 }
 ```
 
@@ -604,9 +604,9 @@ Play fire-and-forget sound effect with low latency.
 
 ```json
 {
-  "Command": "playEffect",
-  "File": "click.wav",
-  "Volume": 75,
+  "command": "playEffect",
+  "file": "click.wav",
+  "volume": 75,
   "Preload": true
 }
 ```
@@ -626,7 +626,7 @@ Stop all currently playing sound effects.
 
 ```json
 {
-  "Command": "stopAllEffects"
+  "command": "stopAllEffects"
 }
 ```
 
@@ -640,8 +640,8 @@ Set master volume for the entire audio zone.
 
 ```json
 {
-  "Command": "setZoneVolume",
-  "Volume": 70
+  "command": "setZoneVolume",
+  "volume": 70
 }
 ```
 
@@ -657,7 +657,7 @@ Request current status of the audio zone.
 
 ```json
 {
-  "Command": "getZoneStatus"
+  "command": "getZoneStatus"
 }
 ```
 
@@ -678,7 +678,7 @@ Stop current audio playback.
 
 ```json
 {
-  "Command": "stopAudio"
+  "command": "stopAudio"
 }
 ```
 
@@ -690,7 +690,7 @@ Stop all audio effects playback.
 
 ```json
 {
-  "Command": "stopAllAudioFx"
+  "command": "stopAllAudioFx"
 }
 ```
 
@@ -702,9 +702,9 @@ Play background music with seamless looping and volume control.
 
 ```json
 {
-  "Command": "playBackgroundMusic",
-  "Audio": "ambient/forest.mp3",
-  "Volume": 70
+  "command": "playBackgroundMusic",
+  "audio": "ambient/forest.mp3",
+  "volume": 70
 }
 ```
 
@@ -722,16 +722,16 @@ Play background music with seamless looping and volume control.
 
 ```json
 {
-  "Command": "playBackgroundMusic",
-  "Audio": "ambient.mp3"
+  "command": "playBackgroundMusic",
+  "audio": "ambient.mp3"
 }
 ```
 
 ```json
 {
-  "Command": "playBackgroundMusic",
-  "Audio": "music/mystical.mp3",
-  "Volume": 60
+  "command": "playBackgroundMusic",
+  "audio": "music/mystical.mp3",
+  "volume": 60
 }
 ```
 
@@ -743,7 +743,7 @@ Stop background music playback.
 
 ```json
 {
-  "Command": "stopBackgroundMusic"
+  "command": "stopBackgroundMusic"
 }
 ```
 
@@ -755,8 +755,8 @@ Set background music volume in real-time.
 
 ```json
 {
-  "Command": "setBackgroundMusicVolume",
-  "Volume": 40
+  "command": "setBackgroundMusicVolume",
+  "volume": 40
 }
 ```
 
@@ -774,9 +774,9 @@ Play speech audio with automatic background music ducking.
 
 ```json
 {
-  "Command": "playSpeech",
-  "Audio": "voice/instructions.mp3",
-  "Volume": 90
+  "command": "playSpeech",
+  "audio": "voice/instructions.mp3",
+  "volume": 90
 }
 ```
 
@@ -794,16 +794,16 @@ Play speech audio with automatic background music ducking.
 
 ```json
 {
-  "Command": "playSpeech",
-  "Audio": "hints/clue1.mp3"
+  "command": "playSpeech",
+  "audio": "hints/clue1.mp3"
 }
 ```
 
 ```json
 {
-  "Command": "playSpeech",
-  "Audio": "narration/intro.mp3",
-  "Volume": 95
+  "command": "playSpeech",
+  "audio": "narration/intro.mp3",
+  "volume": 95
 }
 ```
 
@@ -815,7 +815,7 @@ Clear all queued speech audio and stop current speech.
 
 ```json
 {
-  "Command": "clearSpeechQueue"
+  "command": "clearSpeechQueue"
 }
 ```
 
@@ -827,9 +827,9 @@ Play sound effects with ultra-low latency and parallel playback.
 
 ```json
 {
-  "Command": "playSoundEffect",
-  "Audio": "effects/button_click.wav",
-  "Volume": 100
+  "command": "playSoundEffect",
+  "audio": "effects/button_click.wav",
+  "volume": 100
 }
 ```
 
@@ -848,16 +848,16 @@ Play sound effects with ultra-low latency and parallel playback.
 
 ```json
 {
-  "Command": "playSoundEffect",
-  "Audio": "fx/click.wav"
+  "command": "playSoundEffect",
+  "audio": "fx/click.wav"
 }
 ```
 
 ```json
 {
-  "Command": "playSoundEffect",
-  "Audio": "feedback/success.wav",
-  "Volume": 80
+  "command": "playSoundEffect",
+  "audio": "feedback/success.wav",
+  "volume": 80
 }
 ```
 
@@ -871,10 +871,10 @@ Play a video followed by an image.
 
 ```json
 {
-  "Command": "transition",
-  "Video": "transitions/intro.mp4",
-  "Image": "backgrounds/final.jpg",
-  "Channel": "default"
+  "command": "transition",
+  "video": "transitions/intro.mp4",
+  "image": "backgrounds/final.jpg",
+  "channel": "default"
 }
 ```
 
@@ -888,9 +888,9 @@ Play a video followed by an image.
 
 ```json
 {
-  "Command": "transition",
-  "Video": "intro.mp4",
-  "Image": "lobby.jpg"
+  "command": "transition",
+  "video": "intro.mp4",
+  "image": "lobby.jpg"
 }
 ```
 
@@ -902,7 +902,7 @@ Stop all media playback (video, audio, effects).
 
 ```json
 {
-  "Command": "stopAll"
+  "command": "stopAll"
 }
 ```
 
@@ -916,7 +916,7 @@ Get current video queue status.
 
 ```json
 {
-  "Command": "videoQueue"
+  "command": "videoQueue"
 }
 ```
 
@@ -928,7 +928,7 @@ Get current audio queue status.
 
 ```json
 {
-  "Command": "audioQueue"
+  "command": "audioQueue"
 }
 ```
 
@@ -940,7 +940,7 @@ Clear video or audio queue (context-dependent).
 
 ```json
 {
-  "Command": "clearQueue"
+  "command": "clearQueue"
 }
 ```
 
@@ -954,7 +954,7 @@ Get current device configuration.
 
 ```json
 {
-  "Command": "getConfig"
+  "command": "getConfig"
 }
 ```
 
@@ -972,9 +972,9 @@ Set light color and brightness.
 
 ```json
 {
-  "Command": "setColor",
-  "Color": "#FF6400",
-  "Brightness": 75
+  "command": "setColor",
+  "color": "#FF6400",
+  "brightness": 75
 }
 ```
 
@@ -991,8 +991,8 @@ Turn light on.
 
 ```json
 {
-  "Command": "on",
-  "Brightness": 100
+  "command": "on",
+  "brightness": 100
 }
 ```
 
@@ -1004,7 +1004,7 @@ Turn light off.
 
 ```json
 {
-  "Command": "off"
+  "command": "off"
 }
 ```
 
@@ -1018,10 +1018,10 @@ Set color for all lights in group.
 
 ```json
 {
-  "Command": "setGroupColor",
-  "Color": {"r": 255, "g": 100, "b": 0},
-  "Brightness": 80,
-  "Lights": ["light1", "light2"]
+  "command": "setGroupColor",
+  "color": {"r": 255, "g": 100, "b": 0},
+  "brightness": 80,
+  "lights": ["light1", "light2"]
 }
 ```
 
@@ -1033,9 +1033,9 @@ Fade lights to target brightness over time.
 
 ```json
 {
-  "Command": "fade",
-  "Brightness": 50,
-  "Duration": 30000
+  "command": "fade",
+  "brightness": 50,
+  "duration": 30000
 }
 ```
 
@@ -1056,7 +1056,7 @@ Turn relay on.
 
 ```json
 {
-  "Command": "on"
+  "command": "on"
 }
 ```
 
@@ -1068,7 +1068,7 @@ Turn relay off.
 
 ```json
 {
-  "Command": "off"
+  "command": "off"
 }
 ```
 
@@ -1080,7 +1080,7 @@ Toggle relay state.
 
 ```json
 {
-  "Command": "toggle"
+  "command": "toggle"
 }
 ```
 
@@ -1092,8 +1092,8 @@ Pulse relay (on, then off after delay).
 
 ```json
 {
-  "Command": "pulse",
-  "Duration": 5000
+  "command": "pulse",
+  "duration": 5000
 }
 ```
 
@@ -1201,28 +1201,28 @@ Non-fatal issues are reported as warnings:
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"Command": "setImage", "Image": "background.jpg"}'
+  -m '{"command": "setImage", "image": "background.jpg"}'
 ```
 
 2. **Play intro video:**
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"Command": "playVideo", "Video": "intro.mp4", "VolumeAdjust": -20}'
+  -m '{"command": "playVideo", "video": "intro.mp4", "volumeAdjust": -20}'
 ```
 
 3. **Play background music:**
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"Command": "playAudio", "Audio": "ambient.mp3", "VolumeAdjust": -40}'
+  -m '{"command": "playAudio", "audio": "ambient.mp3", "volumeAdjust": -40}'
 ```
 
 4. **Stop all playback:**
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"Command": "stopAll"}'
+  -m '{"command": "stopAll"}'
 ```
 
 ### Light Control Sequence
@@ -1231,21 +1231,21 @@ mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
-  -m '{"Command": "on", "Brightness": 100}'
+  -m '{"command": "on", "brightness": 100}'
 ```
 
 2. **Set warm color:**
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
-  -m '{"Command": "setColor", "Color": "#FF8C00", "Brightness": 75}'
+  -m '{"command": "setColor", "color": "#FF8C00", "brightness": 75}'
 ```
 
 3. **Fade to dim:**
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
-  -m '{"Command": "fade", "Brightness": 25, "Duration": 10000}'
+  -m '{"command": "fade", "brightness": 25, "duration": 10000}'
 ```
 
 ### Monitoring Status Updates

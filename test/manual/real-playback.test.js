@@ -48,7 +48,7 @@ describe('Real Media Playback Tests', () => {
         if (!REAL_PLAYBACK_ENABLED) return;
 
         console.log(`\n▶️  Playing: ${description}`);
-        console.log(`   Command: ${command} ${args.join(' ')}`);
+        console.log(`   command: ${command} ${args.join(' ')}`);
 
         return new Promise((resolve, reject) => {
             const childProcess = spawn(command, args, {
@@ -255,7 +255,7 @@ describe('Real Media Playback Tests', () => {
 
             try {                // Step 1: Start first image and leave it running
                 console.log('\n▶️  Step 1: Starting background image (persistent)');
-                console.log('   Command: imv-wayland -f (Wayland-native image viewer)');
+                console.log('   command: imv-wayland -f (Wayland-native image viewer)');
 
                 image1Process = spawn('imv-wayland', [
                     '-f',  // fullscreen
@@ -273,7 +273,7 @@ describe('Real Media Playback Tests', () => {
 
                 // Step 2: Start video (should appear on top of image)
                 console.log('\n▶️  Step 2: Starting video overlay (should appear on top)');
-                console.log('   Command: mpv --fullscreen --cursor-autohide=always --no-terminal --volume=60 --osd-level=0');
+                console.log('   command: mpv --fullscreen --cursor-autohide=always --no-terminal --volume=60 --osd-level=0');
 
                 videoProcess = spawn('mpv', [
                     '--fullscreen',
@@ -321,7 +321,7 @@ describe('Real Media Playback Tests', () => {
                 }
 
                 // Start second image process
-                console.log('   Command: imv-wayland -f (Wayland-native image viewer)');
+                console.log('   command: imv-wayland -f (Wayland-native image viewer)');
                 image2Process = spawn('imv-wayland', [
                     '-f',  // fullscreen
                     image2Path

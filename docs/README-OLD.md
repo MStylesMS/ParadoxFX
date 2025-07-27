@@ -159,22 +159,22 @@ Commands
 
 `image-switcher` awaits the following commands on the MQTT command topic:
 
-* `{"Command":"setImage","Image":"Picture1.png"}` - displays image: `Picture1.png`.
-* `{"Command":"transition","Image":"EndFrame.png","Video":"Transition.mp4"}` - plays immediately or when another video is currently playing queues video file: `Transition.mp4` and when the requested video starts playing sets the displayed image to the `EndFrame.png` file, so the image becomes visible when the video ends.
-* `{"Command":"playVideo","Video":"FileName.mp4"}` - plays immediately or when another video is currently playing queues video file: `FileName.mp4`.
-* `{"Command":"playAudio","Audio":"FileName.mp3"}` - plays immediately or when another audio file is currently playing queues audio file: `FileName.mp3`.
-* `{"Command":"playAudioFx","Audio":"SoundFx1.wav"}` - immediately plays audio file: `SoundFx1.wav`.
-* `{"Command":"stopVideo"}` - immediately stops the video playback and removes all queued video.
-* `{"Command":"stopAudio"}` - immediately stops the audio playback and removes all queued audio clips.
-* `{"Command":"stopAllAudioFx"}` - immediately stops all the audio-fx playbacks.
-* `{"Command":"stopAll"}` - immediately stops all video, audio and audio-fx playbacks, removes all queued media.
-* `{"Command":"getConfig"}` - sends current configuration to the reply topic.
-* `{"Command":"videoQueue"}` - sends the names of the currently playing and queued video files to the reply topic.
-* `{"Command":"audioQueue"}` - sends the names of the currently playing and queued audio files to the reply topic.
-* `{"Command":"displayOff"}` - turns off the display if `PX_DISPLAY_OFF_CMD` is set.
-* `{"Command":"displayOn"}` - turns on the display if `PX_DISPLAY_ON_CMD` is set.
-* `{"Command":"reboot"}` - reboots the host if `PX_REBOOT_CMD` is set.
-* `{"Command":"shutdown"}` - shutdowns the host if `PX_SHUTDOWN_CMD` is set.
+* `{"command":"setImage","image":"Picture1.png"}` - displays image: `Picture1.png`.
+* `{"command":"transition","image":"EndFrame.png","video":"Transition.mp4"}` - plays immediately or when another video is currently playing queues video file: `Transition.mp4` and when the requested video starts playing sets the displayed image to the `EndFrame.png` file, so the image becomes visible when the video ends.
+* `{"command":"playVideo","video":"FileName.mp4"}` - plays immediately or when another video is currently playing queues video file: `FileName.mp4`.
+* `{"command":"playAudio","audio":"FileName.mp3"}` - plays immediately or when another audio file is currently playing queues audio file: `FileName.mp3`.
+* `{"command":"playAudioFx","audio":"SoundFx1.wav"}` - immediately plays audio file: `SoundFx1.wav`.
+* `{"command":"stopVideo"}` - immediately stops the video playback and removes all queued video.
+* `{"command":"stopAudio"}` - immediately stops the audio playback and removes all queued audio clips.
+* `{"command":"stopAllAudioFx"}` - immediately stops all the audio-fx playbacks.
+* `{"command":"stopAll"}` - immediately stops all video, audio and audio-fx playbacks, removes all queued media.
+* `{"command":"getConfig"}` - sends current configuration to the reply topic.
+* `{"command":"videoQueue"}` - sends the names of the currently playing and queued video files to the reply topic.
+* `{"command":"audioQueue"}` - sends the names of the currently playing and queued audio files to the reply topic.
+* `{"command":"displayOff"}` - turns off the display if `PX_DISPLAY_OFF_CMD` is set.
+* `{"command":"displayOn"}` - turns on the display if `PX_DISPLAY_ON_CMD` is set.
+* `{"command":"reboot"}` - reboots the host if `PX_REBOOT_CMD` is set.
+* `{"command":"shutdown"}` - shutdowns the host if `PX_SHUTDOWN_CMD` is set.
 
 The media queues are handled in FIFO order. When the queue is full, the first file queued is being dropped. E.g. if the queue capacity was 5 then only the last 5 files queued would be played back.
 
@@ -325,17 +325,17 @@ WMH-WaterTorture-4-Transition-Out.mp4
 # MQTT examples
 
 ```
-mosquitto_pub -h 192.168.8.101 -t /Paradox/WMH/Stereoscope/Commands -m '{"Command":"playVideo","Video":"Stereoscope_9-20.mp4"}'
+mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/stereoscope/command -m '{"command":"playVideo","video":"Stereoscope_9-20.mp4"}'
 
-mosquitto_pub -h 192.168.8.101 -t /Paradox/WMH/LargeRoom/Pictures/MilkCan/Commands -m '{"Command": "setImage", "Image": "WMH-MilkCan-1-Plain-Image.png"}'
+mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/pictures/milk-can/command -m '{"command": "setImage", "image": "WMH-MilkCan-1-Plain-Image.png"}'
 
-mosquitto_pub -h 192.168.8.101 -t /Paradox/WMH/LargeRoom/Pictures/MilkCan/Commands -m '{"Command": "transition", "Image": "WMH-MilkCan-3-Hint-Image.png", "Video": "WMH-MilkCan-2-Transition-In.mp4"}'
+mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/pictures/milk-can/command -m '{"command": "transition", "image": "WMH-MilkCan-3-Hint-Image.png", "video": "WMH-MilkCan-2-Transition-In.mp4"}'
 
-mosquitto_pub -h 192.168.8.101 -t /Paradox/WMH/LargeRoom/Pictures/MilkCan/Commands -m '{"Command": "transition", "Image": "WMH-MilkCan-1-Plain-Image.png", "Video": "WMH-MilkCan-4-Transition-Out.mp4"}'
+mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/pictures/milk-can/command -m '{"command": "transition", "image": "WMH-MilkCan-1-Plain-Image.png", "video": "WMH-MilkCan-4-Transition-Out.mp4"}'
 
-mosquitto_pub -h 192.168.8.101 -t /Paradox/WMH/LargeRoom/Audio/Commands -m '{"Command":"playAudio","Audio":"generator.wav"}'
+mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/audio/command -m '{"command":"playAudio","audio":"generator.wav"}'
 
-mosquitto_pub -h 192.168.8.101 -t /Paradox/WMH/LargeRoom/Audio/Commands -m '{"Command":"playAudioFx","Audio":"cheers.wav"}'
+mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/audio/command -m '{"command":"playAudioFx","audio":"cheers.wav"}'
 ```
 
 # Proposed Install Script

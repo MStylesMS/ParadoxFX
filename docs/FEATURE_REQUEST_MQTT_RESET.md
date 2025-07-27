@@ -17,7 +17,7 @@ During development and production use, the ParadoxFX system can encounter situat
 ### Option A: PFX Restart Command
 ```bash
 # MQTT command
-mosquitto_pub -t "paradox/system/command" -m '{"Command":"restart","reason":"cleanup"}'
+mosquitto_pub -t "paradox/system/command" -m '{"command":"restart","reason":"cleanup"}'
 ```
 
 **Behavior:**
@@ -29,9 +29,9 @@ mosquitto_pub -t "paradox/system/command" -m '{"Command":"restart","reason":"cle
 ### Option B: Selective Reset Command
 ```bash
 # MQTT commands for targeted cleanup
-mosquitto_pub -t "paradox/system/command" -m '{"Command":"reset_audio","zones":["zone1","zone3"]}'
-mosquitto_pub -t "paradox/system/command" -m '{"Command":"reset_sockets"}'
-mosquitto_pub -t "paradox/system/command" -m '{"Command":"cleanup_orphans"}'
+mosquitto_pub -t "paradox/system/command" -m '{"command":"reset_audio","zones":["zone1","zone3"]}'
+mosquitto_pub -t "paradox/system/command" -m '{"command":"reset_sockets"}'
+mosquitto_pub -t "paradox/system/command" -m '{"command":"cleanup_orphans"}'
 ```
 
 **Behavior:**
@@ -75,7 +75,7 @@ mosquitto_pub -t "paradox/system/command" -m '{"Command":"cleanup_orphans"}'
 
 ```json
 {
-  "Command": "system_reset",
+  "command": "system_reset",
   "type": "full|audio|sockets|orphans",
   "zones": ["zone1", "zone2", "zone3"],  // optional: specific zones
   "preserve_state": true,                // optional: try to restore playing state
@@ -136,8 +136,8 @@ Implement an MQTT command-based reset/cleanup system that can be triggered remot
 
 ```bash
 # MQTT command to trigger system cleanup
-mosquitto_pub -t "paradox/system/command" -m '{"Command":"reset","level":"soft"}'
-mosquitto_pub -t "paradox/system/command" -m '{"Command":"reset","level":"hard"}'
+mosquitto_pub -t "paradox/system/command" -m '{"command":"reset","level":"soft"}'
+mosquitto_pub -t "paradox/system/command" -m '{"command":"reset","level":"hard"}'
 ```
 
 ### **Reset Levels**
@@ -239,7 +239,7 @@ if (this.consecutiveFailures > 3) {
 
 ### **Health Check Command**
 ```bash
-mosquitto_pub -t "paradox/system/command" -m '{"Command":"health_check"}'
+mosquitto_pub -t "paradox/system/command" -m '{"command":"health_check"}'
 ```
 Returns:
 - Active MPV process count
@@ -250,7 +250,7 @@ Returns:
 
 ### **Diagnostics Command**
 ```bash
-mosquitto_pub -t "paradox/system/command" -m '{"Command":"diagnostics"}'
+mosquitto_pub -t "paradox/system/command" -m '{"command":"diagnostics"}'
 ```
 Returns:
 - List of all running processes

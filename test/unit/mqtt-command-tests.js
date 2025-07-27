@@ -3,16 +3,16 @@ const assert = require('assert');
 
 // Automated tests for MQTT command handling
 const testCommands = [
-    { Command: 'playVideo', Video: 'test.mp4', Volume: 0.8 },
-    { Command: 'setImage', Image: 'test.png' },
-    { Command: 'transition', Image: 'test.png', Video: 'test.mp4' },
-    { Command: 'playAudio', Audio: 'test.mp3', Volume: 1.0 },
-    { Command: 'playAudioFX', Audio: 'test.mp3', Type: 'one-shot', Volume: 0.5 },
-    { Command: 'clearQueue' },
-    { Command: 'pause' },
-    { Command: 'resume' },
-    { Command: 'skip' },
-    { Command: 'stopAll' },
+    { command: 'playVideo', video: 'test.mp4', volume: 0.8 },
+    { command: 'setImage', image: 'test.png' },
+    { command: 'transition', image: 'test.png', video: 'test.mp4' },
+    { command: 'playAudio', audio: 'test.mp3', volume: 1.0 },
+    { command: 'playAudioFx', audio: 'test.mp3', type: 'one-shot', volume: 0.5 },
+    { command: 'clearQueue' },
+    { command: 'pause' },
+    { command: 'resume' },
+    { command: 'skip' },
+    { command: 'stopAll' },
 ];
 
 const client = mqtt.connect('mqtt://localhost');
@@ -21,10 +21,10 @@ client.on('connect', () => {
     console.log('Connected to MQTT broker');
 
     testCommands.forEach((command, index) => {
-        const topic = `/Paradox/Test/Commands`;
+        const topic = `paradox/test/commands`;
         client.publish(topic, JSON.stringify(command), (err) => {
-            assert.strictEqual(err, undefined, `Failed to publish command: ${command.Command}`);
-            console.log(`Published command: ${command.Command}`);
+            assert.strictEqual(err, undefined, `Failed to publish command: ${command.command}`);
+            console.log(`Published command: ${command.command}`);
         });
     });
 

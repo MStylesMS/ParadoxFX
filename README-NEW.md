@@ -56,15 +56,15 @@ controller = hue
 ```bash
 # Display an image
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"Command": "setImage", "Image": "/media/background.jpg"}'
+  -m '{"command": "setImage", "image": "/media/background.jpg"}'
 
 # Play a video
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"Command": "playVideo", "Video": "/media/intro.mp4", "Volume": 80}'
+  -m '{"command": "playVideo", "video": "/media/intro.mp4", "volume": 80}'
 
 # Control lights
 mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
-  -m '{"Command": "setColor", "Color": "#FF6400", "Brightness": 75}'
+  -m '{"command": "setColor", "color": "#FF6400", "brightness": 75}'
 ```
 
 ## Documentation

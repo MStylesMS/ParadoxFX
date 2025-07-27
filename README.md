@@ -114,27 +114,27 @@ controller = hue
 ```bash
 # Display an image
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"Command": "setImage", "Image": "/media/background.jpg"}'
+  -m '{"command": "setImage", "image": "/media/background.jpg"}'
 
 # Play a video
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"Command": "playVideo", "Video": "/media/intro.mp4", "Volume": 80}'
+  -m '{"command": "playVideo", "video": "/media/intro.mp4", "volume": 80}'
 
 # Control lights
 mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
-  -m '{"Command": "setColor", "Color": "#FF6400", "Brightness": 75}'
+  -m '{"command": "setColor", "color": "#FF6400", "brightness": 75}'
 
 # Play background music
 mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
-  -m '{"Command": "playMusic", "File": "ambient.mp3", "Volume": 60}'
+  -m '{"command": "playMusic", "file": "ambient.mp3", "volume": 60}'
 
 # Play speech with automatic background music ducking
 mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
-  -m '{"Command": "playSpeech", "File": "hint1.wav"}'
+  -m '{"command": "playSpeech", "file": "hint1.wav"}'
 
 # Fire sound effect immediately
 mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
-  -m '{"Command": "playEffect", "File": "click.wav"}'
+  -m '{"command": "playEffect", "file": "click.wav"}'
 ```
 
 ## Documentation
