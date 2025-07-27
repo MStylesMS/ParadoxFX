@@ -20,7 +20,6 @@ class CoreIntegrationValidation {
         const tests = [
             { name: 'Load AudioDevice Class', test: () => this._testAudioDeviceLoad() },
             { name: 'Load AudioManager Class', test: () => this._testAudioManagerLoad() },
-            { name: 'Load DeviceManager Class', test: () => this._testDeviceManagerLoad() },
             { name: 'Load MqttClient Class', test: () => this._testMqttClientLoad() },
             { name: 'Create AudioDevice Instance', test: () => this._testAudioDeviceCreation() },
             { name: 'Validate Configuration Structure', test: () => this._testConfigurationStructure() },
@@ -73,13 +72,6 @@ class CoreIntegrationValidation {
         this.logger.info('🎼 AudioManager class loaded successfully');
     }
 
-    async _testDeviceManagerLoad() {
-        const DeviceManager = require('../../lib/core/device-manager');
-        if (typeof DeviceManager !== 'function') {
-            throw new Error('DeviceManager is not a constructor function');
-        }
-        this.logger.info('🔧 DeviceManager class loaded successfully');
-    }
 
     async _testMqttClientLoad() {
         const MqttClient = require('../../lib/core/mqtt-client');

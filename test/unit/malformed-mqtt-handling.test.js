@@ -150,13 +150,13 @@ describe('Malformed MQTT Message Handling', () => {
         });
 
         test('should reject commands with volume out of range', async () => {
-            const invalidCommand = { Command: 'playSpeech', volume: 2.5 };
+            const invalidCommand = { Command: 'playSpeech', volume: 200 };
 
             await zoneManager._handleZoneCommand('testZone', mockZone, invalidCommand);
 
             expect(mockZone.messages).toHaveLength(1);
             expect(mockZone.messages[0].type).toBe('warning');
-            expect(mockZone.messages[0].data.validation_error).toContain('0 and 1');
+            expect(mockZone.messages[0].data.validation_error).toContain('0 and 150');
         });
     });
 
@@ -234,10 +234,8 @@ describe('Malformed MQTT Message Handling', () => {
 
     describe('Command Validation Helper', () => {
         test('_validateCommand should return null for valid commands', () => {
-            const validCommand = { Command: 'playSpeech', filePath: '/path/file.mp3', volume: 0.8 };
-            
+            const validCommand = { Command: 'playSpeech', filePath: '/path/file.mp3', volume: 80 };
             const result = zoneManager._validateCommand(validCommand);
-            
             expect(result).toBeNull();
         });
 
