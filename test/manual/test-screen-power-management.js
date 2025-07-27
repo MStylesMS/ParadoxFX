@@ -71,10 +71,10 @@ class ScreenPowerTest {
         const tests = [
             { name: 'Sleep Screen', command: { Command: 'sleepScreen' }, delay: 3000 },
             { name: 'Wake Screen', command: { Command: 'wakeScreen' }, delay: 3000 },
-            { name: 'Auto-wake with Image', command: { Command: 'setImage', Image: 'default.mp4' }, delay: 3000 },
+            { name: 'Auto-wake with Image', command: { Command: 'setImage', file: 'default.mp4' }, delay: 3000 },
             { name: 'Sleep Again', command: { Command: 'sleepScreen' }, delay: 3000 },
-            { name: 'Auto-wake with Video', command: { Command: 'playVideo', Video: 'intro_short.mp4' }, delay: 5000 },
-            { name: 'Test HDMI Audio Wake', command: { Command: 'playAudio', Audio: 'default.mp4' }, delay: 3000 },
+            { name: 'Auto-wake with Video', command: { Command: 'playVideo', file: 'intro_short.mp4' }, delay: 5000 },
+            { name: 'Test HDMI Audio Wake', command: { Command: 'playAudio', file: 'default.mp4' }, delay: 3000 },
             { name: 'Final Sleep Test', command: { Command: 'sleepScreen' }, delay: 2000 }
         ];
 

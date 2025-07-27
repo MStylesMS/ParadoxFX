@@ -67,31 +67,31 @@ run_test() {
 run_test "Image Display" \
          "setImage" \
          "defaults/default.png" \
-         '{"command":"setImage","image":"defaults/default.png"}'
+         '{"command":"setImage","file":"defaults/default.png"}'
 
 # Test 2: Video Playback
 run_test "Video Playback" \
          "playVideo" \
          "defaults/default.mp4" \
-         '{"command":"playVideo","video":"defaults/default.mp4"}'
+         '{"command":"playVideo","file":"defaults/default.mp4"}'
 
 # Test 3: Background Music
 run_test "Background Music" \
          "playBackgroundMusic" \
          "music/Funky_Jazz_Saxophone.mp3" \
-         '{"command":"playBackgroundMusic","audio":"music/Funky_Jazz_Saxophone.mp3","volume":70}'
+         '{"command":"playBackgroundMusic","file":"music/Funky_Jazz_Saxophone.mp3","volume":70}'
 
 # Test 4: Sound Effects
 run_test "Sound Effects" \
          "playSoundEffect" \
          "fx/Lasergun.mp3" \
-         '{"command":"playSoundEffect","audio":"fx/Lasergun.mp3","volume":100}'
+         '{"command":"playSoundEffect","file":"fx/Lasergun.mp3","volume":100}'
 
 # Test 5: Speech
 run_test "Speech" \
          "playSpeech" \
          "general/PFX_Vocal_Queuing.mp3" \
-         '{"command":"playSpeech","audio":"general/PFX_Vocal_Queuing.mp3","volume":90}'
+         '{"command":"playSpeech","file":"general/PFX_Vocal_Queuing.mp3","volume":90}'
 
 # Print Summary
 echo "=========================================="

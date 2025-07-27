@@ -236,13 +236,13 @@ Display an image on the screen.
 ```json
 {
   "command": "setImage",
-  "image": "image.jpg"
+  "file": "image.jpg"
 }
 ```
 
 **Parameters:**
 
-- `Image` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `file` (required): Filename or subdirectory path relative to device MEDIA_DIR
 - Supported formats: JPEG, PNG, GIF, BMP, TIFF, WebP
 
 **Examples:**
@@ -250,18 +250,20 @@ Display an image on the screen.
 ```json
 {
   "command": "setImage",
-  "image": "lobby.jpg"
+  "file": "lobby.jpg"
 }
 ```
 
 ```json
 {
   "command": "setImage",
-  "image": "backgrounds/lobby.jpg"
+  "file": "backgrounds/lobby.jpg"
 }
 ```
 
-**Note:** Image paths are relative to the device's configured MEDIA_DIR. For example, if MEDIA_DIR is `/opt/media/room1/`, then "lobby.jpg" resolves to `/opt/media/room1/lobby.jpg` and "backgrounds/lobby.jpg" resolves to `/opt/media/room1/backgrounds/lobby.jpg`.
+**Note:** File paths are relative to the device's configured MEDIA_DIR. For example, if MEDIA_DIR is `/opt/media/room1/`, then "lobby.jpg" resolves to `/opt/media/room1/lobby.jpg` and "backgrounds/lobby.jpg" resolves to `/opt/media/room1/backgrounds/lobby.jpg`.
+
+**Backward Compatibility:** The legacy `image` parameter is still supported but deprecated. Use `file` instead.
 
 ### Video Commands
 
@@ -274,14 +276,14 @@ Play a video file with optional volume control.
 ```json
 {
   "command": "playVideo",
-  "video": "intro.mp4",
+  "file": "intro.mp4",
   "volumeAdjust": -10
 }
 ```
 
 **Parameters:**
 
-- `Video` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `file` (required): Filename or subdirectory path relative to device MEDIA_DIR
 - `VolumeAdjust` (optional): Volume adjustment percentage (-100 to +100), applied to device base VOLUME setting
 - `Channel` (optional): Audio channel routing
 
@@ -292,19 +294,21 @@ Play a video file with optional volume control.
 ```json
 {
   "command": "playVideo",
-  "video": "intro.mp4"
+  "file": "intro.mp4"
 }
 ```
 
 ```json
 {
   "command": "playVideo",
-  "video": "room1/intro.mp4",
+  "file": "room1/intro.mp4",
   "volumeAdjust": 20
 }
 ```
 
-**Note:** Video paths are relative to the device's MEDIA_DIR. VolumeAdjust modifies the base VOLUME setting from the device configuration. For example, if device VOLUME is 80 and VolumeAdjust is -10, the effective volume will be 72 (80 * 0.90).
+**Note:** File paths are relative to the device's MEDIA_DIR. VolumeAdjust modifies the base VOLUME setting from the device configuration. For example, if device VOLUME is 80 and VolumeAdjust is -10, the effective volume will be 72 (80 * 0.90).
+
+**Backward Compatibility:** The legacy `video` parameter is still supported but deprecated. Use `file` instead.
 
 #### stopVideo
 
@@ -435,14 +439,14 @@ Play an audio file with optional volume control.
 ```json
 {
   "command": "playAudio",
-  "audio": "background.mp3",
+  "file": "background.mp3",
   "volumeAdjust": -20
 }
 ```
 
 **Parameters:**
 
-- `Audio` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `file` (required): Filename or subdirectory path relative to device MEDIA_DIR
 - `VolumeAdjust` (optional): Volume adjustment percentage (-100 to +100), applied to device base VOLUME setting
 - `Channel` (optional): Audio channel routing
 
@@ -453,19 +457,21 @@ Play an audio file with optional volume control.
 ```json
 {
   "command": "playAudio",
-  "audio": "ambient.mp3"
+  "file": "ambient.mp3"
 }
 ```
 
 ```json
 {
   "command": "playAudio",
-  "audio": "music/background.mp3",
+  "file": "music/background.mp3",
   "volumeAdjust": 15
 }
 ```
 
-**Note:** Audio paths are relative to the device's MEDIA_DIR. VolumeAdjust modifies the base VOLUME setting from the device configuration.
+**Note:** File paths are relative to the device's MEDIA_DIR. VolumeAdjust modifies the base VOLUME setting from the device configuration.
+
+**Backward Compatibility:** The legacy `audio` parameter is still supported but deprecated. Use `file` instead.
 
 #### playAudioFx
 
@@ -476,7 +482,7 @@ Play audio effects (supports polyphonic playback).
 ```json
 {
   "command": "playAudioFx",
-  "audio": "effects/explosion.wav",
+  "file": "effects/explosion.wav",
   "type": "one-shot",
   "volumeAdjust": 10
 }
@@ -484,7 +490,7 @@ Play audio effects (supports polyphonic playback).
 
 **Parameters:**
 
-- `Audio` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `file` (required): Filename or subdirectory path relative to device MEDIA_DIR
 - `Type` (optional): Playback type ("one-shot", "loop"), default: "one-shot"
 - `VolumeAdjust` (optional): Volume adjustment percentage (-100 to +100), applied to device base VOLUME setting
 
@@ -493,18 +499,20 @@ Play audio effects (supports polyphonic playback).
 ```json
 {
   "command": "playAudioFx",
-  "audio": "doorbell.wav"
+  "file": "doorbell.wav"
 }
 ```
 
 ```json
 {
   "command": "playAudioFx",
-  "audio": "fx/ambient_loop.wav",
+  "file": "fx/ambient_loop.wav",
   "type": "loop",
   "volumeAdjust": -30
 }
 ```
+
+**Backward Compatibility:** The legacy `audio` parameter is still supported but deprecated. Use `file` instead.
 
 ## Multi-Zone Audio Commands
 
@@ -536,7 +544,7 @@ Start background music with automatic volume ducking during speech.
 
 **Parameters:**
 
-- `File` (required): Music file relative to zone's background_music_dir
+- `file` (required): Music file relative to zone's background_music_dir
 - `Volume` (optional): Volume level 0-100, default: 70
 - `Loop` (optional): Whether to loop the music, default: true
 - `FadeIn` (optional): Fade-in duration in seconds, default: 2
@@ -577,7 +585,7 @@ Play speech audio with automatic background music ducking.
 
 **Parameters:**
 
-- `File` (required): Speech file relative to zone's speech_dir
+- `file` (required): Speech file relative to zone's speech_dir
 - `Volume` (optional): Volume level 0-100, default: 80
 - `Priority` (optional): Queue priority ("low", "normal", "high"), default: "normal"
 - `DuckLevel` (optional): Background music duck level 0-100, default: 30
@@ -613,7 +621,7 @@ Play fire-and-forget sound effect with low latency.
 
 **Parameters:**
 
-- `File` (required): Effect file relative to any configured media directory
+- `file` (required): Effect file relative to any configured media directory
 - `Volume` (optional): Volume level 0-100, default: 80
 - `Preload` (optional): Whether to use preloaded effect, default: false
 - `Overlap` (optional): Allow overlapping with other effects, default: true
@@ -703,14 +711,14 @@ Play background music with seamless looping and volume control.
 ```json
 {
   "command": "playBackgroundMusic",
-  "audio": "ambient/forest.mp3",
+  "file": "ambient/forest.mp3",
   "volume": 70
 }
 ```
 
 **Parameters:**
 
-- `Audio` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `file` (required): Filename or subdirectory path relative to device MEDIA_DIR
 - `Volume` (optional): Volume level (0-100), defaults to device configuration
 
 **Features:**
@@ -723,14 +731,14 @@ Play background music with seamless looping and volume control.
 ```json
 {
   "command": "playBackgroundMusic",
-  "audio": "ambient.mp3"
+  "file": "ambient.mp3"
 }
 ```
 
 ```json
 {
   "command": "playBackgroundMusic",
-  "audio": "music/mystical.mp3",
+  "file": "music/mystical.mp3",
   "volume": 60
 }
 ```
@@ -775,14 +783,14 @@ Play speech audio with automatic background music ducking.
 ```json
 {
   "command": "playSpeech",
-  "audio": "voice/instructions.mp3",
+  "file": "voice/instructions.mp3",
   "volume": 90
 }
 ```
 
 **Parameters:**
 
-- `Audio` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `file` (required): Filename or subdirectory path relative to device MEDIA_DIR
 - `Volume` (optional): Volume level (0-100), defaults to device configuration
 
 **Features:**
@@ -795,14 +803,14 @@ Play speech audio with automatic background music ducking.
 ```json
 {
   "command": "playSpeech",
-  "audio": "hints/clue1.mp3"
+  "file": "hints/clue1.mp3"
 }
 ```
 
 ```json
 {
   "command": "playSpeech",
-  "audio": "narration/intro.mp3",
+  "file": "narration/intro.mp3",
   "volume": 95
 }
 ```
@@ -828,14 +836,14 @@ Play sound effects with ultra-low latency and parallel playback.
 ```json
 {
   "command": "playSoundEffect",
-  "audio": "effects/button_click.wav",
+  "file": "effects/button_click.wav",
   "volume": 100
 }
 ```
 
 **Parameters:**
 
-- `Audio` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `file` (required): Filename or subdirectory path relative to device MEDIA_DIR
 - `Volume` (optional): Volume level (0-100), defaults to device configuration
 
 **Features:**
@@ -849,14 +857,14 @@ Play sound effects with ultra-low latency and parallel playback.
 ```json
 {
   "command": "playSoundEffect",
-  "audio": "fx/click.wav"
+  "file": "fx/click.wav"
 }
 ```
 
 ```json
 {
   "command": "playSoundEffect",
-  "audio": "feedback/success.wav",
+  "file": "feedback/success.wav",
   "volume": 80
 }
 ```
@@ -880,9 +888,11 @@ Play a video followed by an image.
 
 **Parameters:**
 
-- `Video` (required): Video filename or subdirectory path relative to device MEDIA_DIR
-- `Image` (required): Image filename or subdirectory path relative to device MEDIA_DIR
+- `video` (required): Video filename or subdirectory path relative to device MEDIA_DIR
+- `image` (required): Image filename or subdirectory path relative to device MEDIA_DIR
 - `Channel` (optional): Audio channel routing
+
+**Note:** The transition command retains the `video` and `image` parameter names since it requires both file types to be specified distinctly.
 
 **Example:**
 
@@ -1215,7 +1225,7 @@ mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"command": "playAudio", "audio": "ambient.mp3", "volumeAdjust": -40}'
+  -m '{"command": "playAudio", "file": "ambient.mp3", "volumeAdjust": -40}'
 ```
 
 4. **Stop all playback:**

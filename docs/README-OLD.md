@@ -159,11 +159,11 @@ Commands
 
 `image-switcher` awaits the following commands on the MQTT command topic:
 
-* `{"command":"setImage","image":"Picture1.png"}` - displays image: `Picture1.png`.
+* `{"command":"setImage","file":"Picture1.png"}` - displays image: `Picture1.png`.
 * `{"command":"transition","image":"EndFrame.png","video":"Transition.mp4"}` - plays immediately or when another video is currently playing queues video file: `Transition.mp4` and when the requested video starts playing sets the displayed image to the `EndFrame.png` file, so the image becomes visible when the video ends.
-* `{"command":"playVideo","video":"FileName.mp4"}` - plays immediately or when another video is currently playing queues video file: `FileName.mp4`.
-* `{"command":"playAudio","audio":"FileName.mp3"}` - plays immediately or when another audio file is currently playing queues audio file: `FileName.mp3`.
-* `{"command":"playAudioFx","audio":"SoundFx1.wav"}` - immediately plays audio file: `SoundFx1.wav`.
+* `{"command":"playVideo","file":"FileName.mp4"}` - plays immediately or when another video is currently playing queues video file: `FileName.mp4`.
+* `{"command":"playAudio","file":"FileName.mp3"}` - plays immediately or when another audio file is currently playing queues audio file: `FileName.mp3`.
+* `{"command":"playAudioFx","file":"SoundFx1.wav"}` - immediately plays audio file: `SoundFx1.wav`.
 * `{"command":"stopVideo"}` - immediately stops the video playback and removes all queued video.
 * `{"command":"stopAudio"}` - immediately stops the audio playback and removes all queued audio clips.
 * `{"command":"stopAllAudioFx"}` - immediately stops all the audio-fx playbacks.
@@ -325,17 +325,17 @@ WMH-WaterTorture-4-Transition-Out.mp4
 # MQTT examples
 
 ```
-mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/stereoscope/command -m '{"command":"playVideo","video":"Stereoscope_9-20.mp4"}'
+mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/stereoscope/command -m '{"command":"playVideo","file":"Stereoscope_9-20.mp4"}'
 
-mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/pictures/milk-can/command -m '{"command": "setImage", "image": "WMH-MilkCan-1-Plain-Image.png"}'
+mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/pictures/milk-can/command -m '{"command": "setImage", "file": "WMH-MilkCan-1-Plain-Image.png"}'
 
 mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/pictures/milk-can/command -m '{"command": "transition", "image": "WMH-MilkCan-3-Hint-Image.png", "video": "WMH-MilkCan-2-Transition-In.mp4"}'
 
 mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/pictures/milk-can/command -m '{"command": "transition", "image": "WMH-MilkCan-1-Plain-Image.png", "video": "WMH-MilkCan-4-Transition-Out.mp4"}'
 
-mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/audio/command -m '{"command":"playAudio","audio":"generator.wav"}'
+mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/audio/command -m '{"command":"playAudio","file":"generator.wav"}'
 
-mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/audio/command -m '{"command":"playAudioFx","audio":"cheers.wav"}'
+mosquitto_pub -h 192.168.8.101 -t /paradox/wmh/large-room/audio/command -m '{"command":"playAudioFx","file":"cheers.wav"}'
 ```
 
 # Proposed Install Script
