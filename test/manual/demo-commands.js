@@ -43,23 +43,23 @@ function showScreenCommands() {
     const examples = [
         {
             name: 'setImage (minimal)',
-            json: { Command: 'setImage', Image: 'test-image.jpg' }
+            json: { command: 'setImage', image: 'test-image.jpg' }
         },
         {
             name: 'playVideo (with options)',
-            json: { Command: 'playVideo', Video: 'videos/intro.mp4', VolumeAdjust: -10, Channel: 'default' }
+            json: { command: 'playVideo', video: 'videos/intro.mp4', volumeAdjust: -10, channel: 'default' }
         },
         {
             name: 'playAudio (minimal)',
-            json: { Command: 'playAudio', Audio: 'background.mp3' }
+            json: { command: 'playAudio', audio: 'background.mp3' }
         },
         {
             name: 'playAudioFx (loop)',
-            json: { Command: 'playAudioFx', Audio: 'effects/ambient.wav', Type: 'loop', VolumeAdjust: -30 }
+            json: { command: 'playAudioFx', audio: 'effects/ambient.wav', type: 'loop', volumeAdjust: -30 }
         },
         {
             name: 'transition',
-            json: { Command: 'transition', Video: 'intro.mp4', Image: 'final.jpg' }
+            json: { command: 'transition', video: 'intro.mp4', image: 'final.jpg' }
         }
     ];
 
@@ -73,11 +73,11 @@ function showLightCommands() {
     const examples = [
         {
             name: 'on (with brightness)',
-            json: { Command: 'on', Brightness: 80 }
+            json: { command: 'on', brightness: 80 }
         },
         {
             name: 'setColor (RGB)',
-            json: { Command: 'setColor', Color: { r: 255, g: 100, b: 0 }, Brightness: 90 }
+            json: { command: 'setColor', color: { r: 255, g: 100, b: 0 }, brightness: 90 }
         }
     ];
 
@@ -91,7 +91,7 @@ function showLightGroupCommands() {
     const examples = [
         {
             name: 'setGroupColor',
-            json: { Command: 'setGroupColor', Color: { r: 255, g: 100, b: 0 }, Brightness: 80, Lights: ['light1', 'light2'] }
+            json: { command: 'setGroupColor', color: { r: 255, g: 100, b: 0 }, brightness: 80, lights: ['light1', 'light2'] }
         }
     ];
 
