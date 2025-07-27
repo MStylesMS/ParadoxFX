@@ -263,8 +263,6 @@ Display an image on the screen.
 
 **Note:** File paths are relative to the device's configured MEDIA_DIR. For example, if MEDIA_DIR is `/opt/media/room1/`, then "lobby.jpg" resolves to `/opt/media/room1/lobby.jpg` and "backgrounds/lobby.jpg" resolves to `/opt/media/room1/backgrounds/lobby.jpg`.
 
-**Backward Compatibility:** The legacy `image` parameter is still supported but deprecated. Use `file` instead.
-
 ### Video Commands
 
 #### playVideo
@@ -307,8 +305,6 @@ Play a video file with optional volume control.
 ```
 
 **Note:** File paths are relative to the device's MEDIA_DIR. VolumeAdjust modifies the base VOLUME setting from the device configuration. For example, if device VOLUME is 80 and VolumeAdjust is -10, the effective volume will be 72 (80 * 0.90).
-
-**Backward Compatibility:** The legacy `video` parameter is still supported but deprecated. Use `file` instead.
 
 #### stopVideo
 
@@ -471,8 +467,6 @@ Play an audio file with optional volume control.
 
 **Note:** File paths are relative to the device's MEDIA_DIR. VolumeAdjust modifies the base VOLUME setting from the device configuration.
 
-**Backward Compatibility:** The legacy `audio` parameter is still supported but deprecated. Use `file` instead.
-
 #### playAudioFx
 
 Play audio effects (supports polyphonic playback).
@@ -511,8 +505,6 @@ Play audio effects (supports polyphonic playback).
   "volumeAdjust": -30
 }
 ```
-
-**Backward Compatibility:** The legacy `audio` parameter is still supported but deprecated. Use `file` instead.
 
 ## Multi-Zone Audio Commands
 
@@ -1211,14 +1203,14 @@ Non-fatal issues are reported as warnings:
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"command": "setImage", "image": "background.jpg"}'
+  -m '{"command": "setImage", "file": "background.jpg"}'
 ```
 
 2. **Play intro video:**
 
 ```bash
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
-  -m '{"command": "playVideo", "video": "intro.mp4", "volumeAdjust": -20}'
+  -m '{"command": "playVideo", "file": "intro.mp4", "volumeAdjust": -20}'
 ```
 
 3. **Play background music:**
