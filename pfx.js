@@ -76,7 +76,8 @@ class PxFxApplication {
         });
         process.on('unhandledRejection', (reason, promise) => {
             this.logger.error('Unhandled rejection at:', promise, 'reason:', reason);
-            this.shutdown();
+            this.logger.error('Application will continue running. Please check for underlying issues.');
+            // Do NOT shutdown on unhandled rejections - this prevents MQTT message errors from crashing the app
         });
     }
 }
