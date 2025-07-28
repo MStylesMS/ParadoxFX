@@ -7,6 +7,9 @@
  * Supports screens, lights, and relays via MQTT commands.
  */
 
+const path = require('path');
+const fs = require('fs');
+const minimist = require('minimist');
 const ZoneManager = require('./lib/core/zone-manager');
 const ConfigLoader = require('./lib/core/config-loader');
 const MqttClient = require('./lib/core/mqtt-client');
@@ -22,15 +25,19 @@ class PxFxApplication {
 
     async start() {
         try {
+            // Parse command line for --config/-c or positional argument
+            const argv = minimist(process.argv.slice(2));
+            const configFile = argv.config || argv.c || argv._[0] || 'pfx.ini';
+            const configPath = path.resolve(configFile);
             this.logger.info('Starting Paradox Effects application...');
-
-            // Parse command line for --config or -c
-            const argv = require('minimist')(process.argv.slice(2));
-            const configFile = argv.config || argv.c || './pfx.ini';
-            this.logger.info(`Using config file: ${configFile}`);
-
+            this.logger.info(`Using configuration: ${configPath}`);
+            if (!fs.existsSync(configPath)) {
+                this.logger.error(`Configuration file not found: ${configPath}`);
+                this.logger.error('Copy pfx.ini.example to pfx.ini and customize your settings.');
+                process.exit(1);
+            }
             // Load configuration
-            this.config = await ConfigLoader.load(configFile);
+            this.config = await ConfigLoader.load(configPath);
             this.logger.info(`Loaded configuration for ${Object.keys(this.config.devices).length} devices`);
 
             // Initialize MQTT client

@@ -58,21 +58,7 @@ else
     echo "ℹ️  pactl command not found, skipping PulseAudio cleanup"
 fi
 
-# Kill ParadoxFX Node.js processes
-echo "🔪 Killing ParadoxFX (node) processes..."
-pfx_pids=$(pgrep -f "node start.js")
-if [ -n "$pfx_pids" ]; then
-    echo "   Found PFX processes: $pfx_pids"
-    pkill -f "node start.js"
-    sleep 1
-    echo "✅ PFX processes terminated"
-else
-    echo "ℹ️  No PFX processes found"
-fi
-
-echo ""
-echo "🎉 Cleanup complete!"
-echo "You can now safely restart PFX with 'node pfx.js'"
+# Check for Node.js processes
 
 
 # Check for Node.js processes
