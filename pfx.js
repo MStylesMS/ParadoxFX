@@ -60,7 +60,7 @@ class PxFxApplication {
     }
 
     async shutdown() {
-        this.logger.info('Shutting down Paradox Effects application...');
+        this.logger.info('PFX shutting down politely, which may take a few seconds.');
 
         if (this.zoneManager) {
             await this.zoneManager.shutdown();

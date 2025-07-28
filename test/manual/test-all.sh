@@ -77,7 +77,7 @@ wait_input
 
 echo "Trigger two video files (queuing test)"
 mosquitto_pub -t "paradox/zone2/command" -m '{"command":"playVideo","video":"defaults/default.mp4"}'
-mosquitto_pub -t "paradox/zone2/command" -m '{"command":"playVideo","video":"defaults/default.mp4"}'
+mosquitto_pub -t "paradox/zone2/command" -m '{"command":"playVideo","video":"defaults/intro_short.mp4"}'
 wait_input
 
 echo "Start background music again"

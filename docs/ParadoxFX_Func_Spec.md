@@ -101,6 +101,21 @@ ParadoxFX provides professional-grade seamless transitions using a single MPV in
 - **Queueing:**
   - Video and audio commands are queued (FIFO). When the queue is full, the oldest item is dropped.
   - Duplicate media (by name) is not added to the queue. Audio effects (FX) are played immediately.
+- **Video/Image Queue Logic:**
+  - The screen queue handles `playVideo` and `setImage` commands to ensure smooth transitions and logical playback order.
+  - **Queuing a New Command:** When a new `playVideo` or `setImage` command is received, it is handled as follows:
+    - **Duplicate Check:** If the new command is identical to the last command already in the queue, it is ignored.
+    - **Replacement Logic:** The system checks the last item currently in the queue:
+      - If the last item is an `setImage` command (for any file type) OR a `playVideo` command for an *image* file, it is considered a "static visual" and is **replaced** by the new command.
+      - If the last item is a `playVideo` command for a *video* file, it is considered an "active visual" and is **not replaced**. The new command is added to the end of the queue.
+  - **Playback Behavior:**
+    - `playVideo` (with video file): Plays the video. Ducks background audio.
+    - `playVideo` (with image file): Displays the image. Does not duck audio.
+    - `setImage` (with video file): Loads the video and pauses on the first frame. Does not duck audio.
+    - `setImage` (with image file): Displays the image. Does not duck audio.
+  - **Resuming Playback:**
+    - A `resumeVideo` command will resume the currently paused video.
+    - If a `playVideo` command is issued for the *same file* that is currently loaded and paused (from a previous `setImage` command), it will be treated as a `resumeVideo` command to avoid reloading the file.
 - **Stop Commands:**
   - `stopVideo`, `stopAudio`, `stopAllAudioFx`, and `stopAll` commands immediately stop playback and clear queues as appropriate.
   - `sleepScreen` and `wakeScreen` commands control display power management
