@@ -94,10 +94,11 @@ Each format is tested individually to ensure the media player factory correctly 
 - Added support for all tested formats
 - Maintained backward compatibility with static methods
 
-### 2. Enhanced ProcessManager
+### 2. Enhanced Media Management
 
-- Added `killAll()` method for test cleanup
-- Improved process management for testing
+- Removed legacy ProcessManager in favor of unified MPV zone management
+- Integrated process management into AudioManager and MpvZoneManager
+- Improved health checks and auto-restart capabilities
 
 ### 3. Comprehensive Test Suite
 

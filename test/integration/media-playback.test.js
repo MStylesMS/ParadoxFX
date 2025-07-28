@@ -8,11 +8,9 @@
 const path = require('path');
 const fs = require('fs');
 const MediaPlayerFactory = require('../../lib/media/media-player-factory');
-const ProcessManager = require('../../lib/media/process-manager');
 
 describe('MediaPlayerFactory Integration Tests', () => {
     let factory;
-    let processManager;
     const testMediaPath = path.join(__dirname, '../../media/test/defaults');
 
     beforeAll(() => {
@@ -29,14 +27,11 @@ describe('MediaPlayerFactory Integration Tests', () => {
             defaultVideoPlayer: 'mpv',
             defaultAudioPlayer: 'mpv'
         };
-        processManager = new ProcessManager();
-        factory = new MediaPlayerFactory(config, processManager);
+        factory = new MediaPlayerFactory(config);
     });
 
     afterEach(async () => {
-        if (processManager) {
-            await processManager.killAll();
-        }
+        // No cleanup needed - ProcessManager removed
     });
 
     describe('Image Playback Tests', () => {
@@ -274,8 +269,11 @@ describe('MediaPlayerFactory Integration Tests', () => {
             expect(imagePlayer).toBeDefined();
             expect(videoPlayer).toBeDefined();
 
-            // Verify different players are selected for different media types
-            expect(imagePlayer.command).not.toBe(videoPlayer.command);
+            // Both use MPV now, but verify they work for different media types
+            expect(imagePlayer.command).toBe('mpv');
+            expect(videoPlayer.command).toBe('mpv');
+            expect(imagePlayer.mediaType).toBe('image');
+            expect(videoPlayer.mediaType).toBe('video');
         });
 
         test('should handle transition from video to audio', async () => {
