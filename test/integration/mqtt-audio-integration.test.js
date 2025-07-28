@@ -14,7 +14,6 @@
 const path = require('path');
 const ConfigLoader = require('../../lib/core/config-loader');
 const MqttClient = require('../../lib/core/mqtt-client');
-const DeviceManager = require('../../lib/core/device-manager');
 const Logger = require('../../lib/utils/logger');
 
 class MqttAudioIntegrationTest {
@@ -22,7 +21,6 @@ class MqttAudioIntegrationTest {
         this.logger = new Logger('MqttAudioTest');
         this.config = null;
         this.mqttClient = null;
-        this.deviceManager = null;
         this.testResults = [];
         this.statusReceived = {};
     }
@@ -38,9 +36,7 @@ class MqttAudioIntegrationTest {
             this.mqttClient = new MqttClient(this.config.global);
             await this.mqttClient.connect();
             
-            // Initialize device manager
-            this.deviceManager = new DeviceManager(this.config, this.mqttClient);
-            await this.deviceManager.initialize();
+            // DeviceManager removed: device logic now handled by zone-centric architecture
             
             // Subscribe to status topics for validation
             await this._setupStatusSubscriptions();
@@ -102,7 +98,8 @@ class MqttAudioIntegrationTest {
     }
 
     async _testBackgroundMusic() {
-        const audioDevice = this.deviceManager.getDevicesByType('audio')[0];
+        // In zone-centric architecture, device lookup should be updated as needed
+        const audioDevice = Object.values(this.config.devices).find(d => d.type === 'audio');
         if (!audioDevice) {
             throw new Error('No audio device found');
         }
@@ -136,7 +133,7 @@ class MqttAudioIntegrationTest {
     }
 
     async _testSoundEffects() {
-        const audioDevice = this.deviceManager.getDevicesByType('audio')[0];
+        const audioDevice = Object.values(this.config.devices).find(d => d.type === 'audio');
         
         const effects = [
             'effects/beep-short.wav',
@@ -166,7 +163,7 @@ class MqttAudioIntegrationTest {
     }
 
     async _testSpeechDucking() {
-        const audioDevice = this.deviceManager.getDevicesByType('audio')[0];
+        const audioDevice = Object.values(this.config.devices).find(d => d.type === 'audio');
         
         // Start background music
         const musicCommand = {
@@ -200,7 +197,7 @@ class MqttAudioIntegrationTest {
     }
 
     async _testSimultaneousAudio() {
-        const audioDevice = this.deviceManager.getDevicesByType('audio')[0];
+        const audioDevice = Object.values(this.config.devices).find(d => d.type === 'audio');
         
         // Start background music
         const musicCommand = {
@@ -236,7 +233,7 @@ class MqttAudioIntegrationTest {
     }
 
     async _testVolumeControl() {
-        const audioDevice = this.deviceManager.getDevicesByType('audio')[0];
+        const audioDevice = Object.values(this.config.devices).find(d => d.type === 'audio');
         
         // Start background music
         const musicCommand = {
@@ -270,7 +267,7 @@ class MqttAudioIntegrationTest {
     }
 
     async _testStatusReporting() {
-        const audioDevice = this.deviceManager.getDevicesByType('audio')[0];
+        const audioDevice = Object.values(this.config.devices).find(d => d.type === 'audio');
         
         // Request status
         const statusCommand = { Command: 'get_status' };
@@ -397,9 +394,7 @@ class MqttAudioIntegrationTest {
     async shutdown() {
         this.logger.info('🛑 Shutting down test infrastructure...');
         
-        if (this.deviceManager) {
-            await this.deviceManager.shutdown();
-        }
+        // No deviceManager to shut down in zone-centric architecture
         
         if (this.mqttClient) {
             await this.mqttClient.disconnect();

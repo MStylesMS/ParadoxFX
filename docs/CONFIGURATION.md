@@ -31,6 +31,7 @@ device_name = media-controller-01   # Unique device identifier for heartbeat mes
 log_level = info                    # Logging level: debug, info, warn, error
 media_base_path = /opt/media       # Base path for media files (deprecated - use device-specific media_dir)
 heartbeat_interval = 30000         # Heartbeat interval in milliseconds
+ducking_volume = 30                # Default volume for audio ducking (0-100)
 preferred_image_player = auto      # Image player preference
 require_video_group = false       # Require video group membership
 ```

@@ -48,21 +48,18 @@ echo "🔊 Cleaning up PulseAudio combined sinks..."
 if command -v pactl >/dev/null 2>&1; then
     # Check if paradox_dual_output sink exists
     if pactl list short sinks | grep -q "paradox_dual_output"; then
-        echo "   Removing combined sink: paradox_dual_output"
-        # Find the module ID for the combined sink
-        module_id=$(pactl list short modules | grep "module-combine-sink.*paradox_dual_output" | cut -f1)
-        if [ -n "$module_id" ]; then
-            pactl unload-module "$module_id"
-            echo "✅ Combined sink removed"
-        else
-            echo "⚠️  Could not find module ID for combined sink"
-        fi
+        echo "   Found combined sink 'paradox_dual_output', unloading..."
+        pactl unload-module module-combine-sink
+        echo "✅ Combined sink unloaded"
     else
         echo "ℹ️  No combined sink found"
     fi
 else
-    echo "⚠️  PulseAudio not available"
+    echo "ℹ️  pactl command not found, skipping PulseAudio cleanup"
 fi
+
+# Check for Node.js processes
+
 
 # Check for Node.js processes
 echo "🔍 Checking for Node.js processes..."

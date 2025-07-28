@@ -7,7 +7,6 @@
 
 const ConfigLoader = require('../../lib/core/config-loader');
 const MqttClient = require('../../lib/core/mqtt-client');
-const DeviceManager = require('../../lib/core/device-manager');
 const Logger = require('../../lib/utils/logger');
 
 class SimpleMqttIntegrationTest {
@@ -15,7 +14,6 @@ class SimpleMqttIntegrationTest {
         this.logger = new Logger('SimpleIntegrationTest');
         this.config = null;
         this.mqttClient = null;
-        this.deviceManager = null;
         this.testResults = [];
         this.messagesReceived = [];
     }
@@ -294,11 +292,9 @@ class SimpleMqttIntegrationTest {
 
     async shutdown() {
         this.logger.info('🛑 Shutting down test infrastructure...');
-        
         if (this.mqttClient) {
             await this.mqttClient.disconnect();
         }
-        
         this.logger.info('✅ Test infrastructure shutdown complete');
     }
 }
