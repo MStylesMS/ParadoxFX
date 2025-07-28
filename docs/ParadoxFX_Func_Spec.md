@@ -370,7 +370,7 @@ For detailed project structure and file organization, see [Appendix B: Project S
 │   ├── media/
 │   │   ├── audio-manager.js        # Three-subsystem audio architecture
 │   │   ├── media-player-factory.js # Platform-optimized player selection
-│   │   ├── process-manager.js      # Multi-zone process coordination
+│   │   ├── mpv-zone-manager.js     # Multi-zone MPV process coordination
 │   │   ├── video-player.js         # Hardware-accelerated video playback
 │   │   └── players/
 │   │       ├── base-player.js      # Base class for all media players

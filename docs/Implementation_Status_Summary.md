@@ -145,8 +145,8 @@
 - **`lib/audio/audio-device-manager.js` vs `lib/audio/multi-zone-audio-manager.js`**: ⚠️ **OVERLAP IDENTIFIED** - Both manage audio device configuration and multi-zone audio. The multi-zone-audio-manager imports audio-device-manager but provides higher-level orchestration. This relationship is functional but could be optimized.
 
 ### **Media Player Framework Analysis**
-- **`lib/media/players/` directory**: ⚠️ **INCOMPLETE FRAMEWORK** - Contains base-player.js, mpv-player.js, fbi-player.js, cvlc-player.js but only base-player.js and mpv-player.js have implementations. Associated with process-manager.js which is marked "TODO: Implement".
-- **`lib/media/process-manager.js`**: ❌ **INCOMPLETE** - Framework exists but core functionality marked as "TODO: Implement" with empty methods.
+- **`lib/media/players/` directory**: ⚠️ **INCOMPLETE FRAMEWORK** - Contains base-player.js, mpv-player.js, fbi-player.js, cvlc-player.js but only base-player.js and mpv-player.js have implementations. Legacy player framework is now deprecated in favor of unified MPV zone management.
+- **Process Management**: ✅ **COMPLETED** - MPV process management is now fully handled by AudioManager and MpvZoneManager with health checks and auto-restart capabilities.
 - **`lib/media/video-player.js`**: ⚠️ **POTENTIAL REDUNDANCY** - May be redundant with MPV zone manager handling all media types.
 
 ### **Effects System Analysis**
@@ -191,7 +191,7 @@
 5. **Consolidate Testing Infrastructure** - Ensures quality and reduces maintenance overhead
 6. **Enhance Heartbeat** - Improves monitoring and debugging
 7. **Create Remaining Configs** - Enables multi-platform deployment
-8. **NEW**: **Evaluate Media Player Framework** - Remove incomplete process-manager and player framework files
+8. **COMPLETED**: **Process Manager Removal** - Removed incomplete process-manager.js and integrated functionality into AudioManager and MpvZoneManager
 9. **NEW**: **Investigate Effects System** - Determine if effect-engine.js is actively used or can be removed
 
 ### **Immediate Next Steps Priority:**
