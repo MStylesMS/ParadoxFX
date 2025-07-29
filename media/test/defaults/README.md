@@ -1,10 +1,10 @@
 # Test Media Files
 
-This directory contains media files used for testing the PxFx media player functionality.
+This directory contains media files used for testing the PFx media player functionality.
 
 ## Available Files
 
-This directory contains media files used for testing the PxFx media player functionality.
+This directory contains media files used for testing the PFx media player functionality.
 
 ### Image Files (Generated from default.png)
 

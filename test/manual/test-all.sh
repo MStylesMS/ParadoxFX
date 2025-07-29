@@ -49,6 +49,49 @@ echo "Play shorter background music non-looping"
 mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playBackgroundMusic","audio":"music/Funky_Jazz_Saxophone.mp3","loop":false,"volume":80}'
 wait_input
 
+echo "=== ZONE 1 VIDEO TESTS (HDMI0) ==="
+
+echo "Play a video file"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playVideo","video":"defaults/intro_short.mp4","volume":80}'
+wait_input
+
+echo "Show a photo"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"setImage","image":"defaults/default.png"}'
+wait_input
+
+echo "ZONE 1 Video Tests - Play looping background music"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playBackgroundMusic","audio":"music/Classic_hip-hop_beat.mp3","loop":true,"volume":80}'
+wait_input
+
+echo "ZONE 1 Video Tests - Play a speech file"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playSpeech","audio":"general/Welcome_ParadoxFX_Long.mp3","volume":80}'
+wait_input
+
+echo "ZONE 1 Video Tests - Play an audio effect"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playSoundEffect","audio":"fx/Deep_Braam_Long.mp3","volume":80}'
+wait_input
+
+echo "Stop the audio"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"stopBackgroundMusic"}'
+wait_input
+
+echo "Trigger two video files (queuing test)"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playVideo","video":"defaults/default.mp4"}'
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playVideo","video":"defaults/intro_short.mp4"}'
+wait_input
+
+echo "Start background music again"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playBackgroundMusic","audio":"music/Funky_Jazz_Saxophone.mp3","loop":true,"volume":80}'
+wait_input
+
+echo "Play a special effect"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playSoundEffect","audio":"fx/Epic_Synth_Dystopian.mp3","volume":80}'
+wait_input
+
+echo "Play a video (audio ducking test)"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playVideo","video":"defaults/intro_short.mp4","volume":80}'
+wait_input
+
 echo "=== ZONE 2 SCREEN TESTS (HDMI1) ==="
 
 echo "Play a video file"

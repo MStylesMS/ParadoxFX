@@ -15,9 +15,9 @@ const ConfigLoader = require('./lib/core/config-loader');
 const MqttClient = require('./lib/core/mqtt-client');
 const Logger = require('./lib/utils/logger');
 
-class PxFxApplication {
+class PFxApplication {
     constructor() {
-        this.logger = new Logger('PxFx');
+        this.logger = new Logger('PFx');
         this.config = null;
         this.zoneManager = null;
         this.mqttClient = null;
@@ -29,7 +29,9 @@ class PxFxApplication {
             const argv = minimist(process.argv.slice(2));
             const configFile = argv.config || argv.c || argv._[0] || 'pfx.ini';
             const configPath = path.resolve(configFile);
+            console.log('****************************************');
             this.logger.info('Starting Paradox Effects application...');
+            console.log('****************************************');
             this.logger.info(`Using configuration: ${configPath}`);
             if (!fs.existsSync(configPath)) {
                 this.logger.error(`Configuration file not found: ${configPath}`);
@@ -51,7 +53,9 @@ class PxFxApplication {
             // Setup graceful shutdown
             this.setupShutdownHandlers();
 
+            console.log('****************************************');
             this.logger.info('Paradox Effects application started successfully');
+            console.log('****************************************');
 
         } catch (error) {
             this.logger.error('Failed to start application:', error);
@@ -60,7 +64,9 @@ class PxFxApplication {
     }
 
     async shutdown() {
+        console.log('****************************************');
         this.logger.info('PFX shutting down politely, which may take a few seconds.');
+        console.log('****************************************');
 
         if (this.zoneManager) {
             await this.zoneManager.shutdown();
@@ -70,7 +76,9 @@ class PxFxApplication {
             await this.mqttClient.disconnect();
         }
 
+        console.log('****************************************');
         this.logger.info('Application shutdown complete');
+        console.log('****************************************');
         process.exit(0);
     }
 
@@ -91,8 +99,8 @@ class PxFxApplication {
 
 // Start the application if this file is run directly
 if (require.main === module) {
-    const app = new PxFxApplication();
+    const app = new PFxApplication();
     app.start();
 }
 
-module.exports = PxFxApplication;
+module.exports = PFxApplication;

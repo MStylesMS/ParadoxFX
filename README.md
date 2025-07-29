@@ -21,8 +21,8 @@ ParadoxFX is a comprehensive system for controlling various devices through MQTT
 
 ### Platform Variants
 
-- **PxFx (Main)**: Optimized for Raspberry Pi 4+ and modern systems
-- **PxFx Pi3**: Specialized version for Raspberry Pi 3 with hardware acceleration
+- **PFx (Main)**: Optimized for Raspberry Pi 4+ and modern systems
+- **PFx Pi3**: Specialized version for Raspberry Pi 3 with hardware acceleration
 
 ## Quick Start
 

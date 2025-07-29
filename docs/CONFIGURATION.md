@@ -249,7 +249,7 @@ monitor_geometry = 1920x1080+1920+0    # width x height + x_offset + y_offset
 
 ### Player Selection
 
-PxFx automatically selects appropriate players for media types:
+PFx automatically selects appropriate players for media types:
 
 - **Images**: fbi, feh, imagemagick
 - **Video**: mpv, vlc
