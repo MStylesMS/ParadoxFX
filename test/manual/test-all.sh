@@ -80,10 +80,6 @@ mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playVideo","video":"def
 mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playVideo","video":"defaults/intro_short.mp4"}'
 wait_input
 
-echo "Start background music again"
-mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playBackgroundMusic","audio":"music/Funky_Jazz_Saxophone.mp3","loop":true,"volume":80}'
-wait_input
-
 echo "Play a special effect"
 mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playSoundEffect","audio":"fx/Epic_Synth_Dystopian.mp3","volume":80}'
 wait_input
