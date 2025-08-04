@@ -318,7 +318,7 @@ Stop current video playback.
 }
 ```
 
-#### pause
+#### pauseVideo
 
 Pause current video playback.
 
@@ -326,11 +326,11 @@ Pause current video playback.
 
 ```json
 {
-  "command": "pause"
+  "command": "pauseVideo"
 }
 ```
 
-#### resume
+#### resumeVideo
 
 Resume paused video playback.
 
@@ -338,19 +338,43 @@ Resume paused video playback.
 
 ```json
 {
-  "command": "resume"
+  "command": "resumeVideo"
 }
 ```
 
-#### skip
+#### skipVideo
 
-Skip to next video in queue.
+Skip to next video in playlist while preserving paused state if needed.
 
 **Format:**
 
 ```json
 {
-  "command": "skip"
+  "command": "skipVideo"
+}
+```
+
+#### pauseAll
+
+Pause all media playback (video and audio).
+
+**Format:**
+
+```json
+{
+  "command": "pauseAll"
+}
+```
+
+#### resumeAll
+
+Resume all paused media playback (video and audio).
+
+**Format:**
+
+```json
+{
+  "command": "resumeAll"
 }
 ```
 
@@ -672,13 +696,37 @@ Request current status of the audio zone.
 
 #### stopAudio
 
-Stop current audio playback.
+Stop all audio playback (background music and speech).
 
 **Format:**
 
 ```json
 {
   "command": "stopAudio"
+}
+```
+
+#### pauseAudio
+
+Pause all audio playback (background music and speech).
+
+**Format:**
+
+```json
+{
+  "command": "pauseAudio"
+}
+```
+
+#### resumeAudio
+
+Resume all paused audio playback (background music and speech).
+
+**Format:**
+
+```json
+{
+  "command": "resumeAudio"
 }
 ```
 
@@ -694,7 +742,7 @@ Stop all audio effects playback.
 }
 ```
 
-#### playBackgroundMusic
+#### playBackground
 
 Play background music with seamless looping and volume control.
 
@@ -702,7 +750,7 @@ Play background music with seamless looping and volume control.
 
 ```json
 {
-  "command": "playBackgroundMusic",
+  "command": "playBackground",
   "audio": "ambient/forest.mp3",
   "volume": 70
 }
@@ -722,20 +770,44 @@ Play background music with seamless looping and volume control.
 
 ```json
 {
-  "command": "playBackgroundMusic",
+  "command": "playBackground",
   "audio": "ambient.mp3"
 }
 ```
 
 ```json
 {
-  "command": "playBackgroundMusic",
+  "command": "playBackground",
   "audio": "music/mystical.mp3",
   "volume": 60
 }
 ```
 
-#### stopBackgroundMusic
+#### pauseBackground
+
+Pause background music playback.
+
+**Format:**
+
+```json
+{
+  "command": "pauseBackground"
+}
+```
+
+#### resumeBackground
+
+Resume background music playback.
+
+**Format:**
+
+```json
+{
+  "command": "resumeBackground"
+}
+```
+
+#### stopBackground
 
 Stop background music playback.
 
@@ -743,7 +815,7 @@ Stop background music playback.
 
 ```json
 {
-  "command": "stopBackgroundMusic"
+  "command": "stopBackground"
 }
 ```
 
@@ -816,6 +888,54 @@ Clear all queued speech audio and stop current speech.
 ```json
 {
   "command": "clearSpeechQueue"
+}
+```
+
+#### pauseSpeech
+
+Pause current speech playback.
+
+**Format:**
+
+```json
+{
+  "command": "pauseSpeech"
+}
+```
+
+#### resumeSpeech
+
+Resume current speech playback.
+
+**Format:**
+
+```json
+{
+  "command": "resumeSpeech"
+}
+```
+
+#### stopSpeech
+
+Stop current speech (continue processing queue).
+
+**Format:**
+
+```json
+{
+  "command": "stopSpeech"
+}
+```
+
+#### skipSpeech
+
+Skip current speech and move to next in queue.
+
+**Format:**
+
+```json
+{
+  "command": "skipSpeech"
 }
 ```
 

@@ -120,13 +120,25 @@ mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
   -m '{"command": "playVideo", "video": "/media/intro.mp4", "volume": 80}'
 
+# Pause video
+mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
+  -m '{"command": "pauseVideo"}'
+
+# Skip to next video
+mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
+  -m '{"command": "skipVideo"}'
+
 # Control lights
 mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
   -m '{"command": "setColor", "color": "#FF6400", "brightness": 75}'
 
 # Play background music
 mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
-  -m '{"command": "playMusic", "file": "ambient.mp3", "volume": 60}'
+  -m '{"command": "playBackground", "file": "ambient.mp3", "volume": 60}'
+
+# Pause background music
+mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
+  -m '{"command": "pauseBackground"}'
 
 # Play speech with automatic background music ducking
 mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
@@ -135,6 +147,10 @@ mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
 # Fire sound effect immediately
 mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
   -m '{"command": "playEffect", "file": "click.wav"}'
+
+# Pause all audio (background + speech)
+mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
+  -m '{"command": "pauseAudio"}'
 ```
 
 ## Documentation
