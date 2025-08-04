@@ -28,7 +28,7 @@ echo "Play looping background music"
 mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playBackgroundMusic","audio":"music/Classic_hip-hop_beat.mp3","loop":true,"volume":80}'
 wait_input
 
-echo "Play a speech file"
+echo "Play a speech file (with ducking)
 mosquitto_pub -t "paradox/zone1/command" -m '{"command":"playSpeech","audio":"general/Welcome_ParadoxFX.mp3","volume":80}'
 wait_input
 
