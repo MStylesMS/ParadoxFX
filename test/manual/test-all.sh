@@ -93,6 +93,14 @@ echo "Stop background audio"
 mosquitto_pub -t "paradox/zone1/command" -m '{"command":"stopBackgroundMusic"}'
 wait_input
 
+# Zone 1 screen power tests
+echo "Put display to sleep"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"sleepScreen"}'
+wait_input
+echo "Wake display"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"wakeScreen"}'
+wait_input
+
 echo "=== ZONE 2 SCREEN TESTS (HDMI1) ==="
 
 echo "Play a video file"
@@ -182,3 +190,7 @@ mosquitto_pub -t "paradox/zone2/command" -m '{"command":"stopVideo"}'
 wait_input
 
 echo "=== TESTING COMPLETE ==="
+
+# Test killPfx command to terminate ParadoxFX
+echo "Kill ParadoxFX application"
+mosquitto_pub -t "paradox/zone1/command" -m '{"command":"killPfx"}'

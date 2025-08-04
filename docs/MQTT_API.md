@@ -225,6 +225,33 @@ mosquitto_pub -t "pfx/screen0/speech/say" -m '{"file": "/media/instructions.mp3"
 
 Screen devices handle image display, video playback, and audio playback.
 
+### Queue Inspection
+
+* `videoQueue`
+  Return current video queue. Publishes an event with field `video_queue` (array of pending media filenames).
+
+* `speechQueue`
+  Return current speech queue. Publishes an event with field `speech_queue` (array of pending speech file paths).
+
+### Screen Power Management
+
+* `sleepScreen`
+  Turn off the display (monitor goes to sleep). Publishes event `screen_sleep`.
+
+* `wakeScreen`
+  Wake the display (monitor on). Publishes event `screen_wake`.
+
+### System Control
+
+* `reboot`
+  Reboot the host machine running PFX (requires sudo privileges). Publishes `command_completed` event.
+
+* `shutdown`
+  Shutdown the host machine running PFX immediately (requires sudo privileges). Publishes `command_completed` event.
+
+* `killPfx`
+  Gracefully terminate the PFX process via SIGTERM. Publishes `command_completed` event.
+
 ### Image Commands
 
 #### setImage

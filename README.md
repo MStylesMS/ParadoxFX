@@ -128,6 +128,32 @@ mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
 mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
   -m '{"command": "skipVideo"}'
 
+# Queue Inspection
+```bash
+# Show current video queue
+mosquitto_pub -h localhost -t "paradox/living-room/screen/command" -m '{"command": "videoQueue"}'
+# Show current speech queue
+mosquitto_pub -h localhost -t "paradox/zone1/command" -m '{"command": "speechQueue"}'
+```
+
+# Screen Power Management
+```bash
+# Turn display off
+mosquitto_pub -h localhost -t "paradox/living-room/screen/command" -m '{"command": "sleepScreen"}'
+# Turn display on
+mosquitto_pub -h localhost -t "paradox/living-room/screen/command" -m '{"command": "wakeScreen"}'
+```
+
+# System Control
+```bash
+# Reboot host machine
+mosquitto_pub -h localhost -t "paradox/zone1/command" -m '{"command": "reboot"}'
+# Shutdown host machine
+mosquitto_pub -h localhost -t "paradox/zone1/command" -m '{"command": "shutdown"}'
+# Terminate ParadoxFX process
+mosquitto_pub -h localhost -t "paradox/zone1/command" -m '{"command": "killPfx"}'
+```
+
 # Control lights
 mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
   -m '{"command": "setColor", "color": "#FF6400", "brightness": 75}'
