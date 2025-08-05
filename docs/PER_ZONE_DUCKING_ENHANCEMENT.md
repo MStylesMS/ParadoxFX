@@ -18,7 +18,7 @@ The original ducking system had several limitations:
 
 1. **Zone-scoped ducking**: Each zone maintains its own independent ducking state
 2. **Overlapping management**: Multiple active duckers use maximum ducking level  
-3. **Ducking parameter**: Optional `ducking` field (0-100) on playSpeech and playVideo
+3. **Ducking parameter**: Optional `ducking` field (negative units) on playSpeech and playVideo
 4. **Proper lifecycle**: Duck on media start, unduck on media end
 
 ### Implementation Details
@@ -27,13 +27,13 @@ The original ducking system had several limitations:
 
 ```javascript
 // Per-zone ducking state
-this._activeDucks = new Map(); // key -> duck level (0-100)
+this._activeDucks = new Map(); // key -> duck level (negative units)
 this._baseBackgroundVolume = null;
 
 // Core methods
-_applyDucking(duckId, level)     // Add ducking with unique ID
+_applyDucking(duckId, level)     // Add ducking with unique ID (negative units)
 _removeDucking(duckId)           // Remove specific ducking
-_updateBackgroundVolume()        // Recalculate and apply volume
+_updateBackgroundVolume()        // Recalculate and apply volume using absolute reduction
 ```
 
 #### Command Extensions
@@ -43,7 +43,8 @@ _updateBackgroundVolume()        // Recalculate and apply volume
 {
   "command": "playSpeech",
   "audio": "general/Hello.mp3",
-  "ducking": 50
+  "ducking": -26
+}
 }
 ```
 
@@ -52,21 +53,54 @@ _updateBackgroundVolume()        // Recalculate and apply volume
 {
   "command": "playVideo", 
   "video": "intro.mp4",
-  "ducking": 30
+  "ducking": -24
 }
 ```
 
 #### Default Ducking Levels
 
-- **Speech**: 50% (moderate reduction for voice clarity)
-- **Video**: 30% (light reduction to maintain immersion)  
-- **Images**: 0% (no ducking for static content)
+- **Speech**: -26 units (moderate reduction for voice clarity)
+- **Video**: -24 units (light reduction to maintain immersion)  
+- **Images**: 0 units (no ducking for static content)
+
+#### INI Configuration
+
+Per-zone ducking defaults can be customized in the configuration file:
+
+```ini
+[screen_living_room]
+device_type = screen
+# ... other settings ...
+speech_ducking = -26    # Override speech ducking default
+video_ducking = -24     # Override video ducking default
+
+[audio_kitchen]
+device_type = audio  
+# ... other settings ...
+speech_ducking = -30    # Different defaults per zone
+video_ducking = -20
+```
+
+### Validation and Error Handling
+
+The system includes validation for ducking parameters:
+
+- **Negative values only**: Only negative values are accepted (e.g., -26, -50)
+- **Positive values ignored**: Positive values are ignored with warning messages sent to console and MQTT
+- **Range limits**: Values below -100 are capped at -100 to prevent negative volume
+- **Invalid types**: Non-numeric values default to the fallback (-26 for speech, -24 for video)
+
+**Warning examples:**
+```
+Console: "Positive ducking values are not allowed (25), ignoring ducking"
+MQTT: {"type": "warning", "message": "Positive ducking values are not allowed (25), ignoring ducking"}
+```
 
 ### Overlapping Behavior
 
 When multiple duckers are active in the same zone:
 
-1. **Maximum level used**: System applies the highest ducking percentage
+1. **Most negative level used**: System applies the highest absolute ducking reduction
 2. **Individual tracking**: Each ducker maintains its own ID and level
 3. **Proper restoration**: When highest ducker removed, switches to next highest
 4. **Complete restoration**: When all duckers removed, restores original volume
@@ -75,9 +109,9 @@ When multiple duckers are active in the same zone:
 
 ```
 Initial volume: 80
-1. Speech starts (50% ducking) → Volume: 40
-2. Video starts (70% ducking) → Volume: 24 (using max 70%)
-3. Speech ends → Volume: 24 (still using video's 70%)
+1. Speech starts (-26 ducking) → Volume: 54 (80 + (-26))
+2. Video starts (-50 ducking) → Volume: 30 (80 + (-50), using most negative)
+3. Speech ends → Volume: 30 (still using video's -50)
 4. Video ends → Volume: 80 (restored to original)
 ```
 
@@ -86,27 +120,27 @@ Initial volume: 80
 ### Basic Usage
 
 ```bash
-# Speech with default ducking (50%)
+# Speech with default ducking (-26)
 mosquitto_pub -t "zone/command" -m '{"command": "playSpeech", "audio": "hello.mp3"}'
 
-# Speech with custom ducking (70%)  
-mosquitto_pub -t "zone/command" -m '{"command": "playSpeech", "audio": "hello.mp3", "ducking": 70}'
+# Speech with custom ducking (-50)  
+mosquitto_pub -t "zone/command" -m '{"command": "playSpeech", "audio": "hello.mp3", "ducking": -50}'
 
 # Speech with no ducking
 mosquitto_pub -t "zone/command" -m '{"command": "playSpeech", "audio": "hello.mp3", "ducking": 0}'
 
-# Video with light ducking (20%)
-mosquitto_pub -t "zone/command" -m '{"command": "playVideo", "video": "intro.mp4", "ducking": 20}'
+# Video with light ducking (-15)
+mosquitto_pub -t "zone/command" -m '{"command": "playVideo", "video": "intro.mp4", "ducking": -15}'
 ```
 
 ### Zone Isolation
 
 ```bash
 # Duck only in living room
-mosquitto_pub -t "living-room/command" -m '{"command": "playSpeech", "audio": "announce.mp3", "ducking": 60}'
+mosquitto_pub -t "living-room/command" -m '{"command": "playSpeech", "audio": "announce.mp3", "ducking": -40}'
 
 # Kitchen remains unaffected  
-mosquitto_pub -t "kitchen/command" -m '{"command": "playSpeech", "audio": "timer.mp3", "ducking": 40}'
+mosquitto_pub -t "kitchen/command" -m '{"command": "playSpeech", "audio": "timer.mp3", "ducking": -25}'
 ```
 
 ## Testing

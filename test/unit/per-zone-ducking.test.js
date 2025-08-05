@@ -62,44 +62,44 @@ describe('Per-Zone Ducking System', () => {
         });
 
         test('should apply single ducking correctly', () => {
-            testZone._applyDucking('speech-1', 50);
+            testZone._applyDucking('speech-1', -30);
             
             expect(testZone._activeDucks.size).toBe(1);
-            expect(testZone._activeDucks.get('speech-1')).toBe(50);
+            expect(testZone._activeDucks.get('speech-1')).toBe(-30);
             expect(testZone._baseBackgroundVolume).toBe(80);
-            expect(testZone.backgroundVolume).toBe(40); // 80 * (100-50) / 100
+            expect(testZone.backgroundVolume).toBe(50); // 80 + (-30) = 50
         });
 
         test('should handle multiple overlapping duckers', () => {
             // Apply first ducker
-            testZone._applyDucking('speech-1', 30);
-            expect(testZone.backgroundVolume).toBe(56); // 80 * (100-30) / 100
+            testZone._applyDucking('speech-1', -20);
+            expect(testZone.backgroundVolume).toBe(60); // 80 + (-20) = 60
 
-            // Apply second ducker with higher level
-            testZone._applyDucking('video-1', 60);
-            expect(testZone.backgroundVolume).toBe(32); // 80 * (100-60) / 100 (max level)
+            // Apply second ducker with higher level (more negative)
+            testZone._applyDucking('video-1', -40);
+            expect(testZone.backgroundVolume).toBe(40); // 80 + (-40) = 40 (uses most negative value)
 
-            // Apply third ducker with lower level
-            testZone._applyDucking('speech-2', 20);
-            expect(testZone.backgroundVolume).toBe(32); // Still using max level (60)
+            // Apply third ducker with lower level (less negative)
+            testZone._applyDucking('speech-2', -10);
+            expect(testZone.backgroundVolume).toBe(40); // Still using -40 (most negative)
 
             expect(testZone._activeDucks.size).toBe(3);
         });
 
         test('should remove ducking correctly', () => {
             // Set up multiple duckers
-            testZone._applyDucking('speech-1', 30);
-            testZone._applyDucking('video-1', 60);
-            testZone._applyDucking('speech-2', 20);
+            testZone._applyDucking('speech-1', -20);
+            testZone._applyDucking('video-1', -40);
+            testZone._applyDucking('speech-2', -10);
 
-            // Remove the highest ducker
+            // Remove the highest ducker (most negative)
             testZone._removeDucking('video-1');
-            expect(testZone.backgroundVolume).toBe(56); // Now using 30% (next highest)
+            expect(testZone.backgroundVolume).toBe(60); // Now using -20 (next most negative)
             expect(testZone._activeDucks.size).toBe(2);
 
             // Remove another ducker
             testZone._removeDucking('speech-1');
-            expect(testZone.backgroundVolume).toBe(64); // Now using 20%
+            expect(testZone.backgroundVolume).toBe(70); // Now using -10
             expect(testZone._activeDucks.size).toBe(1);
 
             // Remove last ducker
@@ -110,52 +110,59 @@ describe('Per-Zone Ducking System', () => {
         });
 
         test('should handle removing non-existent ducker gracefully', () => {
-            testZone._applyDucking('speech-1', 50);
+            testZone._applyDucking('speech-1', -30);
             
             // Try to remove non-existent ducker
             testZone._removeDucking('non-existent');
             
             // Should not affect existing ducker
             expect(testZone._activeDucks.size).toBe(1);
-            expect(testZone.backgroundVolume).toBe(40);
+            expect(testZone.backgroundVolume).toBe(50);
         });
 
         test('should validate ducking levels', () => {
-            // Test invalid levels
-            testZone._applyDucking('test-1', -10);
-            expect(testZone._activeDucks.get('test-1')).toBe(50); // Default fallback
+            // Test positive values (should be ignored with warning)
+            testZone._applyDucking('test-1', 20);
+            expect(testZone._activeDucks.has('test-1')).toBe(false); // Positive values are ignored
 
-            testZone._applyDucking('test-2', 150);
-            expect(testZone._activeDucks.get('test-2')).toBe(50); // Default fallback
+            // Test valid negative value
+            testZone._applyDucking('test-2', -30);
+            expect(testZone._activeDucks.get('test-2')).toBe(-30);
 
-            testZone._applyDucking('test-3', 'invalid');
-            expect(testZone._activeDucks.get('test-3')).toBe(50); // Default fallback
+            // Test very negative value (should be capped)
+            testZone._applyDucking('test-3', -150);
+            expect(testZone._activeDucks.get('test-3')).toBe(-100); // Capped at -100
+
+            // Test invalid type (should use default)
+            testZone._applyDucking('test-4', 'invalid');
+            expect(testZone._activeDucks.get('test-4')).toBe(-26); // Default fallback
+
         });
 
         test('should handle edge cases', () => {
-            // Test 0% ducking (no effect)
+            // Test 0 ducking (should be ignored as positive)
             testZone._applyDucking('test-1', 0);
-            expect(testZone.backgroundVolume).toBe(80); // No change
+            expect(testZone.backgroundVolume).toBe(80); // No change (ignored)
 
-            // Test 100% ducking (complete silence)
-            testZone._applyDucking('test-2', 100);
-            expect(testZone.backgroundVolume).toBe(0); // Complete silence
+            // Test maximum negative ducking
+            testZone._applyDucking('test-2', -80);
+            expect(testZone.backgroundVolume).toBe(0); // 80 + (-80) = 0 (complete silence)
         });
     });
 
     describe('Ducking Status', () => {
         test('should provide correct ducking status', () => {
-            testZone._applyDucking('speech-1', 30);
-            testZone._applyDucking('video-1', 60);
+            testZone._applyDucking('speech-1', -20);
+            testZone._applyDucking('video-1', -40);
 
             const status = testZone._getDuckingStatus();
             expect(status.activeDucks).toEqual({
-                'speech-1': 30,
-                'video-1': 60
+                'speech-1': -20,
+                'video-1': -40
             });
             expect(status.duckCount).toBe(2);
             expect(status.baseVolume).toBe(80);
-            expect(status.maxDuckLevel).toBe(60);
+            expect(status.maxDuckLevel).toBe(-40); // Most negative value
         });
 
         test('should provide empty status when no ducking active', () => {
@@ -170,25 +177,25 @@ describe('Per-Zone Ducking System', () => {
     describe('Complex Scenarios', () => {
         test('should handle rapid add/remove operations', () => {
             // Simulate rapid speech and video requests
-            testZone._applyDucking('speech-1', 40);
-            testZone._applyDucking('video-1', 70);
+            testZone._applyDucking('speech-1', -20);
+            testZone._applyDucking('video-1', -50);
             testZone._removeDucking('speech-1');
-            testZone._applyDucking('speech-2', 20);
+            testZone._applyDucking('speech-2', -10);
             testZone._removeDucking('video-1');
-            testZone._applyDucking('video-2', 50);
+            testZone._applyDucking('video-2', -30);
 
             expect(testZone._activeDucks.size).toBe(2);
-            expect(testZone.backgroundVolume).toBe(40); // 80 * (100-50) / 100
+            expect(testZone.backgroundVolume).toBe(50); // 80 + (-30) = 50 (uses most negative)
         });
 
         test('should maintain base volume correctly across operations', () => {
             const originalVolume = testZone.backgroundVolume;
 
             // Apply and remove ducking
-            testZone._applyDucking('test-1', 30);
+            testZone._applyDucking('test-1', -20);
             expect(testZone._baseBackgroundVolume).toBe(originalVolume);
 
-            testZone._applyDucking('test-2', 60);
+            testZone._applyDucking('test-2', -40);
             expect(testZone._baseBackgroundVolume).toBe(originalVolume);
 
             testZone._removeDucking('test-1');
@@ -247,11 +254,11 @@ describe('AudioZone Ducking Integration', () => {
         // Mock the ducking methods
         const applyDuckingSpy = jest.spyOn(audioZone, '_applyDucking');
         
-        await audioZone._playSpeech('test.mp3', 80, 60);
+        await audioZone._playSpeech('test.mp3', 80, -40);
         
         expect(applyDuckingSpy).toHaveBeenCalledWith(
             expect.stringMatching(/^speech-\d+-\w+$/),
-            60
+            -40
         );
     });
 
@@ -264,11 +271,11 @@ describe('AudioZone Ducking Integration', () => {
         
         expect(applyDuckingSpy).toHaveBeenCalledWith(
             expect.stringMatching(/^speech-\d+-\w+$/),
-            50 // Default level
+            -26 // New default level
         );
     });
 
-    test('should not apply ducking when level is 0', async () => {
+    test('should not apply ducking when level is 0 or positive', async () => {
         await audioZone.initialize();
         
         const applyDuckingSpy = jest.spyOn(audioZone, '_applyDucking');

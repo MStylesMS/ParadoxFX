@@ -47,6 +47,10 @@ effects_volume = 100           # Default volume for sound effects (0-100)
 # Speech settings
 speech_volume = 90             # Default volume for speech/narration (0-100)
 
+# Per-zone ducking settings (negative values reduce background volume by specified units)
+speech_ducking = -26           # Background volume reduction during speech (default: -26)
+video_ducking = -24            # Background volume reduction during video (default: -24)
+
 # =============================================================================
 # MQTT COMMAND EXAMPLES FOR ENHANCED AUDIO
 # =============================================================================
@@ -139,3 +143,17 @@ command_topic = paradox/living-room/lights/command
 status_topic = paradox/living-room/lights/status
 controller_type = hue
 controller_ip = 192.168.1.100
+
+[audio_kitchen]
+# Example audio zone configuration
+device_type = audio
+name = kitchen
+command_topic = paradox/kitchen/audio/command
+status_topic = paradox/kitchen/audio/status
+media_dir = /opt/paradox/apps/pfx/media/kitchen
+audio_device = auto
+volume = 80
+
+# Per-zone ducking settings (negative values reduce background volume by specified units)
+speech_ducking = -26           # Background volume reduction during speech (default: -26)
+video_ducking = -24            # Background volume reduction during video (default: -24)

@@ -35,15 +35,15 @@ class MockAudioZone extends BaseZone {
         return this.backgroundVolume;
     }
 
-    async playSpeech(audioPath, volume, ducking = 50) {
+    async playSpeech(audioPath, volume, ducking = -26) {
         const duckId = `speech-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        if (ducking > 0) {
+        if (ducking < 0) {
             this._applyDucking(duckId, ducking);
         }
         
         // Simulate speech duration
         setTimeout(() => {
-            if (ducking > 0) {
+            if (ducking < 0) {
                 this._removeDucking(duckId);
             }
         }, 100);
@@ -97,24 +97,24 @@ describe('Per-Zone Ducking Integration', () => {
             expect(zone3.backgroundVolume).toBe(90);
 
             // Apply ducking only to zone1
-            zone1._applyDucking('speech-1', 50);
+            zone1._applyDucking('speech-1', -30);
 
             // Zone1 should be ducked, others unaffected
-            expect(zone1.backgroundVolume).toBe(40); // 80 * 0.5
+            expect(zone1.backgroundVolume).toBe(50); // 80 + (-30)
             expect(zone2.backgroundVolume).toBe(70); // unchanged
             expect(zone3.backgroundVolume).toBe(90); // unchanged
         });
 
         test('multiple zones can have independent ducking', async () => {
             // Apply different ducking levels to different zones
-            zone1._applyDucking('speech-1', 30);
-            zone2._applyDucking('video-1', 60);
-            zone3._applyDucking('speech-2', 80);
+            zone1._applyDucking('speech-1', -20);
+            zone2._applyDucking('video-1', -40);
+            zone3._applyDucking('speech-2', -60);
 
             // Each zone should have its own ducking applied
-            expect(zone1.backgroundVolume).toBe(56); // 80 * 0.7
-            expect(zone2.backgroundVolume).toBe(28); // 70 * 0.4  
-            expect(zone3.backgroundVolume).toBe(18); // 90 * 0.2
+            expect(zone1.backgroundVolume).toBe(60); // 80 + (-20)
+            expect(zone2.backgroundVolume).toBe(30); // 70 + (-40)  
+            expect(zone3.backgroundVolume).toBe(30); // 90 + (-60)
         });
     });
 
@@ -124,27 +124,27 @@ describe('Per-Zone Ducking Integration', () => {
             zone1.playBackgroundMusic();
 
             // Apply multiple overlapping ducking requests
-            const result1 = await zone1.playSpeech('hint1.mp3', 80, 30);
-            zone1._applyDucking('video-1', 60);
-            const result2 = await zone1.playSpeech('hint2.mp3', 80, 20);
+            const result1 = await zone1.playSpeech('hint1.mp3', 80, -20);
+            zone1._applyDucking('video-1', -40);
+            const result2 = await zone1.playSpeech('hint2.mp3', 80, -10);
 
-            // Should use the maximum ducking level (60%)
-            expect(zone1.backgroundVolume).toBe(32); // 80 * (100-60) / 100
+            // Should use the maximum ducking level (most negative: -40)
+            expect(zone1.backgroundVolume).toBe(40); // 80 + (-40)
 
             // Remove the highest ducker
             zone1._removeDucking('video-1');
 
-            // Should now use the next highest (30%)
-            expect(zone1.backgroundVolume).toBe(56); // 80 * (100-30) / 100
+            // Should now use the next highest (-20)
+            expect(zone1.backgroundVolume).toBe(60); // 80 + (-20)
         });
 
         test('should restore original volume when all duckers removed', async () => {
             const originalVolume = zone1.backgroundVolume;
 
             // Apply multiple duckers
-            zone1._applyDucking('speech-1', 40);
-            zone1._applyDucking('video-1', 70);
-            zone1._applyDucking('speech-2', 30);
+            zone1._applyDucking('speech-1', -25);
+            zone1._applyDucking('video-1', -50);
+            zone1._applyDucking('speech-2', -15);
 
             expect(zone1.backgroundVolume).not.toBe(originalVolume);
 
@@ -166,16 +166,16 @@ describe('Per-Zone Ducking Integration', () => {
             expect(zone1.backgroundVolume).toBe(80);
 
             // Start video with ducking
-            zone1._applyDucking('video-1', 30);
-            expect(zone1.backgroundVolume).toBe(56); // 80 * 0.7
+            zone1._applyDucking('video-1', -20);
+            expect(zone1.backgroundVolume).toBe(60); // 80 + (-20)
 
             // Speech interrupts with higher ducking
-            const speechResult = await zone1.playSpeech('urgent.mp3', 90, 70);
-            expect(zone1.backgroundVolume).toBe(24); // 80 * 0.3 (max level)
+            const speechResult = await zone1.playSpeech('urgent.mp3', 90, -50);
+            expect(zone1.backgroundVolume).toBe(30); // 80 + (-50) (most negative level)
 
             // Speech ends
             zone1._removeDucking(speechResult.duckId);
-            expect(zone1.backgroundVolume).toBe(56); // Back to video level
+            expect(zone1.backgroundVolume).toBe(60); // Back to video level (80 + (-20))
 
             // Video ends
             zone1._removeDucking('video-1');
@@ -189,26 +189,26 @@ describe('Per-Zone Ducking Integration', () => {
             zone3.playBackgroundMusic();
 
             // Concurrent speech in all zones with different ducking levels
-            await zone1.playSpeech('announce1.mp3', 80, 40);
-            await zone2.playSpeech('announce2.mp3', 80, 60);
-            await zone3.playSpeech('announce3.mp3', 80, 20);
+            await zone1.playSpeech('announce1.mp3', 80, -30);
+            await zone2.playSpeech('announce2.mp3', 80, -40);
+            await zone3.playSpeech('announce3.mp3', 80, -15);
 
             // Each zone should have its own ducking level
-            expect(zone1.backgroundVolume).toBe(48); // 80 * 0.6
-            expect(zone2.backgroundVolume).toBe(28); // 70 * 0.4
-            expect(zone3.backgroundVolume).toBe(72); // 90 * 0.8
+            expect(zone1.backgroundVolume).toBe(50); // 80 + (-30)
+            expect(zone2.backgroundVolume).toBe(30); // 70 + (-40)
+            expect(zone3.backgroundVolume).toBe(75); // 90 + (-15)
 
             // Zones should be independent
             zone1._removeDucking(Object.keys(zone1._getDuckingStatus().activeDucks)[0]);
             expect(zone1.backgroundVolume).toBe(80); // Restored
-            expect(zone2.backgroundVolume).toBe(28); // Still ducked
-            expect(zone3.backgroundVolume).toBe(72); // Still ducked
+            expect(zone2.backgroundVolume).toBe(30); // Still ducked
+            expect(zone3.backgroundVolume).toBe(75); // Still ducked
         });
 
         test('should handle rapid fire ducking requests', async () => {
             // Simulate rapid fire sound effects and speech
             for (let i = 0; i < 10; i++) {
-                zone1._applyDucking(`effect-${i}`, Math.random() * 100);
+                zone1._applyDucking(`effect-${i}`, -(Math.random() * 80 + 5)); // Random negative values -5 to -85
             }
 
             // Should handle all requests
@@ -230,7 +230,7 @@ describe('Per-Zone Ducking Integration', () => {
             zone1.backgroundMusicPlaying = false;
 
             // Apply ducking - should work but have no effect
-            zone1._applyDucking('speech-1', 50);
+            zone1._applyDucking('speech-1', -30);
             
             // Volume methods should still be called safely
             expect(() => zone1._setBackgroundVolume(40)).not.toThrow();
@@ -238,22 +238,22 @@ describe('Per-Zone Ducking Integration', () => {
 
         test('should handle removing duckers in different order than added', async () => {
             // Add duckers in one order
-            zone1._applyDucking('first', 30);
-            zone1._applyDucking('second', 60);
-            zone1._applyDucking('third', 20);
-            zone1._applyDucking('fourth', 80);
+            zone1._applyDucking('first', -20);
+            zone1._applyDucking('second', -40);
+            zone1._applyDucking('third', -10);
+            zone1._applyDucking('fourth', -60);
 
-            expect(zone1.backgroundVolume).toBe(16); // 80 * 0.2 (max 80%)
+            expect(zone1.backgroundVolume).toBe(20); // 80 + (-60) (most negative)
 
             // Remove in different order
             zone1._removeDucking('second');
-            expect(zone1.backgroundVolume).toBe(16); // Still using max (80%)
+            expect(zone1.backgroundVolume).toBe(20); // Still using most negative (-60)
 
             zone1._removeDucking('fourth');
-            expect(zone1.backgroundVolume).toBe(56); // Now using 30%
+            expect(zone1.backgroundVolume).toBe(60); // Now using -20
 
             zone1._removeDucking('first');
-            expect(zone1.backgroundVolume).toBe(64); // Now using 20%
+            expect(zone1.backgroundVolume).toBe(70); // Now using -10
 
             zone1._removeDucking('third');
             expect(zone1.backgroundVolume).toBe(80); // Restored
