@@ -294,7 +294,7 @@ Display an image on the screen.
 
 #### playVideo
 
-Play a video file with optional volume control.
+Play a video file with optional volume control and background ducking.
 
 **Format:**
 
@@ -302,7 +302,8 @@ Play a video file with optional volume control.
 {
   "command": "playVideo",
   "video": "intro.mp4",
-  "volumeAdjust": -10
+  "volumeAdjust": -10,
+  "ducking": 30
 }
 ```
 
@@ -311,6 +312,7 @@ Play a video file with optional volume control.
 - `Video` (required): Filename or subdirectory path relative to device MEDIA_DIR
 - `VolumeAdjust` (optional): Volume adjustment percentage (-100 to +100), applied to device base VOLUME setting
 - `Channel` (optional): Audio channel routing
+- `Ducking` (optional): Background music ducking level (0-100) for video files. Default: 30 for videos, 0 for images
 
 **Supported formats:** MP4, AVI, MKV, MOV, WebM
 
@@ -327,7 +329,8 @@ Play a video file with optional volume control.
 {
   "command": "playVideo",
   "video": "room1/intro.mp4",
-  "volumeAdjust": 20
+  "volumeAdjust": 20,
+  "ducking": 50
 }
 ```
 
@@ -875,7 +878,8 @@ Play speech audio with automatic background music ducking.
 {
   "command": "playSpeech",
   "audio": "voice/instructions.mp3",
-  "volume": 90
+  "volume": 90,
+  "ducking": 50
 }
 ```
 
@@ -883,6 +887,7 @@ Play speech audio with automatic background music ducking.
 
 - `Audio` (required): Filename or subdirectory path relative to device MEDIA_DIR
 - `Volume` (optional): Volume level (0-100), defaults to device configuration
+- `Ducking` (optional): Background music ducking level (0-100), where 0 = no ducking, 100 = complete silence. Default: 50
 
 **Features:**
 - Automatic background music ducking during speech
@@ -902,7 +907,8 @@ Play speech audio with automatic background music ducking.
 {
   "command": "playSpeech",
   "audio": "narration/intro.mp3",
-  "volume": 95
+  "volume": 95,
+  "ducking": 70
 }
 ```
 
