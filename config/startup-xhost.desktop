@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Exec=/opt/paradox/apps/pfx/config/startup-xhost.sh
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=Startup XHost
+Comment=Allow paradox user X11 access for remote PFX

@@ -333,7 +333,6 @@ xinerama_screen = 0
 **Pi5 Audio Device Names:**
 - HDMI0: `pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo`
 - HDMI1: `pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo`
-```
 
 #### Pi5 Dual HDMI Configuration
 
@@ -554,3 +553,65 @@ log_level = debug
 ```
 
 Check logs for detailed error information and device status updates.
+
+## Desktop Autostart and Remote SSH Setup
+
+To ensure ParadoxFX (PFX) and X11 permissions are set up automatically on every desktop login, use the provided example files in `config/`:
+
+- `config/startup-xhost.desktop` – Grants X11 access to the 'paradox' user for remote/SSH sessions
+- `config/pfx.desktop` – Launches ParadoxFX automatically on desktop login
+
+### Step-by-Step Instructions
+
+1. **Copy the example autostart files to your autostart directory:**
+
+   ```bash
+   mkdir -p ~/.config/autostart
+   cp /opt/paradox/apps/pfx/config/startup-xhost.desktop ~/.config/autostart/
+   cp /opt/paradox/apps/pfx/config/pfx.desktop ~/.config/autostart/
+   chmod +x /opt/paradox/apps/pfx/config/startup-xhost.sh
+   ```
+
+2. **Verify the contents (optional):**
+
+   - `~/.config/autostart/startup-xhost.desktop` should contain:
+     ```ini
+     [Desktop Entry]
+     Type=Application
+     Exec=/opt/paradox/apps/pfx/config/startup-xhost.sh
+     Hidden=false
+     NoDisplay=false
+     X-GNOME-Autostart-enabled=true
+     Name=Startup XHost
+     Comment=Allow paradox user X11 access for remote PFX
+     ```
+   - `~/.config/autostart/pfx.desktop` should contain:
+     ```ini
+     [Desktop Entry]
+     Type=Application
+     Exec=/usr/bin/env DISPLAY=:0 node /opt/paradox/apps/pfx/pfx.js
+     Hidden=false
+     NoDisplay=false
+     X-GNOME-Autostart-enabled=true
+     Name=ParadoxFX
+     Comment=Start ParadoxFX media controller
+     ```
+
+3. **How it works:**
+   - On every desktop login, X11 access is granted to the 'paradox' user (for both local and SSH sessions).
+   - ParadoxFX will start automatically and take over the configured screens.
+
+4. **Remote SSH Workflow:**
+   - SSH into the Pi as 'paradox'.
+   - Stop PFX if needed (e.g., `pkill -f pfx.js`).
+   - Make code changes.
+   - Restart PFX with:
+     ```bash
+     export DISPLAY=:0
+     node /opt/paradox/apps/pfx/pfx.js
+     ```
+
+5. **Security Note:**
+   - The `startup-xhost.desktop` file uses `xhost +SI:localuser:paradox` for secure X11 access. Do not use `xhost +` unless you understand the security implications.
+
+For more details, see the example files in `config/` and the comments in `startup-xhost.sh`.

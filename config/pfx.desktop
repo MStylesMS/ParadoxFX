@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Exec=/usr/bin/env DISPLAY=:0 node /opt/paradox/apps/pfx/pfx.js
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=ParadoxFX
+Comment=Start ParadoxFX media controller
