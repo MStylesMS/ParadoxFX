@@ -121,26 +121,26 @@ Initial volume: 80
 
 ```bash
 # Speech with default ducking (-26)
-mosquitto_pub -t "zone/command" -m '{"command": "playSpeech", "audio": "hello.mp3"}'
+mosquitto_pub -t "zone/commands" -m '{"command": "playSpeech", "audio": "hello.mp3"}'
 
 # Speech with custom ducking (-50)  
-mosquitto_pub -t "zone/command" -m '{"command": "playSpeech", "audio": "hello.mp3", "ducking": -50}'
+mosquitto_pub -t "zone/commands" -m '{"command": "playSpeech", "audio": "hello.mp3", "ducking": -50}'
 
 # Speech with no ducking
-mosquitto_pub -t "zone/command" -m '{"command": "playSpeech", "audio": "hello.mp3", "ducking": 0}'
+mosquitto_pub -t "zone/commands" -m '{"command": "playSpeech", "audio": "hello.mp3", "ducking": 0}'
 
 # Video with light ducking (-15)
-mosquitto_pub -t "zone/command" -m '{"command": "playVideo", "video": "intro.mp4", "ducking": -15}'
+mosquitto_pub -t "zone/commands" -m '{"command": "playVideo", "video": "intro.mp4", "ducking": -15}'
 ```
 
 ### Zone Isolation
 
 ```bash
 # Duck only in living room
-mosquitto_pub -t "living-room/command" -m '{"command": "playSpeech", "audio": "announce.mp3", "ducking": -40}'
+mosquitto_pub -t "living-room/commands" -m '{"command": "playSpeech", "audio": "announce.mp3", "ducking": -40}'
 
 # Kitchen remains unaffected  
-mosquitto_pub -t "kitchen/command" -m '{"command": "playSpeech", "audio": "timer.mp3", "ducking": -25}'
+mosquitto_pub -t "kitchen/commands" -m '{"command": "playSpeech", "audio": "timer.mp3", "ducking": -25}'
 ```
 
 ## Testing

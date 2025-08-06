@@ -113,69 +113,69 @@ controller = hue
 
 ```bash
 # Display an image
-mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
   -m '{"command": "setImage", "image": "/media/background.jpg"}'
 
 # Play a video
-mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
   -m '{"command": "playVideo", "video": "/media/intro.mp4", "volume": 80}'
 
 # Pause video
-mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
   -m '{"command": "pauseVideo"}'
 
 # Skip to next video
-mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
   -m '{"command": "skipVideo"}'
 
 # Queue Inspection
 ```bash
 # Show current video queue
-mosquitto_pub -h localhost -t "paradox/living-room/screen/command" -m '{"command": "videoQueue"}'
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" -m '{"command": "videoQueue"}'
 # Show current speech queue
-mosquitto_pub -h localhost -t "paradox/zone1/command" -m '{"command": "speechQueue"}'
+mosquitto_pub -h localhost -t "paradox/zone1/commands" -m '{"command": "speechQueue"}'
 ```
 
 # Screen Power Management
 ```bash
 # Turn display off
-mosquitto_pub -h localhost -t "paradox/living-room/screen/command" -m '{"command": "sleepScreen"}'
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" -m '{"command": "sleepScreen"}'
 # Turn display on
-mosquitto_pub -h localhost -t "paradox/living-room/screen/command" -m '{"command": "wakeScreen"}'
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" -m '{"command": "wakeScreen"}'
 ```
 
 # System Control
 ```bash
 # Reboot host machine
-mosquitto_pub -h localhost -t "paradox/zone1/command" -m '{"command": "reboot"}'
+mosquitto_pub -h localhost -t "paradox/zone1/commands" -m '{"command": "reboot"}'
 # Shutdown host machine
-mosquitto_pub -h localhost -t "paradox/zone1/command" -m '{"command": "shutdown"}'
+mosquitto_pub -h localhost -t "paradox/zone1/commands" -m '{"command": "shutdown"}'
 # Terminate ParadoxFX process
-mosquitto_pub -h localhost -t "paradox/zone1/command" -m '{"command": "killPfx"}'
+mosquitto_pub -h localhost -t "paradox/zone1/commands" -m '{"command": "killPfx"}'
 ```
 
 # Control lights
-mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
+mosquitto_pub -h localhost -t "paradox/living-room/lights/commands" \
   -m '{"command": "setColor", "color": "#FF6400", "brightness": 75}'
 
 # Play background music
-mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
+mosquitto_pub -h localhost -t "paradox/zone1/commands" \
   -m '{"command": "playBackground", "file": "ambient.mp3", "volume": 60}'
 
 # Pause background music
-mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
+mosquitto_pub -h localhost -t "paradox/zone1/commands" \
   -m '{"command": "pauseBackground"}'
 
 # Play speech with automatic background music ducking
-mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
+mosquitto_pub -h localhost -t "paradox/zone1/commands" \
   -m '{"command": "playSpeech", "file": "hint1.wav"}'
 
 # Fire sound effect immediately
-mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
+mosquitto_pub -h localhost -t "paradox/zone1/commands" \
   -m '{"command": "playEffect", "file": "click.wav"}'
 
 # Pause all audio (background + speech)
-mosquitto_pub -h localhost -t "paradox/zone1/audio/command" \
+mosquitto_pub -h localhost -t "paradox/zone1/commands" \
   -m '{"command": "pauseAudio"}'
 ```
 

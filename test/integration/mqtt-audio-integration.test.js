@@ -113,7 +113,7 @@ class MqttAudioIntegrationTest {
         };
         
         this.logger.info('📤 Sending MQTT command: play_background_music');
-        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, command);
+        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/commandss`, command);
         
         // Wait for audio to start
         await this._sleep(2000);
@@ -124,7 +124,7 @@ class MqttAudioIntegrationTest {
         // Test stop command
         const stopCommand = { Command: 'stop_background_music' };
         this.logger.info('📤 Sending MQTT command: stop_background_music');
-        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, stopCommand);
+        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/commands`, stopCommand);
         
         await this._sleep(1000);
         await this._waitForStatusUpdate('background_music_stopped');
@@ -150,7 +150,7 @@ class MqttAudioIntegrationTest {
             this.logger.info(`📤 Playing sound effect: ${effect}`);
             const startTime = Date.now();
             
-            await this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, command);
+            await this.mqttClient.publish(`${audioDevice.config.baseTopic}/commands`, command);
             
             // Sound effects should trigger immediately with Method 3
             await this._sleep(500);
@@ -173,7 +173,7 @@ class MqttAudioIntegrationTest {
         };
         
         this.logger.info('📤 Starting background music for ducking test');
-        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, musicCommand);
+        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/commands`, musicCommand);
         await this._sleep(2000);
         
         // Play speech (should duck background music)
@@ -184,14 +184,14 @@ class MqttAudioIntegrationTest {
         };
         
         this.logger.info('📤 Playing speech with ducking');
-        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, speechCommand);
+        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/commands`, speechCommand);
         
         // Wait for speech to complete and ducking to restore
         await this._sleep(5000);
         
         // Stop background music
         const stopCommand = { Command: 'stop_background_music' };
-        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, stopCommand);
+        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/commands`, stopCommand);
         
         this.logger.info('🎤 Speech ducking MQTT control validated');
     }
@@ -206,7 +206,7 @@ class MqttAudioIntegrationTest {
             volume: 50
         };
         
-        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, musicCommand);
+        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/commands`, musicCommand);
         await this._sleep(1000);
         
         // Fire multiple sound effects simultaneously
@@ -219,7 +219,7 @@ class MqttAudioIntegrationTest {
         this.logger.info('📤 Firing simultaneous sound effects with background music');
         
         const promises = simultaneousCommands.map(command => 
-            this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, command)
+            this.mqttClient.publish(`${audioDevice.config.baseTopic}/commands`, command)
         );
         
         await Promise.all(promises);
@@ -227,7 +227,7 @@ class MqttAudioIntegrationTest {
         
         // Stop background music
         const stopCommand = { Command: 'stop_background_music' };
-        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, stopCommand);
+        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/commands`, stopCommand);
         
         this.logger.info('🎼 Simultaneous audio MQTT control validated');
     }
@@ -242,7 +242,7 @@ class MqttAudioIntegrationTest {
             volume: 50
         };
         
-        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, musicCommand);
+        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/commands`, musicCommand);
         await this._sleep(1000);
         
         // Test volume changes
@@ -255,13 +255,13 @@ class MqttAudioIntegrationTest {
             };
             
             this.logger.info(`📤 Setting volume to: ${volume}%`);
-            await this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, volumeCommand);
+            await this.mqttClient.publish(`${audioDevice.config.baseTopic}/commands`, volumeCommand);
             await this._sleep(1500);
         }
         
         // Stop background music
         const stopCommand = { Command: 'stop_background_music' };
-        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, stopCommand);
+        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/commands`, stopCommand);
         
         this.logger.info('🔊 Volume control MQTT validated');
     }
@@ -273,7 +273,7 @@ class MqttAudioIntegrationTest {
         const statusCommand = { Command: 'get_status' };
         
         this.logger.info('📤 Requesting device status');
-        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/command`, statusCommand);
+        await this.mqttClient.publish(`${audioDevice.config.baseTopic}/commands`, statusCommand);
         
         await this._waitForStatusUpdate('status_requested');
         

@@ -126,7 +126,7 @@ echo "Look at the LEFT/PRIMARY screen and listen for audio"
 echo ""
 
 # Test Screen 0
-send_mqtt_command "paradox/zone1/screen/command" '{"Command": "playVideo", "Video": "default.avi"}' "Play video on Screen 0"
+send_mqtt_command "paradox/zone1/screen/commands" '{"Command": "playVideo", "Video": "default.avi"}' "Play video on Screen 0"
 
 echo "Waiting 8 seconds for video to play..."
 sleep 8
@@ -139,7 +139,7 @@ if [ $screen0_result -eq 1 ]; then
     echo "❌ Screen 0 test FAILED"
     echo "Let's debug this issue..."
     if debug_issue "1"; then
-        send_mqtt_command "paradox/zone1/screen/command" '{"Command": "playVideo", "Video": "default.avi"}' "Retry video on Screen 0"
+        send_mqtt_command "paradox/zone1/screen/commands" '{"Command": "playVideo", "Video": "default.avi"}' "Retry video on Screen 0"
         sleep 8
         wait_for_response "Did the retry work for Screen 0?"
         screen0_result=$?
@@ -150,7 +150,7 @@ elif [ $screen0_result -eq 2 ]; then
 fi
 
 # Stop video before next test
-send_mqtt_command "paradox/zone1/screen/command" '{"Command": "stopVideo"}' "Stop video on Screen 0"
+send_mqtt_command "paradox/zone1/screen/commands" '{"Command": "stopVideo"}' "Stop video on Screen 0"
 sleep 2
 
 echo ""
@@ -163,7 +163,7 @@ echo "Look at the RIGHT/SECONDARY screen and listen for audio"
 echo ""
 
 # Test Screen 1
-send_mqtt_command "paradox/zone2/screen/command" '{"Command": "playVideo", "Video": "default.avi"}' "Play video on Screen 1"
+send_mqtt_command "paradox/zone2/screen/commands" '{"Command": "playVideo", "Video": "default.avi"}' "Play video on Screen 1"
 
 echo "Waiting 8 seconds for video to play..."
 sleep 8
@@ -176,7 +176,7 @@ if [ $screen1_result -eq 1 ]; then
     echo "❌ Screen 1 test FAILED"
     echo "Let's debug this issue..."
     if debug_issue "2"; then
-        send_mqtt_command "paradox/zone2/screen/command" '{"Command": "playVideo", "Video": "default.avi"}' "Retry video on Screen 1"
+        send_mqtt_command "paradox/zone2/screen/commands" '{"Command": "playVideo", "Video": "default.avi"}' "Retry video on Screen 1"
         sleep 8
         wait_for_response "Did the retry work for Screen 1?"
         screen1_result=$?
@@ -187,7 +187,7 @@ elif [ $screen1_result -eq 2 ]; then
 fi
 
 # Stop video
-send_mqtt_command "paradox/zone2/screen/command" '{"Command": "stopVideo"}' "Stop video on Screen 1"
+send_mqtt_command "paradox/zone2/screen/commands" '{"Command": "stopVideo"}' "Stop video on Screen 1"
 sleep 2
 
 echo ""

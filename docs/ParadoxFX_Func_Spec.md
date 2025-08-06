@@ -269,10 +269,10 @@ bridge_username = your-hue-username
    {
      "timestamp": "2025-07-03T10:30:00Z",
      "device": "zone1-hdmi0", 
-     "type": "error",
+     "type": "warning",
      "error_code": "MEDIA_NOT_FOUND",
      "message": "File video1.mp4 not found in media directory",
-     "source_topic": "paradox/zone1/screen/command"
+     "source_topic": "paradox/zone1/screen/commands"
    }
    ```
 

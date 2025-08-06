@@ -152,7 +152,7 @@ class MqttTester {
     }
 
     async testDeviceType(deviceName, deviceConfig) {
-        const commandTopic = `${deviceConfig.baseTopic}/command`;
+        const commandTopic = `${deviceConfig.baseTopic}/commands`;
         console.log(`📡 Command Topic: ${commandTopic}\n`);
 
         switch (deviceConfig.type) {
@@ -400,7 +400,7 @@ class MqttTester {
             console.log(`   JSON: ${JSON.stringify(cmd.command, null, 2)}`);
 
             // Subscribe to status topic for responses
-            const statusTopic = `${commandTopic.replace('/command', '/status')}`;
+            const statusTopic = `${commandTopic.replace('/commands', '/status')}`;
             this.client.subscribe(statusTopic);
 
             console.log(`\n   Would you like to send this command? (y/n/q to quit): `);

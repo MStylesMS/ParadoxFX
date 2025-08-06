@@ -22,7 +22,7 @@ log_level = info
 device_type = screen
 name = living_room
 display = 0
-command_topic = paradox/living-room/screen/command
+command_topic = paradox/living-room/screen/commands
 status_topic = paradox/living-room/screen/status
 media_dir = /opt/paradox/apps/pfx/media/living-room
 
@@ -139,7 +139,7 @@ video_ducking = -24            # Background volume reduction during video (defau
 # Example light device configuration
 device_type = light
 name = living_room_lights
-command_topic = paradox/living-room/lights/command
+command_topic = paradox/living-room/lights/commands
 status_topic = paradox/living-room/lights/status
 controller_type = hue
 controller_ip = 192.168.1.100
@@ -148,7 +148,7 @@ controller_ip = 192.168.1.100
 # Example audio zone configuration
 device_type = audio
 name = kitchen
-command_topic = paradox/kitchen/audio/command
+command_topic = paradox/kitchen/audio/commands
 status_topic = paradox/kitchen/audio/status
 media_dir = /opt/paradox/apps/pfx/media/kitchen
 audio_device = auto

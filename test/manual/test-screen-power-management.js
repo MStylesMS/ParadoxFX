@@ -10,7 +10,7 @@ const Logger = require('../../lib/utils/logger');
 const testConfig = {
     mqttServer: 'localhost',
     mqttPort: 1883,
-    commandTopic: 'paradox/zone1/screen/command',
+    commandTopic: 'paradox/zone1/screen/commands',
     statusTopic: 'paradox/zone1/screen/status'
 };
 

@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Exec=/usr/bin/env DISPLAY=:0 node /opt/paradox/apps/pfx/pfx.js
+Exec=/usr/bin/env DISPLAY=:0 node /opt/paradox/apps/pfx/pfx.js > /opt/paradox/logs/pfx.log 2>&1
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true

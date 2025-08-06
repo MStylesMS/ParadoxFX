@@ -28,7 +28,7 @@ run_test() {
     
     # Send MQTT command
     echo "Sending MQTT command..."
-    mosquitto_pub -t "paradox/zone2/command" -m "$mqtt_command"
+    mosquitto_pub -t "paradox/zone2/commands" -m "$mqtt_command"
     echo "Command sent!"
     echo ""
     

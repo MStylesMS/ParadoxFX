@@ -29,7 +29,7 @@ const pi5TestConfig = {
     // Topics (matching pfx-pi5-h.ini)
     baseTopic: 'paradox/zone1/screen',
     statusTopic: 'paradox/zone1/screen/status',
-    commandTopic: 'paradox/zone1/screen/command',
+    commandTopic: 'paradox/zone1/screen/commands',
 
     // Queue settings
     videoQueueMax: 3,

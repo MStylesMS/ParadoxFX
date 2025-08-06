@@ -22,7 +22,7 @@ echo ""
 
 # Set up MQTT listener in background to confirm messages are being sent
 echo "Setting up MQTT listener..."
-timeout 30 mosquitto_sub -h localhost -t "paradox/+/screen/command" -v &
+timeout 30 mosquitto_sub -h localhost -t "paradox/+/screen/commands" -v &
 MQTT_LISTENER_PID=$!
 echo "✅ MQTT listener started (PID: $MQTT_LISTENER_PID)"
 echo ""
@@ -82,7 +82,7 @@ echo ""
 
 # First send an MQTT message (even though ParadoxFX isn't running)
 echo "📡 Sending MQTT message (for logging/testing):"
-mosquitto_pub -h localhost -t "paradox/zone1/screen/command" -m '{"Command": "playVideo", "Video": "default.avi"}'
+mosquitto_pub -h localhost -t "paradox/zone1/screen/commands" -m '{"Command": "playVideo", "Video": "default.avi"}'
 echo "✅ MQTT message sent"
 echo ""
 
@@ -101,7 +101,7 @@ echo ""
 
 # Send MQTT message
 echo "📡 Sending MQTT message:"
-mosquitto_pub -h localhost -t "paradox/zone2/screen/command" -m '{"Command": "playVideo", "Video": "default.avi"}'
+mosquitto_pub -h localhost -t "paradox/zone2/screen/commands" -m '{"Command": "playVideo", "Video": "default.avi"}'
 echo "✅ MQTT message sent"
 echo ""
 

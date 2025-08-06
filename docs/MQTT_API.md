@@ -22,7 +22,7 @@ PFx uses MQTT for all device communication. Each device subscribes to a command 
 
 ### Base Architecture
 
-- **Commands**: Sent to `{baseTopic}/command`
+- **Commands**: Sent to `{baseTopic}/commandss`
 - **Status**: Published to `{baseTopic}/status`
 - **Heartbeat**: Published to global heartbeat topic
 - **Errors**: Published to both device status topic and global heartbeat topic
@@ -34,8 +34,10 @@ PFx uses MQTT for all device communication. Each device subscribes to a command 
 Each device has a base topic configured in `pfx.ini`:
 
 ```
-{baseTopic}/command    # Incoming commands
+{baseTopic}/commandss   # Incoming commands
 {baseTopic}/status     # Outgoing status updates
+{baseTopic}/events     # Real-time events
+{baseTopic}/warnings   # Warnings and errors
 ```
 
 ### Global Topics
@@ -47,9 +49,11 @@ Each device has a base topic configured in `pfx.ini`:
 ### Example Topic Structure
 
 ```
-paradox/living-room/screen/command    # Commands to living room screen
+paradox/living-room/screen/commandss   # Commands to living room screen
 paradox/living-room/screen/status     # Status from living room screen
-paradox/living-room/lights/command    # Commands to living room lights
+paradox/living-room/screen/events     # Event notifications
+paradox/living-room/screen/warnings   # Warnings and errors
+paradox/living-room/lights/commandss   # Commands to living room lights
 paradox/devices                       # Global heartbeat topic
 ```
 
@@ -567,7 +571,7 @@ Multi-zone audio devices support three distinct audio types with advanced manage
 ### Topic Structure for Audio Zones
 
 ```
-paradox/zone1/audio/command    # Commands to audio zone 1
+paradox/zone1/audio/commands    # Commands to audio zone 1
 paradox/zone1/audio/status     # Status from audio zone 1
 ```
 
@@ -1353,28 +1357,28 @@ Non-fatal issues are reported as warnings:
 1. **Set background image:**
 
 ```bash
-mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
   -m '{"command": "setImage", "image": "background.jpg"}'
 ```
 
 2. **Play intro video:**
 
 ```bash
-mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
   -m '{"command": "playVideo", "video": "intro.mp4", "volumeAdjust": -20}'
 ```
 
 3. **Play background music:**
 
 ```bash
-mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
   -m '{"command": "playAudio", "audio": "ambient.mp3", "volumeAdjust": -40}'
 ```
 
 4. **Stop all playback:**
 
 ```bash
-mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
   -m '{"command": "stopAll"}'
 ```
 
@@ -1383,21 +1387,21 @@ mosquitto_pub -h localhost -t "paradox/living-room/screen/command" \
 1. **Turn on lights:**
 
 ```bash
-mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
+mosquitto_pub -h localhost -t "paradox/living-room/lights/commands" \
   -m '{"command": "on", "brightness": 100}'
 ```
 
 2. **Set warm color:**
 
 ```bash
-mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
+mosquitto_pub -h localhost -t "paradox/living-room/lights/commands" \
   -m '{"command": "setColor", "color": "#FF8C00", "brightness": 75}'
 ```
 
 3. **Fade to dim:**
 
 ```bash
-mosquitto_pub -h localhost -t "paradox/living-room/lights/command" \
+mosquitto_pub -h localhost -t "paradox/living-room/lights/commands" \
   -m '{"command": "fade", "brightness": 25, "duration": 10000}'
 ```
 

@@ -15,7 +15,7 @@ async function showCommands() {
 
         for (const [deviceName, deviceConfig] of Object.entries(config.devices)) {
             console.log(`\n🔧 Device: ${deviceName} (${deviceConfig.type})`);
-            console.log(`📡 Command Topic: ${deviceConfig.baseTopic}/command`);
+            console.log(`📡 Command Topic: ${deviceConfig.baseTopic}/commands`);
             console.log('='.repeat(60));
 
             switch (deviceConfig.type) {
