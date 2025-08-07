@@ -142,15 +142,15 @@ mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"playVideo","video":"de
 wait_input "Zone 1: Video queuing test (two files)"
 
 echo "Play looping background music"
-mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"playBackgroundMusic","audio":"music/Classic_hip-hop_beat.mp3","loop":true,"volume":80}'
+mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"playBackground","audio":"music/Classic_hip-hop_beat.mp3","loop":true,"volume":80}'
 wait_input "Zone 1: Play background music for ducking test"
 
 echo "Play a video (audio ducking test)"
-mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"playVideo","video":"defaults/intro_short.mp4","volume":80}'
+mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"playVideo","video":"defaults/default.mp4","volume":80}'
 wait_input "Zone 1: Audio ducking test (video over background music)"
 
 echo "Stop background audio"
-mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"stopBackgroundMusic"}'
+mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"stopBackground"}'
 wait_input "Zone 1: Stop background music"
 
 # Zone 1 screen power tests

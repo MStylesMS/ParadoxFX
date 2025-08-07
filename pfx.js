@@ -58,7 +58,8 @@ class PFxApplication {
             console.log('****************************************');
 
         } catch (error) {
-            this.logger.error('Failed to start application:', error);
+            this.logger.error('Failed to start application:', error.message);
+            this.logger.debug(error.stack);
             process.exit(1);
         }
     }
