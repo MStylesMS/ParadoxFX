@@ -429,10 +429,12 @@ Put all connected displays into low-power sleep mode using DPMS (Display Power M
 ```
 
 **Behavior:**
-- Sends DPMS sleep signal to all connected displays
+- **Screen zones only**: Sends DPMS sleep signal to the target monitor for this zone
+- **Audio zones**: Command is ignored (no screen to control)
+- **Video playback restriction**: Sleep commands are ignored while video is actively playing
+- Sleep is only applied when video is paused or an image is displayed
 - Maintains system state and media queues
-- Displays will show "No Signal" or enter standby mode
-- All connected displays (HDMI-0, HDMI-1, etc.) are affected simultaneously
+- Display will show "No Signal" or enter standby mode
 
 **Examples:**
 
@@ -444,7 +446,7 @@ Put all connected displays into low-power sleep mode using DPMS (Display Power M
 
 #### wakeScreen
 
-Wake all connected displays from sleep mode and restore default display state.
+Wake the zone's display from sleep mode and restore default display state.
 
 **Format:**
 
@@ -455,10 +457,10 @@ Wake all connected displays from sleep mode and restore default display state.
 ```
 
 **Behavior:**
-- Sends DPMS wake signal to all connected displays
-- Displays return to active state immediately
-- If no media is currently playing, displays show the configured default image
-- All connected displays wake simultaneously
+- **Screen zones only**: Sends DPMS wake signal to the target monitor for this zone
+- **Audio zones**: Command is ignored (no screen to control)
+- Display returns to active state immediately
+- If no media is currently playing, display shows the configured default image
 
 **Examples:**
 
@@ -468,7 +470,7 @@ Wake all connected displays from sleep mode and restore default display state.
 }
 ```
 
-**Note:** Most media commands (`setImage`, `playVideo`) and HDMI audio commands automatically wake sleeping displays, making explicit `wakeScreen` commands typically unnecessary during normal operation.
+**Note:** Most media commands (`setImage`, `playVideo`) automatically wake sleeping displays, making explicit `wakeScreen` commands typically unnecessary during normal operation. Sleep commands are ignored during active video playback to prevent interruption.
 
 #### skip
 
