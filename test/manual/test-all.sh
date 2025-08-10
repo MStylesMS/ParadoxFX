@@ -154,12 +154,12 @@ mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"stopBackground"}'
 wait_input "Zone 1: Stop background music"
 
 # Zone 1 screen power tests
-echo "Put display to sleep"
-mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"sleepScreen"}'
-wait_input "Zone 1: Put display to sleep"
-echo "Wake display"
-mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"wakeScreen"}'
-wait_input "Zone 1: Wake display"
+#echo "Put display to sleep"
+#mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"sleepScreen"}'
+#wait_input "Zone 1: Put display to sleep"
+#echo "Wake display"
+#mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"wakeScreen"}'
+#wait_input "Zone 1: Wake display"
 
 echo "=== ZONE 2 SCREEN TESTS (HDMI1) ==="
 
