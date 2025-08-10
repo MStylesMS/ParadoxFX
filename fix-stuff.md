@@ -1,4 +1,5 @@
 # ParadoxFX Fix Summary and Recovery Plan
+**WIP:** Video queue processing now immediately plays new videos instead of waiting for EOF, and screen sleep/wake behavior is still not working (issues #4 and #5 under investigation).
 
 ## Context
 **CORRECT BASELINE: Commit `3a2b053b`** - This commit already includes MQTT resilience, video queue fixes, and sleep/wake improvements. PFX runs successfully with all fixes integrated.
