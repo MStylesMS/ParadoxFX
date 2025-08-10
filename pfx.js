@@ -29,6 +29,26 @@ class PFxApplication {
             const argv = minimist(process.argv.slice(2));
             const configFile = argv.config || argv.c || argv._[0] || 'pfx.ini';
             const configPath = path.resolve(configFile);
+            // Ensure log directory exists and set up file logging
+            const logDir = path.resolve('/opt/paradox/logs');
+            fs.mkdirSync(logDir, { recursive: true });
+            const logFile = path.join(logDir, 'pfx.log');
+            const logStream = fs.createWriteStream(logFile, { flags: 'a' });
+            const origLog = console.log;
+            const origError = console.error;
+            const origWarn = console.warn;
+            console.log = (...args) => {
+                origLog(...args);
+                logStream.write(args.join(' ') + '\n');
+            };
+            console.error = (...args) => {
+                origError(...args);
+                logStream.write(args.join(' ') + '\n');
+            };
+            console.warn = (...args) => {
+                origWarn(...args);
+                logStream.write(args.join(' ') + '\n');
+            };
             console.log('****************************************');
             this.logger.info('Starting Paradox Effects application...');
             console.log('****************************************');

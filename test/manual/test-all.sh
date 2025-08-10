@@ -138,6 +138,7 @@ wait_input "Zone 1: Show photo"
 
 echo "Trigger two video files (queuing test)"
 mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"playVideo","video":"defaults/default.mp4"}'
+sleep 1
 mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"playVideo","video":"defaults/intro_short.mp4"}'
 wait_input "Zone 1: Video queuing test (two files)"
 
@@ -208,6 +209,7 @@ wait_input "Zone 2: Skip speech"
 
 echo "Trigger two video files (queuing test)"
 mosquitto_pub -t "paradox/zone2/commands" -m '{"command":"playVideo","video":"defaults/default.mp4"}'
+sleep 1
 mosquitto_pub -t "paradox/zone2/commands" -m '{"command":"playVideo","video":"defaults/intro_short.mp4"}'
 wait_input "Zone 2: Video queuing test (two files)"
 

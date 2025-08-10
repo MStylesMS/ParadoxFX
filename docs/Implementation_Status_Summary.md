@@ -68,12 +68,11 @@
 - **Key Files**: `test/manual/config-pi-audio.js` (good foundation), need enhanced setup validation
 
 ### **Testing Consolidation (PARTIAL)**
-- **Specification Says**: Unified testing approach across platforms
-- **Code Reality**: Multiple test types exist but lack consolidation and standardization
-- **Status**: ⚠️ **NEEDS CONSOLIDATION** - Great coverage but fragmented approach
-- **Key Files**: `test/integration/`, `test/manual/`, various platform-specific tests
 
 ## Priority Implementation Tasks
+ **Specification Says**: Queue multiple videos atomically in FIFO order; ignore duplicate same-file requests
+ **Code Reality**: `ScreenZone` queue manager now enqueues `playVideo` correctly, processes in order, ignores redundant A→A commands
+ **Status**: ✅ **IMPLEMENTED** - Video queuing feature working correctly; next WIP: sleepScreen/wakeScreen enhancements
 
 ### **HIGH PRIORITY (Core Architecture)**
 
