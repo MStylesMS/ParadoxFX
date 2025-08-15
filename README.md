@@ -7,6 +7,7 @@ A Node.js multi-modal media and effect controller for screens, lights, and relay
 ParadoxFX is a comprehensive system for controlling various devices through MQTT messaging. It supports:
 
 - **Screens**: Video/audio playback via media players (mpv, vlc, fbi, etc.)
+- **Browser Integration**: Web content display with window management (Chromium)
 - **Multi-Zone Audio**: Advanced audio management with background music, speech, and sound effects
 - **Lights**: Individual and group lighting control (Hue, WiZ, Zigbee, Z-Wave)  
 - **Relays**: Switch and outlet control
@@ -127,6 +128,23 @@ mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
 # Skip to next video
 mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
   -m '{"command": "skipVideo"}'
+
+# Browser Management (Web Content Display)
+# Launch browser (⚠️ visible initially - manually hide after 10s)
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
+  -m '{"command": "enableBrowser", "url": "http://localhost/clock/"}'
+
+# Hide browser after page loads (typically 10 seconds)
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
+  -m '{"command": "hideBrowser"}'
+
+# Show browser (bring to front)
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
+  -m '{"command": "showBrowser"}'
+
+# Disable browser completely
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
+  -m '{"command": "disableBrowser"}'
 
 # Queue Inspection
 ```bash

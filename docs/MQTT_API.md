@@ -580,7 +580,7 @@ ParadoxFX supports browser integration for displaying web content alongside mult
 
 #### enableBrowser
 
-Launch browser process and keep it **hidden in background**. Browser remains behind MPV until explicitly shown.
+⚠️ **Launch browser process in foreground**. Browser will be visible until manually hidden.
 
 ```json
 {
@@ -594,9 +594,11 @@ Launch browser process and keep it **hidden in background**. Browser remains beh
 
 **Behavior:** 
 - Launches Chromium process with specified URL
-- Browser window is created but kept **behind MPV** (not visible)
-- Browser remains hidden until `showBrowser` command is sent
+- ⚠️ **Browser window appears in foreground initially**
+- Must manually send `hideBrowser` after page loads (typically 10 seconds)
 - Uses isolated profile: `/tmp/pfx-browser-{zoneName}/`
+
+> **💡 Scheduling Tip**: To launch hidden, send `enableBrowser` followed by `hideBrowser` with a 10-second delay to allow page loading.
 
 #### disableBrowser
 
@@ -678,7 +680,7 @@ Enable/disable automatic browser restart on crash.
 Browser management provides **pure window focus control** with clear separation of concerns:
 
 **Process Lifecycle:**
-- `enableBrowser`: Launch browser process (hidden in background)
+- `enableBrowser`: Launch browser process (⚠️ **visible in foreground initially**)
 - `disableBrowser`: Terminate browser process completely
 
 **Window Focus Control:**
@@ -687,9 +689,11 @@ Browser management provides **pure window focus control** with clear separation 
 
 **Key Design Principles:**
 - **No automatic fade effects**: show/hide commands perform only window switching
-- **Background launch**: enableBrowser starts hidden browser behind MPV
+- **⚠️ Foreground launch**: enableBrowser starts browser visible in foreground - manually hide after page loads
 - **External fade control**: Clock fade effects managed separately via clock MQTT commands
 - **Proven technique**: Uses Option 6 (`xdotool windowactivate`) for reliable window switching
+
+> **📝 Note**: `enableBrowser` will launch the browser in front. If you want it hidden, you must send a `hideBrowser` command manually after the page has finished loading. Generally, 10 seconds should be more than enough for most pages if you want to schedule a `hideBrowser` command to be sent after the `enableBrowser` command.
 
 **Clock Integration (Separate):**
 If you want clock fade effects with browser switching, send separate commands:

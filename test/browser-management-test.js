@@ -33,6 +33,9 @@ class BrowserManagementTest {
             baseTopic: 'paradox',
             heartbeatTopic: 'paradox/system/heartbeat',
             heartbeatInterval: 10000, // 10 seconds for testing
+            global: {
+                mediaBasePath: '/opt/paradox/media'
+            },
             devices: {
                 'screen1': {
                     name: 'screen1',

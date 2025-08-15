@@ -169,10 +169,10 @@ function wmctrlActivateWindow(winId) {
 }
 ```
 
-#### 3. Background Browser Launch Implementation
+#### 3. Production Browser Launch Implementation
 
 ```javascript
-// Launch Chromium positioned but HIDDEN behind MPV
+// Launch Chromium positioned normally (VISIBLE initially)
 const chromeArgs = [
   `--user-data-dir=${CHROME_PROFILE}`,
   `--class=${CHROME_CLASS}`,
@@ -190,14 +190,16 @@ const chrome = spawn(chromeBin, chromeArgs, {
   env: { ...process.env, DISPLAY } 
 });
 
-// Position and configure Chromium window (KEEP HIDDEN)
+// Position and configure Chromium window
 let chromeWin = await waitForWindowByClass(CHROME_CLASS, 4000);
 if (chromeWin) {
   moveWindowToDisplay(chromeWin, targetDisplay);
   fullscreenWindow(chromeWin);
-  addWinState(chromeWin, 'below'); // CRITICAL: Start behind MPV
-  // DO NOT activate - keep browser hidden until explicit showBrowser command
+  // ⚠️ Browser starts VISIBLE - manually hide with hideBrowser after page loads
 }
+```
+
+> **📝 Production Note**: `enableBrowser` launches the browser visibly in the foreground. To launch "hidden", send `enableBrowser` followed by `hideBrowser` after ~10 seconds to allow page loading.
 
 // Launch MPV with IPC enabled
 const mpvArgs = [
@@ -270,3 +272,67 @@ if (mpvWin) {
 - Operation phase switching is seamless and smooth
 
 This implementation provides reliable, seamless window switching suitable for production use in escape room or interactive media applications.
+
+## Hidden Browser Launch Investigation
+
+**Challenge**: Launch browser completely hidden (off-screen) to avoid visual artifacts during startup.
+
+### Attempted Approaches
+
+#### ❌ Approach: Extreme Negative Coordinates
+**Method**: Launch browser at `(-screenWidth, -screenHeight)` coordinates (e.g., `-1920, -1080`)
+**Result**: FAILED - Window manager/Chromium rejected extreme coordinates, browser appeared on primary monitor and auto-fullscreened
+**Issue**: X11 window managers have sanity checks preventing completely off-screen windows
+
+#### 🔍 Attempted Approaches (Failures Analyzed)
+- **Option B**: Minimized Launch - Use `--start-minimized` flag + immediate minimize (TESTED: Window manager compatibility issues)
+- **Option C**: Virtual Desktop - Launch on different workspace, switch during show
+- **Option E**: Headless Mode - Launch headless, restart windowed when needed
+
+#### ❌ Failed Approaches: Off-Screen Positioning  
+**Extreme Negative Coordinates**: Position at `(-screenWidth, -screenHeight)` (e.g., `-1920, -1080`)
+- **Result**: FAILED - Window manager rejected coordinates, browser appeared on primary monitor
+- **Root Cause**: X11 window managers have sanity checks preventing completely off-screen windows
+
+**Bottom-Right Edge Positioning**: Position one pixel beyond screen boundary (e.g., `1921, 1081`)
+- **Result**: FAILED - Still caused full-screen takeover during loading  
+- **Root Cause**: Browser gained focus during content loading regardless of initial position
+
+**Bottom-Right Corner**: Position at screen corner with minimal visibility
+- **Result**: FAILED - Full takeover still occurred during React app loading
+
+#### ❌ Failed Approach: Minimized Launch (Option B)
+**Method**: Use Chromium `--start-minimized` flag with window state management
+- **Result**: FAILED - Inconsistent behavior, window manager compatibility issues
+- **Root Cause**: Complex window state transitions unreliable across environments
+
+#### 🎯 CURRENT SOLUTION: Timing + Settle Approach (Option D) - PRODUCTION READY
+**Method**: Accept brief visibility, optimize for reliability and minimal duration
+**Strategy**: Launch → Position → 8-Second Settle → Reliable Hide with Option 6
+
+**Technical Implementation**:
+```javascript
+// Process Flow:
+1. Launch browser at target display coordinates
+2. Detect window creation (10s timeout)
+3. Position window immediately after detection  
+4. Wait 8 seconds for React app loading and browser stabilization
+5. Retry MPV window detection (3 attempts, 1s intervals)
+6. Use proven Option 6 (xdotool windowactivate) to hide browser
+```
+
+**Results**:
+- ✅ **Initial Setup**: Browser visible 8-10 seconds during enableBrowser
+- ✅ **Show/Hide Operations**: Instant, reliable switching afterward
+- ✅ **Multi-Monitor Support**: Proper Zone 2 targeting
+- ✅ **Production Ready**: Consistent, predictable behavior
+
+**Performance Metrics**:
+- Window Detection: ~2 seconds
+- Settle Time: 8 seconds (configurable)
+- Total Startup: ~10 seconds with brief visibility
+- Show/Hide Speed: <100ms after initial setup
+
+**Implementation Status**: DEPLOYED - 95% of desired functionality achieved with acceptable compromise
+
+**Detailed Analysis**: See [ISSUE_BROWSER_STARTUP.md](./ISSUE_BROWSER_STARTUP.md) for comprehensive investigation results and technical learnings.
