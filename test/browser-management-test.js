@@ -80,28 +80,25 @@ class BrowserManagementTest {
         }
 
         try {
-            // Test 1: Enable browser
-            this.logger.info('Test 1: Enable browser');
+            // Test 1: Enable browser (background launch)
+            this.logger.info('Test 1: Enable browser (background launch)');
             await zone.handleCommand({
                 command: 'enableBrowser',
-                url: 'http://localhost/clock/',
-                focus: false
+                url: 'http://localhost/clock/'
             });
             await this._delay(2000);
 
-            // Test 2: Show browser (should bring to front)
-            this.logger.info('Test 2: Show browser');
+            // Test 2: Show browser (pure window management)
+            this.logger.info('Test 2: Show browser (pure window management)');
             await zone.handleCommand({
-                command: 'showBrowser',
-                effect: 'fade'
+                command: 'showBrowser'
             });
             await this._delay(3000);
 
             // Test 3: Hide browser (back to MPV)
-            this.logger.info('Test 3: Hide browser');
+            this.logger.info('Test 3: Hide browser (pure window management)');
             await zone.handleCommand({
-                command: 'hideBrowser',
-                effect: 'fade'
+                command: 'hideBrowser'
             });
             await this._delay(3000);
 

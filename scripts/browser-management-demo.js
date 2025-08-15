@@ -25,31 +25,28 @@ Zone Topic: paradox/{zone-name}/commands
 const demoCommands = [
     {
         step: 1,
-        description: "Enable browser with clock URL (background launch)",
+        description: "Enable browser with clock URL (hidden background launch)",
         command: {
             command: "enableBrowser",
-            url: "http://localhost/clock/",
-            focus: false
+            url: "http://localhost/clock/"
         },
-        expected: "Browser launches in background, MPV remains focused"
+        expected: "Browser launches hidden behind MPV, MPV remains focused and visible"
     },
     {
         step: 2, 
-        description: "Show browser with fade effect",
+        description: "Show browser (pure window management)",
         command: {
-            command: "showBrowser",
-            effect: "fade"
+            command: "showBrowser"
         },
-        expected: "Clock fades out, browser comes to front, clock fades in"
+        expected: "Browser brought to front using xdotool windowactivate, no fade effects"
     },
     {
         step: 3,
-        description: "Hide browser with fade effect", 
+        description: "Hide browser (pure window management)", 
         command: {
-            command: "hideBrowser",
-            effect: "fade"
+            command: "hideBrowser"
         },
-        expected: "Clock fades out, MPV comes to front, content resumes"
+        expected: "MPV brought to front, browser pushed behind, no fade effects"
     },
     {
         step: 4,
@@ -58,7 +55,7 @@ const demoCommands = [
             command: "setBrowserUrl", 
             url: "https://www.google.com"
         },
-        expected: "Browser restarted with new URL"
+        expected: "Browser restarted with new URL (hidden behind MPV)"
     },
     {
         step: 5,
@@ -66,7 +63,7 @@ const demoCommands = [
         command: {
             command: "showBrowser"
         },
-        expected: "Google.com displayed, focus tracked"
+        expected: "Google.com displayed, focus tracked, pure window switching"
     },
     {
         step: 6,
@@ -137,10 +134,11 @@ Enhanced heartbeat includes zone focus summary:
 =========================
 
 Window Switching Technology: Option 6 (xdotool windowactivate)
-- Proven reliable focus + raise technique
+- Proven reliable focus + raise technique  
+- Pure window management (no fade effects)
 - External process control (no auto-launch config)
 - Chromium profile isolation: /tmp/pfx-browser-{zone}
-- MQTT clock fade integration for smooth transitions
+- Background browser launch (hidden behind MPV)
 
 Dependencies:
 - xdotool (window management)
@@ -150,21 +148,25 @@ Dependencies:
 🎯 Quick Test Commands
 ====================
 
-# Enable browser
+# Enable browser (hidden launch)
 mosquitto_pub -h localhost -t "paradox/screen1/commands" \\
   -m '{"command": "enableBrowser", "url": "http://localhost/clock/"}'
 
-# Show browser with fade
+# Show browser (pure window switching)
 mosquitto_pub -h localhost -t "paradox/screen1/commands" \\
-  -m '{"command": "showBrowser", "effect": "fade"}'
+  -m '{"command": "showBrowser"}'
 
-# Hide browser
+# Hide browser (pure window switching)
 mosquitto_pub -h localhost -t "paradox/screen1/commands" \\
-  -m '{"command": "hideBrowser", "effect": "fade"}'
+  -m '{"command": "hideBrowser"}'
 
 # Disable browser
 mosquitto_pub -h localhost -t "paradox/screen1/commands" \\
   -m '{"command": "disableBrowser"}'
+
+# External Clock Fade (if desired - separate from browser commands)
+mosquitto_pub -h localhost -t "paradox/houdini/clock/commands" \\
+  -m '{"command": "fadeOut"}'
 
 ✅ Integration Complete!
 =======================

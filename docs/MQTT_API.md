@@ -576,27 +576,31 @@ Wake the zone's display from sleep mode and restore default display state.
 
 ### Browser Management Commands
 
-ParadoxFX supports browser integration for displaying web content alongside multimedia. Browser management uses external process control without auto-launch configuration.
+ParadoxFX supports browser integration for displaying web content alongside multimedia. Browser management provides **pure window focus control** with **process lifecycle management**.
 
 #### enableBrowser
 
-Launch and enable browser with specified URL.
+Launch browser process and keep it **hidden in background**. Browser remains behind MPV until explicitly shown.
 
 ```json
 {
   "command": "enableBrowser",
-  "url": "http://localhost/clock/",
-  "focus": false
+  "url": "http://localhost/clock/"
 }
 ```
 
 **Parameters:**
 - `url` (optional): Initial URL to load (default: `http://localhost/clock/`)
-- `focus` (optional): Whether to bring browser to front immediately (default: `false`)
+
+**Behavior:** 
+- Launches Chromium process with specified URL
+- Browser window is created but kept **behind MPV** (not visible)
+- Browser remains hidden until `showBrowser` command is sent
+- Uses isolated profile: `/tmp/pfx-browser-{zoneName}/`
 
 #### disableBrowser
 
-Terminate browser process and clean up resources.
+Terminate browser process and clean up all resources.
 
 ```json
 {
@@ -604,33 +608,42 @@ Terminate browser process and clean up resources.
 }
 ```
 
+**Behavior:**
+- Terminates browser process completely
+- Cleans up temporary profile directory
+- Returns focus to MPV content
+
 #### showBrowser
 
-Bring browser to front with optional transition effect.
+**Pure window management**: Bring browser window to front using window focus switching.
 
 ```json
 {
-  "command": "showBrowser",
-  "effect": "fade"
+  "command": "showBrowser"
 }
 ```
 
-**Parameters:**
-- `effect` (optional): Transition effect - `"fade"` or `"none"` (default: `"fade"`)
+**Behavior:**
+- Uses `xdotool windowactivate` to bring browser to front
+- MPV window is pushed behind browser
+- **No fade effects or clock commands** - pure window layering
+- Browser must be enabled first with `enableBrowser`
 
 #### hideBrowser
 
-Return focus to MPV content with optional transition effect.
+**Pure window management**: Return focus to MPV by bringing MPV window to front.
 
 ```json
 {
-  "command": "hideBrowser", 
-  "effect": "fade"
+  "command": "hideBrowser"
 }
 ```
 
-**Parameters:**
-- `effect` (optional): Transition effect - `"fade"` or `"none"` (default: `"fade"`)
+**Behavior:**
+- Uses `xdotool windowactivate` to bring MPV to front
+- Browser window is pushed behind MPV (still running, just hidden)
+- **No fade effects or clock commands** - pure window layering
+- Browser process continues running in background
 
 #### setBrowserUrl
 
@@ -660,21 +673,33 @@ Enable/disable automatic browser restart on crash.
 **Parameters:**
 - `enabled` (required): Boolean flag for keep-alive behavior
 
-### Browser/Clock Integration
+### Browser Window Management Architecture
 
-The browser management system integrates with the clock fade system for smooth transitions:
+Browser management provides **pure window focus control** with clear separation of concerns:
 
-```json
-{
-  "command": "showBrowser",
-  "effect": "fade"
-}
+**Process Lifecycle:**
+- `enableBrowser`: Launch browser process (hidden in background)
+- `disableBrowser`: Terminate browser process completely
+
+**Window Focus Control:**
+- `showBrowser`: Bring browser window to front (pure window management)
+- `hideBrowser`: Bring MPV window to front (pure window management)
+
+**Key Design Principles:**
+- **No automatic fade effects**: show/hide commands perform only window switching
+- **Background launch**: enableBrowser starts hidden browser behind MPV
+- **External fade control**: Clock fade effects managed separately via clock MQTT commands
+- **Proven technique**: Uses Option 6 (`xdotool windowactivate`) for reliable window switching
+
+**Clock Integration (Separate):**
+If you want clock fade effects with browser switching, send separate commands:
+
+```bash
+# Manual fade sequence example
+mosquitto_pub -t "paradox/houdini/clock/commands" -m '{"command": "fadeOut"}'
+mosquitto_pub -t "paradox/zone1/commands" -m '{"command": "showBrowser"}'
+mosquitto_pub -t "paradox/houdini/clock/commands" -m '{"command": "fadeIn"}'
 ```
-
-This will:
-1. Send `fadeOut` command to clock MQTT topic
-2. Switch window focus to browser using `xdotool windowactivate` 
-3. Send `fadeIn` command to clock MQTT topic
 4. Update zone status with focus and content tracking
 
 **Clock MQTT Topic**: `paradox/houdini/clock/commands`

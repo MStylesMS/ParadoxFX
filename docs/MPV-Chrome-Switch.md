@@ -97,10 +97,12 @@ Based on successful testing of Options 3 and 6, here's how to implement reliable
 
 ### Architecture Overview
 
-The implementation uses a **two-phase approach**:
+The implementation uses a **pure window management approach**:
 
-1. **Setup Phase**: Launch and position both windows (flicker acceptable)
-2. **Operation Phase**: Only change Z-order (seamless switching)
+1. **Setup Phase**: Launch browser hidden behind MPV (no flicker)
+2. **Operation Phase**: Pure window focus switching (seamless Z-order changes)
+
+**Key Design Principle**: Browser management provides **pure window focus control** with no automatic fade effects or clock integration.
 
 ### Core Implementation
 
@@ -167,10 +169,10 @@ function wmctrlActivateWindow(winId) {
 }
 ```
 
-#### 3. Setup Phase Implementation
+#### 3. Background Browser Launch Implementation
 
 ```javascript
-// Launch Chromium with specific positioning
+// Launch Chromium positioned but HIDDEN behind MPV
 const chromeArgs = [
   `--user-data-dir=${CHROME_PROFILE}`,
   `--class=${CHROME_CLASS}`,
@@ -188,12 +190,13 @@ const chrome = spawn(chromeBin, chromeArgs, {
   env: { ...process.env, DISPLAY } 
 });
 
-// Position and configure Chromium window
+// Position and configure Chromium window (KEEP HIDDEN)
 let chromeWin = await waitForWindowByClass(CHROME_CLASS, 4000);
 if (chromeWin) {
   moveWindowToDisplay(chromeWin, targetDisplay);
   fullscreenWindow(chromeWin);
-  addWinState(chromeWin, 'below'); // Start behind MPV
+  addWinState(chromeWin, 'below'); // CRITICAL: Start behind MPV
+  // DO NOT activate - keep browser hidden until explicit showBrowser command
 }
 
 // Launch MPV with IPC enabled
@@ -220,23 +223,29 @@ if (mpvWin) {
 }
 ```
 
-#### 4. Operation Phase Implementation
+#### 4. Pure Window Focus Switching Implementation
 
 ```javascript
-// Show browser (from MPV)
+// Show browser (from MPV) - PURE WINDOW MANAGEMENT
 log('SWITCHING TO BROWSER: xdotool windowactivate (focus + raise)');
 if (chromeWin) {
   xdotoolActivateWindow(chromeWin);
+  // NO fade effects, NO clock commands - pure window switching
 }
 
-// Show MPV (from browser)  
+// Show MPV (from browser) - PURE WINDOW MANAGEMENT  
 log('SWITCHING TO MPV: xdotool windowactivate (focus + raise)');
 if (mpvWin) {
   xdotoolActivateWindow(mpvWin);
+  // NO fade effects, NO clock commands - pure window switching
 }
 ```
 
-### Key Implementation Notes
+**IMPORTANT**: This implementation provides **pure window focus control**:
+- **No automatic fade effects** sent to clock applications
+- **No MQTT commands** to external services during switching
+- **Only window management** using proven Option 6 technique
+- Clock fade effects must be handled **separately** by external automation### Key Implementation Notes
 
 **Why These Methods Work:**
 - Both `xdotool windowactivate` and `wmctrl -i -a` perform **focus + raise** operations
