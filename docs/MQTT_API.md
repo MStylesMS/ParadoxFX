@@ -404,6 +404,108 @@ Pause all media playback (video and audio).
 
 Resume all paused media playback (video and audio).
 
+### Browser/Clock Commands
+
+Generic browser control to show/hide a Chromium-based UI (e.g., the clock at http://localhost/clock/). These commands are zone-aware and will target the screen zone’s display.
+
+#### enableBrowser
+
+Launch the browser on the target screen and optionally focus it.
+
+Format:
+
+```json
+{
+  "command": "enableBrowser",
+  "url": "http://localhost/clock/",
+  "screen": 1,
+  "focus": true
+}
+```
+
+Parameters:
+- url (optional): Page to open. Default: http://localhost/clock/
+- screen (optional): Screen index or identifier; if omitted, use zone’s configured screen.
+- focus (optional): Bring window to front. Default: true.
+
+#### disableBrowser
+
+Terminate the browser instance managed by this zone.
+
+Format:
+
+```json
+{ "command": "disableBrowser" }
+```
+
+#### showBrowser
+
+Bring the browser to the front. Optionally apply a fade effect via the page’s MQTT API.
+
+Format:
+
+```json
+{
+  "command": "showBrowser",
+  "effect": "fade"
+}
+```
+
+Parameters:
+- effect (optional): "fade" | "instant" (default: "fade"). When "fade", publishes `{ "command": "fadeIn" }` to `paradox/houdini/clock/commands`.
+
+#### hideBrowser
+
+Hide the browser and return focus to MPV. Optionally apply a fade-out effect.
+
+Format:
+
+```json
+{
+  "command": "hideBrowser",
+  "effect": "fade"
+}
+```
+
+Parameters:
+- effect (optional): "fade" | "instant" (default: "fade"). When "fade", publishes `{ "command": "fadeout" }` to `paradox/houdini/clock/commands` before switching back.
+
+#### setBrowserUrl
+
+Update the URL. If the browser is running, it will relaunch or navigate accordingly; otherwise it’s stored for the next `enableBrowser`.
+
+Format:
+
+```json
+{
+  "command": "setBrowserUrl",
+  "url": "http://localhost/clock/?theme=dark"
+}
+```
+
+#### setBrowserKeepAlive
+
+Enable or disable auto-restart of the browser if it exits.
+
+Format:
+
+```json
+{
+  "command": "setBrowserKeepAlive",
+  "enabled": true
+}
+```
+
+#### browserStatus (optional)
+
+Request current browser status. Zone publishes status to its status topic including fields like `running`, `url`, `windowClass`, and `keepAlive`.
+
+Format:
+
+```json
+{ "command": "browserStatus" }
+```
+
 **Format:**
 
 ```json
@@ -470,7 +572,127 @@ Wake the zone's display from sleep mode and restore default display state.
 }
 ```
 
-**Note:** Most media commands (`setImage`, `playVideo`) automatically wake sleeping displays, making explicit `wakeScreen` commands typically unnecessary during normal operation. Sleep commands are ignored during active video playback to prevent interruption.
+**Note:** Most media commands (`setImage`, `playVideo`) automatically wake sleeping displays, making explicit `wakeScreen` commands typically unnecessary during normal operation. Sleep commands are ignored during active video playbook to prevent interruption.
+
+### Browser Management Commands
+
+ParadoxFX supports browser integration for displaying web content alongside multimedia. Browser management uses external process control without auto-launch configuration.
+
+#### enableBrowser
+
+Launch and enable browser with specified URL.
+
+```json
+{
+  "command": "enableBrowser",
+  "url": "http://localhost/clock/",
+  "focus": false
+}
+```
+
+**Parameters:**
+- `url` (optional): Initial URL to load (default: `http://localhost/clock/`)
+- `focus` (optional): Whether to bring browser to front immediately (default: `false`)
+
+#### disableBrowser
+
+Terminate browser process and clean up resources.
+
+```json
+{
+  "command": "disableBrowser"
+}
+```
+
+#### showBrowser
+
+Bring browser to front with optional transition effect.
+
+```json
+{
+  "command": "showBrowser",
+  "effect": "fade"
+}
+```
+
+**Parameters:**
+- `effect` (optional): Transition effect - `"fade"` or `"none"` (default: `"fade"`)
+
+#### hideBrowser
+
+Return focus to MPV content with optional transition effect.
+
+```json
+{
+  "command": "hideBrowser", 
+  "effect": "fade"
+}
+```
+
+**Parameters:**
+- `effect` (optional): Transition effect - `"fade"` or `"none"` (default: `"fade"`)
+
+#### setBrowserUrl
+
+Update browser URL (will relaunch browser if running).
+
+```json
+{
+  "command": "setBrowserUrl",
+  "url": "https://www.example.com"
+}
+```
+
+**Parameters:**
+- `url` (required): New URL to load
+
+#### setBrowserKeepAlive
+
+Enable/disable automatic browser restart on crash.
+
+```json
+{
+  "command": "setBrowserKeepAlive",
+  "enabled": true
+}
+```
+
+**Parameters:**
+- `enabled` (required): Boolean flag for keep-alive behavior
+
+### Browser/Clock Integration
+
+The browser management system integrates with the clock fade system for smooth transitions:
+
+```json
+{
+  "command": "showBrowser",
+  "effect": "fade"
+}
+```
+
+This will:
+1. Send `fadeOut` command to clock MQTT topic
+2. Switch window focus to browser using `xdotool windowactivate` 
+3. Send `fadeIn` command to clock MQTT topic
+4. Update zone status with focus and content tracking
+
+**Clock MQTT Topic**: `paradox/houdini/clock/commands`
+
+**Status Reporting**: Browser status is included in zone status updates:
+
+```json
+{
+  "focus": "chromium",
+  "content": "http://localhost/clock/",
+  "browser": {
+    "enabled": true,
+    "url": "http://localhost/clock/",
+    "process_id": 12345,
+    "window_id": "0x123456"
+  }
+}
+```
 
 #### skip
 
