@@ -12,7 +12,7 @@ echo ""
 MEDIA_FILE="/opt/paradox/media/zone1/default.avi"
 AUDIO_DEVICE="pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo"
 
-if [ ! -f "$MEDIA_FILE" ]; then
+if [ ! -f "$MEDIA_FILE" ]; thenalsa_output.platform-fef05700.hdmi.hdmi-stere
     echo "❌ Media file not found: $MEDIA_FILE"
     exit 1
 fi

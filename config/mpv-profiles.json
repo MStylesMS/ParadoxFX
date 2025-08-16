@@ -1,48 +1,64 @@
 {
   "profiles": {
-    "basic": {
-      "name": "Basic MPV Profile",
-      "description": "Simple MPV configuration without hardware acceleration for reliable display",
+    "pi4-drm": {
+      "name": "Raspberry Pi 4 (DRM)",
+      "description": "Pi4 with DRM hardware acceleration (recommended for most setups)",
       "tested": true,
       "baseArgs": [
-        "--no-terminal",
-        "--keep-open=always"
-      ],
-      "displayArgs": {
-        "wayland": [],
-        "x11": []
-      },
-      "performance": {
-        "profile": null,
-        "extraArgs": []
-      },
-      "notes": "Simple, reliable profile for testing display functionality"
-    },
-
-    "pi5-drm": {
-      "name": "Raspberry Pi 5 (DRM)",
-      "description": "Pi5 with DRM GPU context - may not work with multi-screen setups",
-      "tested": true,
-      "baseArgs": [
-        "--hwdec=auto",
+        "--hwdec=drm",
         "--vo=gpu",
         "--cache=yes",
-        "--demuxer-max-bytes=50M",
+        "--demuxer-max-bytes=32M",
         "--no-terminal",
         "--no-osc",
         "--keep-open=always"
       ],
       "displayArgs": {
-        "wayland": ["--vo=gpu"],
-        "x11": ["--vo=gpu", "--gpu-context=drm"]
+        "wayland": [
+          "--vo=gpu"
+        ],
+        "x11": [
+          "--vo=gpu"
+        ]
       },
       "performance": {
-        "profile": null,
-        "extraArgs": []
+        "profile": "fast",
+        "extraArgs": [
+          "--video-sync=audio"
+        ]
       },
-      "notes": "DRM context may conflict with xinerama screen targeting. Use pi5 profile for multi-screen."
+      "notes": "Pi4 uses DRM hardware decoding for best performance. Removed gpu-context=drm for compatibility."
     },
-
+    "pi4-vaapi": {
+      "name": "Raspberry Pi 4 (VAAPI)",
+      "description": "Pi4 with VAAPI hardware acceleration (alternative for some desktop environments)",
+      "tested": true,
+      "baseArgs": [
+        "--hwdec=vaapi",
+        "--vo=gpu",
+        "--cache=yes",
+        "--demuxer-max-bytes=32M",
+        "--no-terminal",
+        "--no-osc",
+        "--keep-open=always"
+      ],
+      "displayArgs": {
+        "wayland": [
+          "--vo=gpu"
+        ],
+        "x11": [
+          "--vo=gpu",
+          "--gpu-context=drm"
+        ]
+      },
+      "performance": {
+        "profile": "fast",
+        "extraArgs": [
+          "--video-sync=audio"
+        ]
+      },
+      "notes": "Pi4 uses VAAPI hardware decoding. Use if you have issues with DRM or need vaapi for your desktop."
+    },
     "pi5": {
       "name": "Raspberry Pi 5",
       "description": "Optimized settings for Pi5 with dual HDMI and hardware acceleration (X11 compatible)",
@@ -57,8 +73,12 @@
         "--keep-open=always"
       ],
       "displayArgs": {
-        "wayland": ["--vo=gpu"],
-        "x11": ["--vo=gpu"]
+        "wayland": [
+          "--vo=gpu"
+        ],
+        "x11": [
+          "--vo=gpu"
+        ]
       },
       "performance": {
         "profile": null,
@@ -66,31 +86,6 @@
       },
       "notes": "Pi5 optimized without DRM context for compatibility with multi-screen setups."
     },
-    
-    "pi4": {
-      "name": "Raspberry Pi 4",
-      "description": "Optimized settings for Pi4 with hardware acceleration",
-      "tested": false,
-      "baseArgs": [
-        "--hwdec=auto",
-        "--vo=gpu",
-        "--cache=yes",
-        "--demuxer-max-bytes=32M",
-        "--no-terminal",
-        "--no-osc",
-        "--keep-open=always"
-      ],
-      "displayArgs": {
-        "wayland": ["--vo=gpu"],
-        "x11": ["--vo=gpu", "--gpu-context=drm"]
-      },
-      "performance": {
-        "profile": "fast",
-        "extraArgs": ["--video-sync=audio"]
-      },
-      "notes": "Pi4 has less GPU memory, reduced buffer size. May need profile=fast for performance."
-    },
-    
     "pi3": {
       "name": "Raspberry Pi 3",
       "description": "Conservative settings for Pi3 with limited hardware acceleration",
@@ -105,8 +100,12 @@
         "--keep-open=always"
       ],
       "displayArgs": {
-        "wayland": ["--vo=gpu"],
-        "x11": ["--vo=gpu"]
+        "wayland": [
+          "--vo=gpu"
+        ],
+        "x11": [
+          "--vo=gpu"
+        ]
       },
       "performance": {
         "profile": "fast",
@@ -117,7 +116,6 @@
       },
       "notes": "Pi3 has limited GPU capabilities. Smaller buffers and aggressive performance settings."
     },
-    
     "pi-zero": {
       "name": "Raspberry Pi Zero/Zero W",
       "description": "Minimal settings for Pi Zero with software decoding",
@@ -132,8 +130,12 @@
         "--keep-open=always"
       ],
       "displayArgs": {
-        "wayland": ["--vo=x11"],
-        "x11": ["--vo=x11"]
+        "wayland": [
+          "--vo=x11"
+        ],
+        "x11": [
+          "--vo=x11"
+        ]
       },
       "performance": {
         "profile": "fast",
@@ -146,7 +148,6 @@
       },
       "notes": "Pi Zero has very limited CPU/GPU. Software decoding only, aggressive frame dropping."
     },
-    
     "generic-linux": {
       "name": "Generic Linux Desktop",
       "description": "Standard settings for typical Linux desktop with modern GPU",
@@ -161,8 +162,14 @@
         "--keep-open=always"
       ],
       "displayArgs": {
-        "wayland": ["--vo=gpu", "--gpu-context=wayland"],
-        "x11": ["--vo=gpu", "--gpu-context=x11"]
+        "wayland": [
+          "--vo=gpu",
+          "--gpu-context=wayland"
+        ],
+        "x11": [
+          "--vo=gpu",
+          "--gpu-context=x11"
+        ]
       },
       "performance": {
         "profile": "gpu-hq",
@@ -173,7 +180,6 @@
       },
       "notes": "Assumes modern hardware with good GPU and plenty of memory. High quality settings."
     },
-    
     "generic-minimal": {
       "name": "Generic Minimal",
       "description": "Fallback settings for older or resource-constrained systems",
@@ -188,8 +194,12 @@
         "--keep-open=always"
       ],
       "displayArgs": {
-        "wayland": ["--vo=x11"],
-        "x11": ["--vo=x11"]
+        "wayland": [
+          "--vo=x11"
+        ],
+        "x11": [
+          "--vo=x11"
+        ]
       },
       "performance": {
         "profile": "fast",
@@ -201,49 +211,72 @@
       "notes": "Software-only fallback for systems without GPU acceleration or when all else fails."
     }
   },
-  
   "autoDetection": {
     "rules": [
       {
         "description": "Raspberry Pi 5 detection",
         "conditions": {
-          "cpuInfo": ["BCM2712"],
-          "deviceTree": ["/proc/device-tree/model"],
-          "deviceTreeContent": ["Raspberry Pi 5"]
+          "cpuInfo": [
+            "BCM2712"
+          ],
+          "deviceTree": [
+            "/proc/device-tree/model"
+          ],
+          "deviceTreeContent": [
+            "Raspberry Pi 5"
+          ]
         },
         "profile": "pi5"
       },
       {
-        "description": "Raspberry Pi 4 detection", 
+        "description": "Raspberry Pi 4 detection",
         "conditions": {
-          "cpuInfo": ["BCM2711"],
-          "deviceTree": ["/proc/device-tree/model"],
-          "deviceTreeContent": ["Raspberry Pi 4"]
+          "cpuInfo": [
+            "BCM2711"
+          ],
+          "deviceTree": [
+            "/proc/device-tree/model"
+          ],
+          "deviceTreeContent": [
+            "Raspberry Pi 4"
+          ]
         },
         "profile": "pi4"
       },
       {
         "description": "Raspberry Pi 3 detection",
         "conditions": {
-          "cpuInfo": ["BCM2837", "BCM2836"],
-          "deviceTree": ["/proc/device-tree/model"],
-          "deviceTreeContent": ["Raspberry Pi 3"]
+          "cpuInfo": [
+            "BCM2837",
+            "BCM2836"
+          ],
+          "deviceTree": [
+            "/proc/device-tree/model"
+          ],
+          "deviceTreeContent": [
+            "Raspberry Pi 3"
+          ]
         },
         "profile": "pi3"
       },
       {
         "description": "Raspberry Pi Zero detection",
         "conditions": {
-          "cpuInfo": ["BCM2835"],
-          "deviceTree": ["/proc/device-tree/model"],
-          "deviceTreeContent": ["Raspberry Pi Zero"]
+          "cpuInfo": [
+            "BCM2835"
+          ],
+          "deviceTree": [
+            "/proc/device-tree/model"
+          ],
+          "deviceTreeContent": [
+            "Raspberry Pi Zero"
+          ]
         },
         "profile": "pi-zero"
       }
     ],
     "fallback": "generic-minimal"
   },
-  
   "metadata": {
     "version": "1.0.0",
     "lastUpdated": "2025-07-26",

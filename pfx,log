@@ -1,0 +1,44 @@
+****************************************
+2025-08-16T15:21:02.025Z [INFO ] PFx                  Starting Paradox Effects application...
+****************************************
+2025-08-16T15:21:02.026Z [INFO ] PFx                  Using configuration: /opt/paradox/apps/pfx/pfx.ini
+2025-08-16T15:21:02.027Z [INFO ] ConfigLoader         Loading configuration from /opt/paradox/apps/pfx/pfx.ini
+🔧 DEBUG: config.target_monitor = 0, config.xinerama_screen = undefined
+🔧 DEBUG: Using target_monitor: 0
+🔧 DEBUG: config.target_monitor = 1, config.xinerama_screen = undefined
+🔧 DEBUG: Using target_monitor: 1
+2025-08-16T15:21:02.044Z [INFO ] ConfigLoader         Configuration loaded successfully: 3 devices
+2025-08-16T15:21:02.044Z [INFO ] PFx                  Loaded configuration for 3 devices
+2025-08-16T15:21:02.046Z [INFO ] MqttClient           Connecting to MQTT broker at mqtt://127.0.0.1:1883 (attempt 1, delay 2000ms)
+2025-08-16T15:21:02.245Z [INFO ] MqttClient           Connected to MQTT broker
+2025-08-16T15:21:02.247Z [INFO ] ZoneManager          Initializing all zones…
+2025-08-16T15:21:02.248Z [INFO ] ZoneManager          Creating screen zone: screen:mirror-hdmi0
+2025-08-16T15:21:02.251Z [INFO ] AudioManager:screen:mirror-hdmi0 AudioManager initialized with device: pulse/alsa_output.platform-fef00700.hdmi.hdmi-stereo
+2025-08-16T15:21:02.251Z [INFO ] AudioManager:screen:mirror-hdmi0 AudioManager initialized with device: pulse/alsa_output.platform-fef00700.hdmi.hdmi-stereo
+2025-08-16T15:21:02.253Z [INFO ] ScreenZone:screen:mirror-hdmi0 Initializing screen zone on display :0
+2025-08-16T15:21:02.254Z [INFO ] ScreenPowerManager   Disabling screen blanking for continuous operation
+2025-08-16T15:21:02.323Z [INFO ] ScreenPowerManager   ✅ Screen blanking disabled - displays will stay active
+2025-08-16T15:21:02.338Z [INFO ] ScreenPowerManager   ✅ DPMS support detected
+2025-08-16T15:21:02.339Z [INFO ] MediaPlayerFactory   Creating MPV Zone Manager for zone: screen:mirror-hdmi0
+2025-08-16T15:21:02.340Z [INFO ] MediaPlayerFactory   🔍 DEBUG: zoneConfig.targetMonitor = 0 (type: number)
+2025-08-16T15:21:02.341Z [INFO ] MpvZoneManager:screen:mirror-hdmi0 🎯 DEBUG: targetMonitor config value: 0, final value: 0
+2025-08-16T15:21:02.342Z [INFO ] MpvZoneManager:screen:mirror-hdmi0 Initializing MPV Zone Manager...
+2025-08-16T15:21:02.344Z [INFO ] MpvProfileManager    MPV profiles loaded successfully
+2025-08-16T15:21:02.344Z [INFO ] MpvZoneManager:screen:mirror-hdmi0 Using configured MPV profile: pi4-drm
+2025-08-16T15:21:02.344Z [INFO ] MpvZoneManager:screen:mirror-hdmi0 MPV Profile Configuration: {
+  "profileName": "pi4-drm",
+  "profileDescription": "Raspberry Pi 4 (DRM)",
+  "audioDevice": "pulse/alsa_output.platform-fef00700.hdmi.hdmi-stereo",
+  "screen": 0
+}
+2025-08-16T15:21:02.345Z [INFO ] MpvProfileManager    Building MPV args for profile: Raspberry Pi 4 (DRM)
+2025-08-16T15:21:02.945Z [WARN ] MpvZoneManager:screen:mirror-hdmi0 MPV process exited with code 1, signal null
+2025-08-16T15:21:07.396Z [ERROR] MpvZoneManager:screen:mirror-hdmi0 Failed to initialize MPV Zone Manager: {}
+2025-08-16T15:21:07.397Z [INFO ] MpvZoneManager:screen:mirror-hdmi0 Shutting down MPV Zone Manager...
+2025-08-16T15:21:07.399Z [INFO ] MpvZoneManager:screen:mirror-hdmi0 MPV Zone Manager shutdown complete
+2025-08-16T15:21:07.400Z [ERROR] ScreenZone:screen:mirror-hdmi0 Screen zone initialization failed: {}
+2025-08-16T15:21:07.405Z [ERROR] ScreenZone:screen:mirror-hdmi0 Zone initialization failed {
+  "error": "MPV IPC socket creation timeout"
+}
+2025-08-16T15:21:07.406Z [ERROR] ZoneManager          Zone "screen:mirror-hdmi0" failed to initialize: MPV IPC socket creation timeout
+2025-08-16T15:21:07.407Z [ERROR] PFx                  Failed to start application: MPV IPC socket creation timeout
