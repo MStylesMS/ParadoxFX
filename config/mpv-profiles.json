@@ -1,11 +1,11 @@
 {
   "profiles": {
-    "pi4-drm": {
-      "name": "Raspberry Pi 4 (DRM)",
-      "description": "Pi4 with DRM hardware acceleration (recommended for most setups)",
+    "pi4": {
+      "name": "Raspberry Pi 4",
+      "description": "Pi4 with auto hardware acceleration (recommended for most setups)",
       "tested": true,
       "baseArgs": [
-        "--hwdec=drm",
+        "--hwdec=auto",
         "--vo=gpu",
         "--cache=yes",
         "--demuxer-max-bytes=32M",
@@ -22,42 +22,10 @@
         ]
       },
       "performance": {
-        "profile": "fast",
-        "extraArgs": [
-          "--video-sync=audio"
-        ]
+        "profile": null,
+        "extraArgs": []
       },
-      "notes": "Pi4 uses DRM hardware decoding for best performance. Removed gpu-context=drm for compatibility."
-    },
-    "pi4-vaapi": {
-      "name": "Raspberry Pi 4 (VAAPI)",
-      "description": "Pi4 with VAAPI hardware acceleration (alternative for some desktop environments)",
-      "tested": true,
-      "baseArgs": [
-        "--hwdec=vaapi",
-        "--vo=gpu",
-        "--cache=yes",
-        "--demuxer-max-bytes=32M",
-        "--no-terminal",
-        "--no-osc",
-        "--keep-open=always"
-      ],
-      "displayArgs": {
-        "wayland": [
-          "--vo=gpu"
-        ],
-        "x11": [
-          "--vo=gpu",
-          "--gpu-context=drm"
-        ]
-      },
-      "performance": {
-        "profile": "fast",
-        "extraArgs": [
-          "--video-sync=audio"
-        ]
-      },
-      "notes": "Pi4 uses VAAPI hardware decoding. Use if you have issues with DRM or need vaapi for your desktop."
+      "notes": "Pi4 uses auto hardware decoding for best performance. Removed gpu-context=drm for compatibility."
     },
     "pi5": {
       "name": "Raspberry Pi 5",
