@@ -32,8 +32,22 @@ class PFxApplication {
             // Ensure log directory exists and set up file logging
             const logDir = path.resolve('/opt/paradox/logs');
             fs.mkdirSync(logDir, { recursive: true });
-            const logFile = path.join(logDir, 'pfx.log');
+            
+            // Create timestamped log file for this session
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19);
+            const logFile = path.join(logDir, `pfx-${timestamp}.log`);
             const logStream = fs.createWriteStream(logFile, { flags: 'a' });
+            
+            // Also create/update the latest log symlink
+            const latestLogFile = path.join(logDir, 'pfx-latest.log');
+            try {
+                if (fs.existsSync(latestLogFile)) {
+                    fs.unlinkSync(latestLogFile);
+                }
+                fs.symlinkSync(path.basename(logFile), latestLogFile);
+            } catch (err) {
+                // Ignore symlink errors, just use timestamped file
+            }
             const origLog = console.log;
             const origError = console.error;
             const origWarn = console.warn;
@@ -51,6 +65,7 @@ class PFxApplication {
             };
             console.log('****************************************');
             this.logger.info('Starting Paradox Effects application...');
+            this.logger.info(`Logging to: ${logFile}`);
             console.log('****************************************');
             this.logger.info(`Using configuration: ${configPath}`);
             if (!fs.existsSync(configPath)) {
