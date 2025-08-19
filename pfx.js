@@ -77,6 +77,15 @@ class PFxApplication {
             this.config = await ConfigLoader.load(configPath);
             this.logger.info(`Loaded configuration for ${Object.keys(this.config.devices).length} devices`);
 
+            // Set up combined audio sinks if configured
+            const AudioSetup = require('./lib/utils/audio-setup');
+            const audioSetup = new AudioSetup();
+            if (await audioSetup.testPulseAudio()) {
+                await audioSetup.setupCombinedSinks(this.config.global, Object.values(this.config.devices));
+            } else {
+                this.logger.warn('PulseAudio not available, skipping combined sink setup');
+            }
+
             // Initialize MQTT client
             this.mqttClient = new MqttClient(this.config.global);
             await this.mqttClient.connect();
