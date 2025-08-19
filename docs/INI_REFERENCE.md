@@ -32,6 +32,8 @@ This document explains all available settings in ParadoxFX `.ini` configuration 
 | heartbeat_interval     | integer  | No       | 10000         | Interval between heartbeats (ms)                                                      |
 | heartbeat_topic        | string   | No       | `paradox/heartbeat` | MQTT topic for heartbeat messages                                              |
 | ducking_volume         | integer  | No       | 30            | Default volume for audio ducking (0-100)                                     |
+| speech_ducking         | integer  | No       | (unset)       | Optional global default for speech ducking (negative units, e.g. -26)        |
+| video_ducking          | integer  | No       | (unset)       | Optional global default for video ducking (negative units, e.g. -24)         |
 | max_concurrent_videos  | integer  | No       | 1             | Maximum simultaneous video streams per zone                                           |
 | max_concurrent_audio_streams | integer  | No       | 1             | Maximum simultaneous audio streams per zone                                           |
 | enable_hardware_acceleration | boolean  | No    | false         | Whether to enable hardware video decoding                                             |

@@ -16,10 +16,10 @@ The original ducking system had several limitations:
 
 ### Core Features
 
-1. **Zone-scoped ducking**: Each zone maintains its own independent ducking state
-2. **Overlapping management**: Multiple active duckers use maximum ducking level  
-3. **Ducking parameter**: Optional `ducking` field (negative units) on playSpeech and playVideo
-4. **Proper lifecycle**: Duck on media start, unduck on media end
+1. Zone-scoped ducking: Each zone maintains its own independent ducking state.
+2. Overlapping management: Multiple active duckers are tracked and the most-negative (largest absolute) duck level wins.
+3. Ducking parameter: Optional `ducking` field (negative integer, e.g. -26) accepted on `playSpeech` and `playVideo` commands.
+4. Deterministic lifecycle: Zones apply a duck when media starts and remove that exact duck only when the media actually ends (no timeout-based unduck).
 
 ### Implementation Details
 
@@ -57,11 +57,17 @@ _updateBackgroundVolume()        // Recalculate and apply volume using absolute 
 }
 ```
 
-#### Default Ducking Levels
+#### Default Ducking Levels and Precedence
 
-- **Speech**: -26 units (moderate reduction for voice clarity)
-- **Video**: -24 units (light reduction to maintain immersion)  
-- **Images**: 0 units (no ducking for static content)
+- Speech default: -26 (applied when no other override provided)
+- Video default: -24
+- Images: 0 (no ducking)
+
+Precedence for resolving ducking level for a media playback request (highest → lowest):
+1. Explicit `ducking` parameter in the command payload
+2. Per-zone INI setting (`speech_ducking` / `video_ducking`)
+3. Global INI defaults (`speech_ducking` / `video_ducking`) loaded by the config loader
+4. Code default (-26 for speech, -24 for video)
 
 #### INI Configuration
 
@@ -81,29 +87,26 @@ speech_ducking = -30    # Different defaults per zone
 video_ducking = -20
 ```
 
-### Validation and Error Handling
+#### Validation and Error Handling
 
-The system includes validation for ducking parameters:
+Rules enforced:
 
-- **Negative values only**: Only negative values are accepted (e.g., -26, -50)
-- **Positive values ignored**: Positive values are ignored with warning messages sent to console and MQTT
-- **Range limits**: Values below -100 are capped at -100 to prevent negative volume
-- **Invalid types**: Non-numeric values default to the fallback (-26 for speech, -24 for video)
+- Only negative integer ducking levels are meaningful and applied. Positive values are treated as 'no duck' and ignored (the system will log a warning and publish a warning event).
+- Extremely large negative values are clamped to a safe lower bound (implementation caps may vary; the code will warn if the value is out of range).
+- Non-numeric values are ignored and fall back to the precedence chain above.
 
-**Warning examples:**
-```
-Console: "Positive ducking values are not allowed (25), ignoring ducking"
-MQTT: {"type": "warning", "message": "Positive ducking values are not allowed (25), ignoring ducking"}
-```
+Warning example (MQTT-style event):
 
-### Overlapping Behavior
+{"type":"warning","message":"Positive ducking values are not allowed (25), ignoring ducking"}
+
+#### Overlapping Behavior
 
 When multiple duckers are active in the same zone:
 
-1. **Most negative level used**: System applies the highest absolute ducking reduction
-2. **Individual tracking**: Each ducker maintains its own ID and level
-3. **Proper restoration**: When highest ducker removed, switches to next highest
-4. **Complete restoration**: When all duckers removed, restores original volume
+1. The system tracks each ducker with a unique ID and level.
+2. The most-negative ducking level (largest absolute reduction) is applied globally within the zone.
+3. When a ducker is removed, the system recalculates the active most-negative level and applies that (no premature restoration).
+4. When all duckers are removed, the zone restores the original background volume.
 
 #### Example Scenario
 
@@ -143,23 +146,22 @@ mosquitto_pub -t "living-room/commands" -m '{"command": "playSpeech", "audio": "
 mosquitto_pub -t "kitchen/commands" -m '{"command": "playSpeech", "audio": "timer.mp3", "ducking": -25}'
 ```
 
-## Testing
+### Testing
 
-### Unit Tests (14 tests)
-- Ducking registry operations
-- Overlapping ducker management  
-- Volume calculations and restoration
-- Edge cases and validation
+Unit and integration tests should cover:
 
-### Integration Tests (9 tests)
-- Zone isolation verification
-- Real-world overlapping scenarios
-- Concurrent multi-zone operations
-- Order independence testing
+- Duck registry operations (add/remove, id tracking)
+- Overlapping ducker resolution (most-negative wins)
+- Volume calculation and restoration
+- Validation and edge cases (positive values, non-numeric input)
 
-### Manual Testing
+Manual test example:
+
 ```bash
-./test/manual/test-per-zone-ducking.sh
+# Start background then play speech with explicit ducking
+mosquitto_pub -t "paradox/houdini/picture/commands" -m '{"command":"playBackground","file":"default.mp3","loop":true}'
+sleep 1
+mosquitto_pub -t "paradox/houdini/picture/commands" -m '{"command":"playSpeech","file":"hint.mp3","ducking":-50}'
 ```
 
 ## Files Modified

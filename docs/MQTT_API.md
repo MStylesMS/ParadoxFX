@@ -318,6 +318,12 @@ Play a video file with optional volume control and background ducking.
 - `Channel` (optional): Audio channel routing
 - `Ducking` (optional): Background music volume reduction in units. Use negative values only (e.g., -24 to reduce by 24 units). Default: -24 for videos, 0 for images. Positive values are ignored with warning.
 
+Ducking resolution precedence (highest → lowest):
+1. Explicit `ducking` parameter in the command payload
+2. Per-zone INI setting (`speech_ducking` / `video_ducking`)
+3. Global INI defaults (`speech_ducking` / `video_ducking`) loaded by the config loader
+4. Code default (-26 for speech, -24 for video)
+
 **Supported formats:** MP4, AVI, MKV, MOV, WebM
 
 **Examples:**
@@ -1147,9 +1153,43 @@ Play speech audio with automatic background music ducking.
 - `Ducking` (optional): Background music volume reduction in units. Use negative values only (e.g., -26 to reduce by 26 units). Default: -26. Positive values are ignored with warning.
 
 **Features:**
-- Automatic background music ducking during speech
+- Automatic background music ducking during speech using the precedence chain described above
 - Queue-based system for multiple speech items
-- Automatic volume restoration after speech completion
+- Deterministic unduck: speech removes only its own duck when the speech item completes (no timeout-based unduck)
+
+**Manual duck/unduck commands**
+
+You can apply or remove manual ducks at runtime using the `duck` and `unduck` commands. Manual ducks are tracked by a generated `duck_id` and are resolved by the same per-zone duck registry (most-negative wins).
+
+Manual duck example (apply -50 immediately):
+
+```json
+{
+  "command": "duck",
+  "ducking": -50
+}
+```
+
+Manual unduck examples:
+
+Remove a specific manual duck by id:
+
+```json
+{
+  "command": "unduck",
+  "duck_id": "manual-175562..."
+}
+```
+
+Remove all manual ducks:
+
+```json
+{
+  "command": "unduck"
+}
+```
+
+Manual unduck removes the specified duck(s) immediately and the zone recalculates the active duck level (no timeout-based restoration).
 
 **Examples:**
 
@@ -1165,7 +1205,7 @@ Play speech audio with automatic background music ducking.
   "command": "playSpeech",
   "audio": "narration/intro.mp3",
   "volume": 95,
-  "ducking": 70
+  "ducking": -10
 }
 ```
 
