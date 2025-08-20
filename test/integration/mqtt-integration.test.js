@@ -5,24 +5,20 @@
 const mqtt = require('mqtt');
 const MqttClient = require('../../lib/core/mqtt-client');
 
-describe('MQTT Integration', () => {
+const shouldSkipIntegrationTests = process.env.SKIP_INTEGRATION_TESTS === '1';
+
+const describeIntegration = shouldSkipIntegrationTests ? describe.skip : describe;
+
+describeIntegration('MQTT Integration', () => {
     let testBroker;
     let mqttClient;
 
     beforeAll(async () => {
         // These tests require an actual MQTT broker running on localhost
-        // Skip if SKIP_INTEGRATION_TESTS is set
-        if (process.env.SKIP_INTEGRATION_TESTS) {
-            console.log('Skipping MQTT integration tests');
-            return;
-        }
+        console.log('Running MQTT integration tests - requires broker on localhost:1883');
     });
 
     beforeEach(() => {
-        if (process.env.SKIP_INTEGRATION_TESTS) {
-            return;
-        }
-
         const config = {
             mqttServer: 'localhost',
             mqttPort: 1883,
@@ -34,29 +30,17 @@ describe('MQTT Integration', () => {
     });
 
     afterEach(async () => {
-        if (process.env.SKIP_INTEGRATION_TESTS) {
-            return;
-        }
-
         if (mqttClient) {
             await mqttClient.disconnect();
         }
     });
 
     test('should connect to real MQTT broker', async () => {
-        if (process.env.SKIP_INTEGRATION_TESTS) {
-            return;
-        }
-
         await expect(mqttClient.connect()).resolves.toBeUndefined();
         expect(mqttClient.connected).toBe(true);
     }, 15000);
 
     test('should publish and receive messages', async () => {
-        if (process.env.SKIP_INTEGRATION_TESTS) {
-            return;
-        }
-
         await mqttClient.connect();
 
         const testTopic = 'test/integration/message';
@@ -86,10 +70,6 @@ describe('MQTT Integration', () => {
     }, 10000);
 
     test('should handle multiple subscribers', async () => {
-        if (process.env.SKIP_INTEGRATION_TESTS) {
-            return;
-        }
-
         await mqttClient.connect();
 
         const testTopic = 'test/integration/multi';
@@ -131,10 +111,6 @@ describe('MQTT Integration', () => {
     }, 10000);
 
     test('should handle connection loss and reconnection', async () => {
-        if (process.env.SKIP_INTEGRATION_TESTS) {
-            return;
-        }
-
         await mqttClient.connect();
         expect(mqttClient.connected).toBe(true);
 
@@ -147,10 +123,6 @@ describe('MQTT Integration', () => {
     }, 10000);
 
     test('should respect QoS settings', async () => {
-        if (process.env.SKIP_INTEGRATION_TESTS) {
-            return;
-        }
-
         await mqttClient.connect();
 
         const testTopic = 'test/integration/qos';

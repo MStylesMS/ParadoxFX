@@ -22,7 +22,7 @@ const fs = require('fs');
 const readline = require('readline');
 
 // Test media files
-const BACKGROUND_MUSIC = path.resolve(__dirname, '../../media/test/defaults/houdini_music.mp3');
+const BACKGROUND_MUSIC = path.resolve(__dirname, '../../media/test/defaults/default.mp3');
 const SOUND_EFFECT = path.resolve(__dirname, '../../media/test/defaults/default_fx.wav');
 const SPEECH_AUDIO = path.resolve(__dirname, '../../media/test/defaults/stuff_to_do.mp3');
 
@@ -271,14 +271,11 @@ async function runTests() {
             console.log('\n⚠️  Some audio features may need additional configuration or debugging.');
         }
 
-        // Wait for user input before cleanup
-        console.log('\nPress ENTER to shutdown and cleanup...');
-        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-        await new Promise(resolve => rl.question('', resolve));
-        rl.close();
+        return { allPassed, results };
 
     } catch (error) {
         console.error('Fatal error during testing:', error);
+        throw error;
     } finally {
         // Cleanup
         if (audioManager) {
@@ -287,24 +284,30 @@ async function runTests() {
             console.log('✓ Audio system shutdown complete');
         }
     }
-
-    console.log('Integration test complete!');
-    process.exit(0);
 }
+
+// Export runTests so wrapper tests can import and run it under Jest
+module.exports = module.exports || {};
+module.exports.runTests = runTests;
 
 // Check if test media files exist
 const testFiles = [BACKGROUND_MUSIC, SOUND_EFFECT, SPEECH_AUDIO];
 const missingFiles = testFiles.filter(file => !fs.existsSync(file));
 
 if (missingFiles.length > 0) {
-    console.error('❌ Missing test media files:');
-    missingFiles.forEach(file => console.error(`   - ${file}`));
-    console.error('\nPlease ensure test media files are available in media/test/defaults/');
-    process.exit(1);
+    const msg = ['❌ Missing test media files:'];
+    missingFiles.forEach(file => msg.push(`   - ${file}`));
+    msg.push('\nPlease ensure test media files are available in media/test/defaults/');
+
+    // If this file is executed as a script, print and exit with error.
+    if (require.main === module) {
+        console.error(msg.join('\n'));
+        process.exit(1);
+    } else {
+        // If imported (e.g., by Jest), throw so the caller can handle it.
+        throw new Error(msg.join('\n'));
+    }
 }
 
-// Run the tests
-runTests().catch(error => {
-    console.error('Test suite failed:', error);
-    process.exit(1);
-});
+// NOTE: This file is now importable for Jest wrappers. Do not run automatically.
+// If you need to run as CLI, use the companion CLI script or run via Node explicitly.

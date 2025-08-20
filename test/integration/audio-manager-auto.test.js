@@ -16,12 +16,14 @@ const path = require('path');
 const fs = require('fs');
 
 // Test media files
-const BACKGROUND_MUSIC = path.resolve(__dirname, '../../media/test/defaults/houdini_music.mp3');
+const BACKGROUND_MUSIC = path.resolve(__dirname, '../../media/test/defaults/default.mp3');
 const SOUND_EFFECT = path.resolve(__dirname, '../../media/test/defaults/default_fx.wav');
 const SPEECH_AUDIO = path.resolve(__dirname, '../../media/test/defaults/stuff_to_do.mp3');
 
-console.log('🎵 Enhanced Audio System Automated Test');
-console.log('=======================================');
+if (require.main === module) {
+    console.log('🎵 Enhanced Audio System Automated Test');
+    console.log('=======================================');
+}
 
 /**
  * Test AudioManager initialization
@@ -236,7 +238,8 @@ async function runTests() {
 
     } catch (error) {
         console.error('Fatal error during testing:', error.message);
-        process.exit(1);
+        // Return failure results to caller instead of exiting when imported
+        return { error: error.message, results };
     } finally {
         // Cleanup
         if (audioManager) {
@@ -249,22 +252,30 @@ async function runTests() {
     console.log('\nIntegration test complete!');
 
     const allPassed = Object.values(results).every(result => result);
-    process.exit(allPassed ? 0 : 1);
+    // Return results instead of exiting so Jest can manage process
+    return { allPassed, results };
 }
 
 // Check if test media files exist
 const testFiles = [BACKGROUND_MUSIC, SOUND_EFFECT, SPEECH_AUDIO];
 const missingFiles = testFiles.filter(file => !fs.existsSync(file));
 
-if (missingFiles.length > 0) {
-    console.error('❌ Missing test media files:');
-    missingFiles.forEach(file => console.error(`   - ${file}`));
-    console.error('\nPlease ensure test media files are available in media/test/defaults/');
-    process.exit(1);
-}
+if (require.main === module) {
+    if (missingFiles.length > 0) {
+        console.error('❌ Missing test media files:');
+        missingFiles.forEach(file => console.error(`   - ${file}`));
+        console.error('\nPlease ensure test media files are available in media/test/defaults/');
+        process.exit(1);
+    }
 
-// Run the tests
-runTests().catch(error => {
-    console.error('Test suite failed:', error.message);
-    process.exit(1);
-});
+    // Run as CLI
+    runTests().then(({ allPassed }) => {
+        process.exit(allPassed ? 0 : 1);
+    }).catch(error => {
+        console.error('Test suite failed:', error.message);
+        process.exit(1);
+    });
+} else {
+    // When imported by Jest, export runTests for a test wrapper to call
+    module.exports = { runTests };
+}

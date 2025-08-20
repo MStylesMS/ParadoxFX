@@ -37,6 +37,36 @@ Summary: The repository contains unit, integration, and manual tests; several do
 Action: Audit and update automated unit/integration tests to match current implementation. Update or add manual test scripts under `test/manual/` and refresh test documentation so that CI or local test runners validate the current behavior (audio dual-output, speech queue, MPV zone manager behaviors).
 
 
+---
+
+## Issue 7 — Regression: Background audio ducking not restored after short speech
+Summary: Background audio is being ducked when a short speech clip plays, but the background volume is not being restored (unducked) after the speech completes. This used to work and appears to be a recent regression.
+
+Observed behavior:
+- When `playSpeech` is issued while background music is playing, the zone publishes an event showing `ducking_applied` and a `duck_id` (duck applied). However, after the speech file completes (very short clip), the background music volume remains reduced and no `unducked` event is emitted.
+- Manual smoke test using `test/manual/test-all.sh` playSpeech steps reproduces the issue with short files.
+
+Reproduction steps:
+1. Ensure background music is playing in Zone 1:
+	mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"playBackground","audio":"music/Classic_hip-hop_beat.mp3","loop":true,"volume":80}'
+2. Play a short speech clip:
+	mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"playSpeech","audio":"general/Welcome_ParadoxFX.mp3","volume":80}'
+3. Observe `paradox/zone1/events` and `/status` topics and logs. The `ducking_applied` event appears but background volume does not return to previous level.
+
+Likely causes / areas to inspect:
+- Race condition in `AudioManager.playSpeech` / MPV IPC where the EOF property/event is not reliably observed for very short files, causing the `await` that triggers duck removal to be skipped or delayed.
+- `_baseBackgroundVolume` not set correctly before ducking (e.g., background not marked as playing) so the restore logic in `BaseZone._updateBackgroundVolume` doesn't restore correctly.
+- Multiple active duck IDs left in `_activeDucks` due to duck id mismatch or removal path not executed on error.
+
+Severity: Medium — audio remains ducked disrupting user experience; reproducible with short speech files.
+
+Suggested next steps:
+1. Add observability: publish an explicit `unducked` event when `_removeDucking()` runs (small code change in `lib/zones/base-zone.js`). This will make it trivial to confirm unduck actions in MQTT and logs.
+2. Harden speech completion detection in `AudioManager` (ensure `_monitorProperty` reliably detects `eof-reached` for short files or add a fallback timeout that resolves the speech promise and triggers duck removal).
+3. Add a unit/integration test that plays an artificially short speech file and asserts that ducking is applied and then removed within a short timeout.
+4. Audit recent commits touching `audio-manager`, `base-zone`, or MPV IPC code for possible regressions.
+
+If useful, I can implement step 1 (add `unducked` event publish) as a small patch and re-run the audio wrapper test to show the new event. I'll wait for your go-ahead before changing code.
 
 If you'd like, I can:
 - Add file/line references for each code snippet that demonstrates the current implementation.
