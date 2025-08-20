@@ -23,9 +23,9 @@ PFx uses MQTT for all device communication. Each device subscribes to a command 
 ### Base Architecture
 
 - **Commands**: Sent to `{baseTopic}/commands`
-- **Status**: Published to `{baseTopic}/status`
+- **State**: Published to `{baseTopic}/state`
 - **Heartbeat**: Published to global heartbeat topic
-- **Errors**: Published to both device status topic and global heartbeat topic
+- **Errors**: Published to both device state topic and global heartbeat topic
 
 ## Topic Structure
 
@@ -35,7 +35,7 @@ Each device has a base topic configured in `pfx.ini`:
 
 ```
 {baseTopic}/commands   # Incoming commands
-{baseTopic}/status     # Outgoing status updates
+{baseTopic}/state      # Outgoing state updates
 {baseTopic}/events     # Real-time events
 {baseTopic}/warnings   # Warnings and errors
 ```
@@ -50,7 +50,7 @@ Each device has a base topic configured in `pfx.ini`:
 
 ```
 paradox/living-room/screen/commands   # Commands to living room screen
-paradox/living-room/screen/status     # Status from living room screen
+paradox/living-room/screen/state      # State from living room screen
 paradox/living-room/screen/events     # Event notifications
 paradox/living-room/screen/warnings   # Warnings and errors
 paradox/living-room/lights/commands   # Commands to living room lights
