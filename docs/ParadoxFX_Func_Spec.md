@@ -61,9 +61,9 @@ ParadoxFX features a comprehensive three-subsystem audio architecture designed f
   - Multi-zone support on Pi4/Pi5 with independent video streams per soft device
   - Single MPV instance per zone for seamless media transitions
 - **Audio Routing:**
-  - Independent audio device targeting per zone using PipeWire (default) or PulseAudio
-  - Simultaneous multi-zone audio with different content per soft device
-  - Platform-specific device identifiers optimized for PipeWire/PulseAudio compatibility
+  - Independent audio device targeting per zone. The implementation currently uses PulseAudio-compatible tooling (pactl) and `pulse/<name>` device identifiers; full PipeWire-only handling is not guaranteed and is under review (see `docs/Issues.md`).
+  - Simultaneous multi-zone audio with different content per soft device is supported via configured audio devices and runtime combined-sink handling.
+  - Platform-specific device identifiers are used primarily in PulseAudio-compatible form; mapping to native PipeWire identifiers may require additional glue.
 
 ### 3. Platform Configuration Templates
 
@@ -77,16 +77,16 @@ Pre-configured .ini templates for each supported platform:
 
 #### **Seamless Media Transitions**
 
-ParadoxFX provides professional-grade seamless transitions using a single MPV instance per zone with IPC control:
+ParadoxFX provides professional-grade seamless transitions using per-zone MPV processes (images/video) with IPC control; audio playback (background music, speech, effects) is managed via separate MPV instances created by the AudioManager.
 
-- **Image-to-Video Transitions:**
-  - Single MPV instance loads image and pauses on first frame
+**Image-to-Video Transitions:**
+  - Zone MPV instance loads image and can pause on first frame when the media is a video
   - IPC commands seamlessly switch to video playback without application restart
   - Hardware-accelerated transitions minimize visible interruption
   - Zone-specific control allows independent transitions per soft device
 
-- **Video-to-Image Transitions:**
-  - Video automatically pauses on last frame using `--keep-open=yes`
+**Video-to-Image Transitions:**
+  - Video playback can be configured to keep the last frame using MPV options (e.g., `--keep-open=yes`) but the implementation adds duration-based EOF handling and playback-time polling to robustly detect media end
   - IPC commands load next image while maintaining MPV session
   - Smart queue management determines whether to pause or continue to next media
   - Multi-zone support allows independent media flows per soft device
@@ -98,9 +98,9 @@ ParadoxFX provides professional-grade seamless transitions using a single MPV in
 
 ### 4. Advanced Media Queuing and Control
 
-- **Queueing:**
-  - Video and audio commands are queued (FIFO). When the queue is full, the oldest item is dropped.
-  - Duplicate media (by name) is not added to the queue. Audio effects (FX) are played immediately.
+-- **Queueing:**
+  - Video queuing is implemented as an application-level FIFO with explicit replacement rules for static visuals (setImage). When the configured queue length is exceeded the oldest video command is dropped.
+  - Audio queuing differs from video: speech uses a dedicated queue with de-duplication and completion promises; sound effects are fire-and-forget MPV spawns. These differing semantics are intentional but should be revisited (see `docs/Issues.md`).
 - **Video/Image Queue Logic:**
   - The screen queue handles `playVideo` and `setImage` commands to ensure smooth transitions and logical playback order.
   - **Queuing a New Command:** When a new `playVideo` or `setImage` command is received, it is handled as follows:
@@ -109,7 +109,7 @@ ParadoxFX provides professional-grade seamless transitions using a single MPV in
       - If the last item is an `setImage` command (for any file type) OR a `playVideo` command for an *image* file, it is considered a "static visual" and is **replaced** by the new command.
       - If the last item is a `playVideo` command for a *video* file, it is considered an "active visual" and is **not replaced**. The new command is added to the end of the queue.
   - **Playback Behavior:**
-    - `playVideo` (with video file): Plays the video. Ducks background audio.
+  - `playVideo` (with video file): Plays the video. When configured, ducking is applied by the zone layer (ScreenZone) which coordinates with the AudioManager for background audio reduction.
     - `playVideo` (with image file): Displays the image. Does not duck audio.
     - `setImage` (with video file): Loads the video and pauses on the first frame. Does not duck audio.
     - `setImage` (with image file): Displays the image. Does not duck audio.
@@ -164,16 +164,17 @@ ParadoxFX implements intelligent screen power management that balances energy ef
   - `setBackgroundMusicVolume`: Real-time volume adjustment
   - `clearSpeechQueue`: Immediate speech queue management
 
-- **Enhanced Status Reporting:**
+-- **Enhanced Status Reporting:**
   - Real-time audio subsystem status (background music, effects, speech queue)
-  - Multi-zone device health and performance monitoring
-  - Audio latency and performance metrics
-  - Platform-specific hardware status reporting
+  - Multi-zone device health and basic performance monitoring (heartbeat)
+  - Detailed audio latency and low-level platform performance metrics are not currently published by the code; consider opening an issue to specify required telemetry (see `docs/Issues.md`).
+  - Platform-specific hardware status reporting is available at a heartbeat level; deeper metrics require additional instrumentation.
 
-- **Configuration Management:**
-  - Runtime configuration updates via MQTT
+-- **Configuration Management:**
   - Device discovery and capability reporting
   - Remote logging and debugging capabilities
+
+  NOTE: Runtime hot-reload of the full `pfx.ini` via MQTT is not implemented; configuration is parsed at startup. If runtime configuration updates are required, add a tracked item in `docs/Issues.md`.
 
 ### 6. Comprehensive Device Configuration
 
@@ -304,13 +305,13 @@ bridge_username = your-hue-username
 
 ### 8. Media Player Support
 
-ParadoxFX uses MPV exclusively for all media playback:
+ParadoxFX uses MPV extensively for media playback:
 
-- **MPV Integration**: Single media player for images, video, and audio
+- **MPV Integration**: MPV-based playback with JSON IPC for control. Images and video are managed by a zone-specific MPV process; background music and speech use separate MPV instances managed by the AudioManager.
 - **IPC Control**: JSON-based socket communication for real-time control
 - **Hardware Acceleration**: Platform-specific optimization (GPU decode, etc.)
-- **Audio System Integration**: PipeWire (default) and PulseAudio support
-- **Multi-Instance**: Independent MPV process per soft device/zone
+- **Audio System Integration**: The implementation uses PulseAudio-compatible tooling (pactl, combined sinks). Pure PipeWire-only workflows are not guaranteed and may require additional mapping.
+- **Multi-Instance**: Independent MPV processes are used per soft device/zone for media; additional MPV instances exist for background audio and speech.
 
 ### 9. Testing
 

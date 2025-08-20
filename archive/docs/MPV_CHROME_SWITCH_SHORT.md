@@ -24,14 +24,12 @@ Document how Option 6 (xdotool windowactivate) behaved during testing, and how O
 - Option 4: `xdotool windowraise` — failed; browser never became visible.
 - Option 5: `wmctrl` restack / geometry tweaks — failed as implemented; browser never became visible.
 
-## Restore note
-At one point several unsuccessful approaches were tried and then a prior checkpoint was restored to recover the working setup. This file records the working options (3 and 6) and notes that other approaches were attempted and did not succeed.
+````markdown
+# MPV / Chromium Z-order switching — Consolidated
 
-## Backups created
-- `scripts/proof-mpv-chromium-option6.js` — placeholder backup created after Option 6
-- `PROOF_TEST-option6.md` — snapshot of `PROOF_TEST.md` after Option 6
-- `PROOF_TEST-option3.md` — snapshot intended to represent the `PROOF_TEST.md` state when Option 3 was used
+This short note has been consolidated into `MPV-Chrome-Switch-Notes.md`.
 
+Please consult `docs/MPV-Chrome-Switch-Notes.md` for the authoritative, up-to-date guidance and implementation sketches.
+
+````
 ## Next steps
-- If desired, replace the option6 backup placeholder with a full copy of the script (or a git branch/commit tag) for archival.
-- Continue testing other methods from `PROOF_TEST.md` if needed.

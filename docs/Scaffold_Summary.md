@@ -57,19 +57,11 @@
 
 ### ✅ Test Framework
 
-- **Unit Tests**: 35 passing tests for core components
-- **Integration Tests**: MQTT integration and media playback test structure
-- **Media Tests**: Comprehensive media file format testing (images, video, audio)
-- **Transition Tests**: Media type switching and player selection validation
-- **Audio Testing Suite**: 
-  - Standard audio testing with background music, sound effects, and speech
-  - Multi-zone audio testing across 3 independent physical outputs
-  - Raspberry Pi audio configuration and device testing
-  - Low-latency audio validation (<50ms for sound effects)
-  - MQTT topic routing simulation for zone-specific audio control
-- **Coverage**: Jest configuration with coverage reporting
-- **Mocking**: Comprehensive mock setup for testing
-- **Test Media**: Structured test media files for realistic testing
+- **Unit Tests**: Unit test suite exists and covers core components (run with `npm test`)
+- **Integration Tests**: Integration test scaffolding present; some tests require an MQTT broker or real media playback and may be skipped in CI.
+- **Media Tests**: Manual and automated media tests are provided under `test/manual/` for format and playback verification.
+- **Audio Testing**: Scripts and manual tests target multi-zone and low-latency audio scenarios.
+- **Coverage & Mocks**: Jest config and mock helpers are included for test development.
 
 ### ✅ Configuration & Documentation
 
@@ -82,57 +74,23 @@
 ## Test Results
 
 ```
-Test Suites: 2 failed, 2 passed, 4 total
-Tests:       6 failed, 35 passed, 41 total
+# Test notes
+
+Test results vary by environment. Some integration tests require an MQTT broker and X11/Audio hardware; run unit tests locally with `npm test` and use `npm run test:manual` for manual media/audio validations.
 ```
 
-- **85% test success rate**
-- Failed tests are expected (require MQTT broker for integration tests)
-- All core unit tests passing
+## File Structure (high-level)
 
-## File Structure
+The runtime and source layout is under the `pfx/` application folder. Core items include:
 
-```
-pfx/
-├── package.json              # Dependencies and scripts
-├── pfx.js                   # Main application entry
-├── start.js                  # Startup script with config handling
-├── pfx.ini                  # Runtime configuration
-├── pfx.ini.example          # Configuration template
-├── README.md                 # Project documentation
-├── LICENSE                   # MIT license
-├── .gitignore               # Version control exclusions
-├── jest.config.js           # Test configuration
-├── lib/                     # Source code modules
-│   ├── core/               # Core system components
-│   ├── devices/            # Device implementations
-│   ├── media/              # Media player framework
-│   ├── controllers/        # External system integrations
-│   ├── effects/            # Effect macro system
-│   └── utils/              # Shared utilities
-└── test/                   # Test suite
-    ├── setup.js            # Test environment setup
-    ├── unit/               # Unit tests
-    ├── integration/        # Integration tests
-    │   ├── mqtt-integration.test.js    # MQTT broker tests
-    │   └── media-playback.test.js      # Media player tests
-    ├── manual/             # Manual testing scripts
-    │   ├── test-audio.js           # Standard audio testing
-    │   ├── test-audio-3devices.js  # Multi-zone audio testing
-    │   ├── config-pi-audio.js      # Raspberry Pi audio config
-    │   ├── test-mqtt.js            # MQTT communication tests
-    │   └── real-playback.test.js   # Real media playback tests
-    └── utils/              # Test utilities
-        └── loadTestConfig.js # Test configuration management
-├── media/                  # Media files organized by category
-│   └── test/               # Test media files
-│       ├── defaults/       # Default test media (png, mp4, mp3, wav, etc.)
-│       ├── fx/             # Sound effects library  
-│       ├── music/          # Background music tracks
-│       ├── general/        # Speech and voice prompts
-│       ├── devices/        # Device identification audio
-│       └── surround/       # Multi-channel audio test files
-```
+- `package.json` — project dependencies and scripts
+- `pfx.js`, `start.js` — application entry and startup helpers
+- `pfx.ini` / `pfx.ini.example` — runtime configuration examples
+- `lib/` — application source (core, devices, media, controllers, utils)
+- `test/` — unit/integration/manual test scripts and helpers
+- `media/` — media assets used for testing and samples
+
+Refer to the repo root and `docs/` for detailed guides and examples.
 
 ## Next Steps
 

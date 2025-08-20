@@ -45,20 +45,14 @@ cp pfx.ini.example pfx.ini
 npm start
 ```
 
-### Raspberry Pi 5 Installation
+### Raspberry Pi specific notes
 
-**Pi5 requires specific setup for dual-HDMI functionality:**
+For platform-specific guidance see the `docs/` folder:
 
-```bash
-# See detailed Pi5 setup guide
-cat docs/PI5_SETUP_GUIDE.md
+- Pi5 notes and setup guidance: `docs/Pi5-Notes.md`
+- Pi4 notes and setup guidance: `docs/Pi4_Notes.md`
 
-# Quick setup for Pi5 dual-HDMI:
-cp config/pfx-pi5-hh.ini pfx.ini
-# Edit pfx.ini for your MQTT broker and media paths
-```
-
-**Important**: Pi5 dual-screen requires X11 (not Wayland). Use `sudo raspi-config` to switch display systems.
+Both documents include Pi-specific boot config recommendations and MPV profiles. For INI options and examples, see `docs/INI_Config.md`.
 
 ### Raspberry Pi 3 Installation
 
@@ -200,9 +194,10 @@ mosquitto_pub -h localhost -t "paradox/zone1/commands" \
 ## Documentation
 
 - **[MQTT API Reference](docs/MQTT_API.md)** - Complete command reference and message formats
-- **[Configuration Guide](docs/CONFIGURATION.md)** - Detailed setup and configuration instructions
-- **[Project Architecture](docs/SCAFFOLD_SUMMARY.md)** - Technical implementation details
-- **[Media Format Testing](docs/MEDIA_FORMAT_TEST_SUMMARY.md)** - Supported media formats and testing
+- **[Configuration & INI Reference](docs/INI_Config.md)** - Consolidated INI reference and examples
+- **[Project Architecture](docs/Scaffold_Summary.md)** - Technical implementation details
+- **[Browser Switching & Startup Timing](docs/Browser_Switching.md)** - Browser lifecycle and show/hide guidance matching runtime behavior
+- **Platform notes**: `docs/Pi4_Notes.md`, `docs/Pi5-Notes.md`
 
 ## Requirements
 

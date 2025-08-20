@@ -1,0 +1,228 @@
+````markdown
+# ParadoxFX INI Configuration (Merged Reference)
+
+This file consolidates the previous `CONFIGURATION.md` and `INI_REFERENCE.md` into a single authoritative INI configuration reference and examples document.
+
+Contents:
+- Quick overview and workflow
+- Full setting reference with types, defaults, and descriptions
+- Per-section examples and Pi5-specific notes
+- Troubleshooting and recommended settings
+
+---
+
+## Quick Overview
+
+ParadoxFX is configured using INI files. Pick a sample config from `config/` (e.g., `config/pfx-pi5-hh.ini`) and copy to `pfx.ini`. Sections are typically: `[mqtt]`, `[global]`, `[screen:<name>]`, `[audio:<name>]`, `[light:<id>]`, `[relay:<id>]`, `[controller:<type>]`.
+
+General advice:
+- Keep environment- and deployment-specific settings (like X11 DISPLAY or mpvOntop) in local `pfx.ini` and out of shared branches when necessary.
+- Use `log_level = debug` for troubleshooting window/MPV/browser issues.
+
+---
+
+## Full Setting Reference (by section)
+
+### [mqtt]
+
+| Setting | Type | Req | Default | Description |
+|---|---:|:--:|---|---|
+| broker | string | Yes | N/A | MQTT broker host or IP |
+| port | integer | No | 1883 | MQTT port |
+| username | string | No | - | MQTT user |
+| password | string | No | - | MQTT password |
+| client_id | string | Yes | N/A | Unique client id |
+| keepalive | integer | No | 60 | Keepalive seconds |
+| clean_session | boolean | No | true | Clean session flag |
+| base_topic | string | Yes | N/A | Root topic for messages |
+| device_name | string | Yes | N/A | Device name for heartbeat/topic suffix |
+| mqtt_qos | integer | No | 0 | Default QoS (0/1/2) |
+| mqtt_retain | boolean | No | false | Retain published messages |
+
+### [global]
+
+| Setting | Type | Req | Default | Description |
+|---|---:|:--:|---|---|
+| log_level | string | No | info | error|warn|info|debug|trace |
+| media_base_path | path | Yes | N/A | Base directory for media (prefer zone-specific media_dir) |
+| heartbeat_enabled | boolean | No | false | Enable heartbeat messages |
+| heartbeat_interval | integer(ms) | No | 10000 | Heartbeat interval in ms |
+| heartbeat_topic | string | No | paradox/heartbeat | Heartbeat MQTT topic |
+| ducking_volume | integer | No | 30 | Default ducking percent (0-100) |
+| max_concurrent_videos | integer | No | 1 | Max videos per zone |
+| enable_hardware_acceleration | boolean | No | false | HW decode flag (mpv) |
+
+### [screen:<zone_name>]
+
+Defines video+audio screen zones. Common keys:
+
+| Setting | Type | Req | Default | Description |
+|---|---:|:--:|---|---|
+| type | string | Yes | screen | Must be `screen` |
+| topic | string | Yes | N/A | Base MQTT topic for zone commands |
+| status_topic | string | No | - | Topic for status updates |
+| media_dir | path | No | - | Zone media directory |
+| volume | integer | No | 80 | Base volume % |
+| player_type | string | No | mpv | mpv|vlc|auto |
+| audio_device | string | No | default | Pulse/PipeWire/ALSA identifier |
+| display | string | Yes | N/A | X11 display (`:0`) or Wayland display |
+| xinerama_screen | integer | No | 0 | Xinerama index for multi-monitor |
+| default_image | string | No | default.png | Startup image |
+| mpv_video_options | string | No | - | Extra mpv CLI options |
+| mpvOntop | boolean | No | true | If `false` remove `--ontop` from mpv args (useful when Chromium must be on top) |
+
+Notes:
+- `mpvOntop = false` is recommended for zones where Chromium browser must be raised above MPV (e.g., clocks/UI overlays).
+- Use `display = :0` and `xinerama_screen` to target specific monitors under X11. For Pi5 dual-HDMI use X11 (see Pi5 section).
+
+Combined sink configuration (PulseAudio)
+
+PFx supports creating and managing PulseAudio "combined" sinks when you need one logical audio sink that forwards audio to multiple physical sinks (for example, two HDMI outputs).
+
+Configuration keys (per `screen:` or `audio:` device)
+
+| Setting | Type | Req | Default | Description |
+|---|---:|:--:|---|---|
+| combined_sinks | array or string (JSON) | No | N/A | List of Pulse sink identifiers to combine (e.g. `["pulse/alsa_output.platform-...","pulse/alsa_output.platform-..."]`). PFx accepts a JSON string or native array in the INI parser. |
+| combined_sink_name | string | No | combined_output | Name to give the created combined sink (used as `pulse/<name>` for `audio_device`). |
+| combined_sink_description | string | No | Combined Audio Output | Description property assigned to the combined sink when created. |
+| primary_device | string | No | N/A | Primary Pulse sink id (e.g. `pulse/alsa_output.platform-...`) used by PFx when trying to build a combined sink. |
+| secondary_device | string | No | N/A | Secondary Pulse sink id used for combined/dual output scenarios. |
+
+Behavior and operator guidance
+- If `combined_sinks` (or the explicit primary/secondary device keys) is present, PFx will attempt to ensure a combined sink exists at startup. The runtime code will:
+	- Detect existing sinks/modules via `pactl` and parse current sinks/modules.
+	- Reuse an existing combined sink when correctly configured, or unload/recreate it when slaves differ.
+	- Update the runtime `audio_device` to `pulse/<combined_sink_name>` when the combined sink is created or successfully detected. If creation fails PFx will fall back to the configured `primary_device`.
+- Because module-created sinks are transient (lost when PulseAudio restarts), choose one of the persistence methods described in `COMBINED_AUDIO.md`: persist the module in PulseAudio startup config, run a discovery script at boot (recommended on Pi hardware), or allow PFx to recreate the sink at app startup.
+- Avoid hardcoding fragile sink names when possible. Use discovery logic that matches sinks by properties (device description) or run a small discovery script to produce stable names before PFx starts.
+
+Example (dual HDMI combined sink created by PFx):
+
+```ini
+[screen:dual-hdmi]
+type = screen
+media_dir = /opt/paradox/media/zone-dual
+# Primary/secondary physical sinks (Pulse sink ids)
+primary_device = pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo
+secondary_device = pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo
+# Or provide an explicit array of sinks:
+# combined_sinks = ["pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo", "pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo"]
+combined_sink_name = paradox_dual_output
+combined_sink_description = Paradox Dual HDMI Output
+```
+
+See `COMBINED_AUDIO.md` for operational guidance on persistence, discovery scripts, and `pactl` commands to create the sink manually or at boot.
+
+### [audio:<zone_name>]
+
+Audio-only zones. Common keys:
+
+| Setting | Type | Req | Default | Description |
+|---|---:|:--:|---|---|
+| type | string | Yes | audio | Must be `audio` |
+| topic | string | Yes | N/A | MQTT topic |
+| audio_device | string | Yes | N/A | Pulse/PipeWire/ALSA device id |
+| background_music_volume | integer | No | 100 | Music volume |
+| ducking_volume | integer | No | 100 | Ducked level |
+| mpv_audio_options | string | No | - | Extra mpv audio options |
+
+### [light:<id>] and [lightgroup:<id>]
+
+Lighting sections for supported controllers (hue, wiz, zigbee). Keys include `controller`, `controller_config`, `lights` for groups, and controller-specific connection settings.
+
+### [relay:<id>]
+
+Relay/controller sections define switching endpoints and include `controller`, `node_id`/`device_id`, and `topic`.
+
+### [controller:<type>]
+
+Controller-global settings (serial_port, bridge_ip, polling_interval, timeout, max_retries).
+
+---
+
+## Platform Notes (Pi5)
+
+- Pi5 is HDMI-only for analog audio. Use `hdmi0` / `hdmi1` mappings or PipeWire sink names.
+- For reliable dual-HDMI video targeting, switch Pi5 to X11 (Wayland has multi-monitor limitations for mpv). Use `sudo raspi-config` → Advanced → Wayland → X11.
+- Recommended boot config additions in `/boot/firmware/config.txt`:
+
+```ini
+gpu_mem=256
+hdmi_enable_4kp60=1
+hdmi_drive=2
+hdmi_force_hotplug=1
+config_hdmi_boost=7
+dtoverlay=vc4-kms-v3d
+max_framebuffers=2
+```
+
+## Examples
+
+Single-screen minimal:
+
+```ini
+[mqtt]
+broker = localhost
+port = 1883
+
+[global]
+device_name = main-controller
+log_level = info
+
+[screen:main]
+type = screen
+topic = paradox/main/screen
+media_dir = /opt/media
+volume = 75
+player_type = auto
+audio_device = default
+```
+
+Pi5 dual-HDMI example:
+
+```ini
+[mqtt]
+broker = localhost
+client_id = pfx-pi5-hh
+
+[global]
+device_name = pi5-dual
+log_level = info
+
+[screen:zone1-hdmi0]
+type = screen
+media_dir = /opt/paradox/media/zone1
+audio_device = pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo
+display = :0
+xinerama_screen = 0
+
+[screen:zone2-hdmi1]
+type = screen
+media_dir = /opt/paradox/media/zone2
+audio_device = pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo
+display = :0
+xinerama_screen = 1
+```
+
+## Troubleshooting & Diagnostics
+
+- Enable `log_level = debug` in `[global]` to capture window manager and mpv diagnostics.
+- For browser show/hide issues check `/opt/paradox/logs/pfx-latest.log` for stored pid/window id mismatches.
+- Useful commands (run with proper XAUTHORITY/DISPLAY):
+
+```bash
+wmctrl -lG
+wmctrl -lp
+xdotool search --class ParadoxBrowser
+```
+
+## Removal of old docs
+
+`CONFIGURATION.md` and `INI_REFERENCE.md` are replaced by this consolidated `INI_CONFIG.md` file. Keep per-deployment `pfx.ini` files local and out of commits unless intentional.
+
+---
+
+*Last updated: August 2025 — consolidated reference*
+
+````

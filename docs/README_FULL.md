@@ -7,14 +7,15 @@ This directory contains the complete documentation for ParadoxFX (Paradox Effect
 ### User Documentation
 
 - **[MQTT API Reference](MQTT_API.md)** - Complete MQTT command reference, message formats, and examples
-- **[Configuration Guide](CONFIGURATION.md)** - Detailed setup and configuration instructions
-- **[Pi5 Setup Guide](PI5_SETUP_GUIDE.md)** - Step-by-step Raspberry Pi 5 installation and optimization
+- **[Configuration Guide](INI_Config.md)** - Consolidated INI reference and configuration examples (merged from older CONFIGURATION.md / INI_REFERENCE.md)
+- **[Pi5 Notes](Pi5-Notes.md)** - Pi5-specific deployment guidance
+- **[Pi4 Notes](Pi4_Notes.md)** - Pi4-specific deployment guidance
 
 ### Technical Documentation
 
-- **[Project Architecture](SCAFFOLD_SUMMARY.md)** - Technical implementation details, test results, and development status
+- **[Project Architecture](Scaffold_Summary.md)** - Technical implementation details, test results, and development status
+- **[Browser Switching & Startup timing](Browser_Switching.md)** - Guidance matching runtime behavior for browser show/hide and settle times
 - **[Media Format Testing](MEDIA_FORMAT_TEST_SUMMARY.md)** - Supported media formats and testing results
-- **[Pi5 Wayland Issue Report](pi5-wayland-mpv-issue.md)** - Technical analysis of dual-HDMI limitations under Wayland
 
 ### Historical Documentation
 
