@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ParadoxFX Zone Status",
+  "description": "Schema for PFX zone status messages published to {baseTopic}/state",
+  "type": "object",
+  "required": ["timestamp","zone","type","current_state","mpv_instances","volume","status"],
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "zone": { "type": "string" },
+    "type": { "type": "string", "enum": ["status"] },
+    "current_state": {
+      "type": "object",
+      "required": ["status","volume","errors","screenAwake","focus","content","browser"],
+      "properties": {
+        "status": {"type":"string","enum":["idle","showing_image","playing_video","playing_audio","paused","error","starting"]},
+        "volume": {"type":"number"},
+        "lastCommand": {"type":["string","null"]},
+        "errors": {"type":"array"},
+        "currentImage": {"type":["string","null"]},
+        "currentVideo": {"type":["string","null"]},
+        "backgroundMusic": {"type":["string","null"]},
+        "videoQueueLength": {"type":"integer","minimum":0},
+        "audioQueueLength": {"type":"integer","minimum":0},
+        "speechQueueLength": {"type":"integer","minimum":0},
+        "screenAwake": {"type":"boolean"},
+        "focus": {"type":"string","enum":["mpv","chromium","none"]},
+        "content": {"type":["string","null"]},
+        "browser": {
+          "type": "object",
+          "required": ["enabled","foreground"],
+          "properties": {
+            "enabled": {"type":"boolean"},
+            "url": {"type":["string","null"]},
+            "process_id": {"type":["number","null"]},
+            "window_id": {"type":["string","null"]},
+            "foreground": {"type":"boolean"}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    },
+    "mpv_instances": {
+      "type": "object",
+      "properties": {
+        "media": {
+          "type": "object",
+          "properties": {
+            "status": {"type":"string"},
+            "file": {"type":["string","null"]},
+            "socket_path": {"type":"string"}
+          }
+        },
+        "background": {"type":"object","properties":{"status":{"type":"string"},"file":{"type":["string","null"]},"socket_path":{"type":"string"}}},
+        "speech": {"type":"object","properties":{"status":{"type":"string"},"file":{"type":["string","null"]},"socket_path":{"type":"string"}}}
+      },
+      "additionalProperties": false
+    },
+    "volume": {"type":"number"},
+    "status": {"type":"string"}
+  },
+  "additionalProperties": true
+}

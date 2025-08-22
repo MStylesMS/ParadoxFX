@@ -80,6 +80,25 @@ else
     echo "ℹ️  No PFX processes found"
 fi
 
+# Kill Chromium processes
+echo "🌐 Killing Chromium processes..."
+chromium_pids=$(pgrep chromium)
+if [ -n "$chromium_pids" ]; then
+    echo "   Found Chromium processes: $chromium_pids"
+    pkill chromium
+    sleep 2
+    
+    # Force kill if still running
+    remaining_pids=$(pgrep chromium)
+    if [ -n "$remaining_pids" ]; then
+        echo "   Force killing remaining Chromium processes: $remaining_pids"
+        pkill -9 chromium
+    fi
+    echo "✅ Chromium processes terminated"
+else
+    echo "ℹ️  No Chromium processes found"
+fi
+
 echo ""
 echo "🎉 Cleanup complete!"
 echo "You can now safely restart PFX with 'node pfx.js'"

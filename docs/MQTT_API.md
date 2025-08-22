@@ -725,9 +725,92 @@ mosquitto_pub -t "paradox/houdini/clock/commands" -m '{"command": "fadeIn"}'
     "url": "http://localhost/clock/",
     "process_id": 12345,
     "window_id": "0x123456"
+    "foreground": true
   }
 }
 ```
+
+### System / State Message Schema (Full)
+
+All PFX devices publish a `status` message to their `{baseTopic}/state` topic. The message is JSON and always includes a timestamp, zone/device identifier and a `current_state` object. For screen zones the `current_state` contains additional fields for media and browser tracking. Below is the canonical schema and description of each field.
+
+Top-level fields
+- `timestamp` (string, ISO 8601): When the state snapshot was generated
+- `zone` (string): Zone identifier (e.g., `screen:mirror-hdmi0`)
+- `type` (string): Message type, typically `status`
+- `current_state` (object): Detailed runtime state for the zone
+- `mpv_instances` (object): Status for MPV player instances (media/background/speech)
+- `volume` (number): Current effective volume for the zone (0-100)
+- `status` (string): High-level human readable state (e.g., `idle`, `playing_video`, `showing_image`)
+
+`current_state` fields (common)
+- `status` (string): One of `idle`, `showing_image`, `playing_video`, `playing_audio`, `paused`, `error`, `starting`
+- `volume` (number): Configured base volume for the zone (0-100)
+- `lastCommand` (string|null): Last command processed by the zone (if any)
+- `errors` (array): List of error objects or messages
+- `currentImage` (string|null): Image filename currently displayed
+- `currentVideo` (string|null): Video filename currently playing
+- `backgroundMusic` (string|null): Background music file currently playing
+- `videoQueueLength` (number): Number of items waiting in the video queue
+- `audioQueueLength` (number): Number of items waiting in the audio/effects queue
+- `speechQueueLength` (number): Number of items waiting in the speech queue
+- `screenAwake` (boolean): Whether the screen/display is awake (DPMS state)
+- `focus` (string): `mpv`, `chromium`, or `none` — indicates which window currently has focus
+- `content` (string|null): Short description or URL of the content currently in focus
+
+`current_state.browser` (object - screens only)
+- `enabled` (boolean): Whether the managed browser process is running
+- `url` (string|null): URL currently loaded in the browser
+- `process_id` (number|null): PID of the chromium process if running
+- `window_id` (string|null): Window identifier used by the WindowManager (may be hex like `0x200001` or decimal)
+- `foreground` (boolean): NEW — true if the browser window is currently the foreground (active) window on the display. Computed by comparing the browser `window_id` to the active window reported by the WindowManager; falls back to `focus === 'chromium'` if WM APIs are unavailable
+
+`mpv_instances` (object)
+- `media` (object): `{ status: 'idle'|'active'|'playing', file: string|null, socket_path: string }`
+- `background` (object): `{ status: 'idle'|'active', file: string|null, socket_path: string }`
+- `speech` (object): `{ status: 'idle'|'active', file: string|null, socket_path: string }`
+
+Examples
+```
+paradox/houdini/mirror/state {
+  "timestamp": "2025-08-22T19:27:08.951Z",
+  "zone": "screen:mirror-hdmi0",
+  "type": "status",
+  "current_state": {
+    "status": "showing_image",
+    "volume": 100,
+    "lastCommand": "enableBrowser",
+    "errors": [],
+    "currentImage": "black_screen.png",
+    "currentVideo": null,
+    "backgroundMusic": null,
+    "videoQueueLength": 0,
+    "audioQueueLength": 0,
+    "speechQueueLength": 0,
+    "screenAwake": true,
+    "focus": "none",
+    "content": "none",
+    "browser": {
+      "enabled": true,
+      "url": "http://localhost/clock/index.html",
+      "process_id": 60891,
+      "window_id": "33554433",
+      "foreground": true
+    }
+  },
+  "mpv_instances": {
+    "media": { "status": "idle", "file": "black_screen.png", "socket_path": "/tmp/mpv-mirror-media.sock" },
+    "background": { "status": "idle", "file": null, "socket_path": "/tmp/mpv-mirror-background.sock" },
+    "speech": { "status": "idle", "file": null, "socket_path": "/tmp/mpv-mirror-speech.sock" }
+  },
+  "volume": 100,
+  "status": "showing_image"
+}
+```
+
+This schema is authoritative for all screen zones. Non-screen devices (lights, relays, audio-only zones) publish simplified `current_state` objects containing the applicable fields (e.g., `status`, `volume`, `errors`, and device-specific keys).
+
+If you want me to also add machine-readable JSON Schema for these messages (for validation or UI generation), I can add that to the docs as a follow-up.
 
 #### skip
 
