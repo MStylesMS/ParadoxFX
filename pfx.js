@@ -9,6 +9,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const { spawn } = require('child_process');
 const minimist = require('minimist');
 const ZoneManager = require('./lib/core/zone-manager');
 const ConfigLoader = require('./lib/core/config-loader');
@@ -94,6 +95,13 @@ class PFxApplication {
             this.zoneManager = new ZoneManager(this.config, this.mqttClient);
             await this.zoneManager.initialize();
 
+            // Start cursor-hiding helper (unclutter) for relevant displays
+            try {
+                await this._startUnclutter();
+            } catch (err) {
+                this.logger.warn('Failed to start unclutter cursor-hider: ' + err.message);
+            }
+
             // Setup graceful shutdown
             this.setupShutdownHandlers();
 
@@ -112,6 +120,13 @@ class PFxApplication {
         console.log('****************************************');
         this.logger.info('PFX shutting down politely, which may take a few seconds.');
         console.log('****************************************');
+
+        // Stop unclutter if we started it
+        try {
+            await this._stopUnclutter();
+        } catch (err) {
+            this.logger.warn('Error stopping unclutter: ' + err.message);
+        }
 
         if (this.zoneManager) {
             await this.zoneManager.shutdown();
@@ -139,6 +154,77 @@ class PFxApplication {
             this.logger.error('Application will continue running. Please check for underlying issues.');
             // Do NOT shutdown on unhandled rejections - this prevents MQTT message errors from crashing the app
         });
+    }
+
+    /**
+     * Start unclutter for each unique DISPLAY used by zones to hide the mouse cursor.
+     * We spawn one unclutter process per DISPLAY and keep references for shutdown.
+     */
+    async _startUnclutter() {
+        // Avoid starting twice
+        if (this._unclutterProcs) return;
+        this._unclutterProcs = new Map();
+
+        // Discover displays from zone configs
+        try {
+            const displays = new Set();
+            for (const deviceName of Object.keys(this.config.devices || {})) {
+                const dev = this.config.devices[deviceName];
+                const d = dev.display || dev.display_name || process.env.DISPLAY || ':0';
+                displays.add(d);
+            }
+
+            for (const display of displays) {
+                try {
+                    // Spawn unclutter with no delay and explicitly set DISPLAY
+                    const env = { ...process.env, DISPLAY: display };
+                    // Prefer unclutter binary if available, otherwise try 'unclutter-xfixes'
+                    const bin = this._whichSync('unclutter') || this._whichSync('unclutter-xfixes');
+                    if (!bin) {
+                        this.logger.warn('unclutter binary not found on PATH; cursor will not be hidden');
+                        break;
+                    }
+                    const proc = spawn(bin, ['-idle', '0', '-root'], { env, detached: true, stdio: 'ignore' });
+                    proc.unref();
+                    this._unclutterProcs.set(display, { proc, bin });
+                    this.logger.info(`Started ${bin} on DISPLAY=${display} to hide mouse cursor`);
+                } catch (err) {
+                    this.logger.warn(`Failed to start unclutter on DISPLAY=${display}: ${err.message}`);
+                }
+            }
+        } catch (err) {
+            this.logger.warn('Failed to enumerate displays for unclutter: ' + err.message);
+        }
+    }
+
+    /**
+     * Stop any unclutter processes started by this application
+     */
+    async _stopUnclutter() {
+        if (!this._unclutterProcs) return;
+        for (const [display, info] of this._unclutterProcs.entries()) {
+            try {
+                const proc = info.proc;
+                if (proc && !proc.killed) {
+                    try { process.kill(proc.pid, 'SIGTERM'); } catch (_) {}
+                    try { process.kill(proc.pid, 'SIGKILL'); } catch (_) {}
+                    this.logger.info(`Stopped ${info.bin} on DISPLAY=${display}`);
+                }
+            } catch (err) {
+                this.logger.warn(`Error stopping unclutter on DISPLAY=${display}: ${err.message}`);
+            }
+        }
+        this._unclutterProcs.clear();
+        this._unclutterProcs = null;
+    }
+
+    _whichSync(cmd) {
+        try {
+            const out = require('child_process').execSync(`command -v ${cmd} 2>/dev/null || true`).toString().trim();
+            return out || null;
+        } catch {
+            return null;
+        }
     }
 }
 

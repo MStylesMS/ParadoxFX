@@ -72,3 +72,46 @@ If you'd like, I can:
 - Add file/line references for each code snippet that demonstrates the current implementation.
 - Draft proposed spec edits or a migration plan for any of the issues above.
 - Create issues in the repository tracker (if you want PR/issue automation).
+
+---
+
+## Issue 8 — Per-zone browser PID -> window-id mapping (new)
+
+- Goal: Allow multiple browser instances (one per screen/zone) to run simultaneously without control-message confusion.
+- Symptom: With multiple enabled browsers, commands intended for one zone may be applied to another because window selection uses class/name heuristics.
+- Proposed solution: Implement authoritative per-zone tracking of browser processes and map each browser PID to its window id(s) on the X server. Use the PID->window-id mapping to validate window ownership before performing window operations (move, fullscreen, activate, raise).
+
+Implementation sketch:
+1. When launching Chromium for a zone, record the child process PID returned by `spawn()`.
+2. Extend `WindowManager` with a helper `getWindowIdsForPid(pid)` that parses `wmctrl -lp` or `xprop` output to return matching window ids (normalized to decimal ids used by xdotool).
+3. Store the mapping `zone.browserPid -> windowId` and use it for subsequent `showBrowser` / `hideBrowser` / `moveWindow` calls. If no window id is found for that PID, fall back to current heuristics but publish a warning event.
+4. Add a fallback global lock option that prevents enabling a second browser until the first is disabled (configurable toggle) while PID->window mapping is rolling out.
+
+- Backwards compatibility: Keep existing heuristics as a fallback. Publish diagnostic events when PID->window resolution fails so operators can triage multi-browser cases.
+
+Additional recommended details (from consolidated browser notes):
+
+- Robust showBrowser algorithm: Prefer window ids that map to the browser PID (via `wmctrl -lp`) when selecting which Chromium window to activate; then try `xdotool windowactivate`, retry with short backoff, and fall back to `wmctrl -i -a` and aggressive unmap/raise/focus attempts. Collect diagnostics (`wmctrl -lG`, `wmctrl -lp`, `xdotool search --class ParadoxBrowser`) when activation fails.
+
+- Startup/settle behavior: Chromium-based web apps can take several seconds to settle. Recommend waiting for an HTTP readiness probe (example: `waitForHttpOk(url, 8000)`) or schedule an explicit `hideBrowser()` ~8s after `enableBrowser()` if a hidden startup is required.
+
+- Window id normalization: Ensure `WindowManager` normalizes window ids (hex from `wmctrl` vs decimal from `xdotool`) so PID->window mapping is consistent across helpers.
+
+- Zone status and MQTT: Extend zone status payloads to include `browser: { pid, window_id }`, `focus`, and `content` fields so orchestration can verify which zone currently owns a browser process/window.
+
+- Tests & diagnostics:
+	- Unit test `WindowManager.getWindowIdsForPid()` by mocking `wmctrl -lp` and `xdotool` outputs.
+	- Integration test: full lifecycle on a real display (or Xvfb) to exercise enable/show/hide/disable and verify PID->window id mapping remains stable across restarts.
+	- Log and publish diagnostic events when PID->window resolution fails or when stale window ids are detected and refreshed.
+
+- Configuration knobs:
+	- `mpvOntop` already exists — recommend documenting that disabling MPV `--ontop` reduces focus conflicts when showing browsers.
+	- Add a runtime toggle `allowMultipleBrowsers` (default: false) while rollout and PID->window mapping is validated.
+
+- Backwards-compatible rollout plan:
+ 1. Implement PID capture and `getWindowIdsForPid(pid)` with heuristics fallback.
+ 2. Publish enhanced status (`browser.pid`, `browser.window_id`) and diagnostic events.
+ 3. Add `allowMultipleBrowsers` config flag and keep it disabled by default until tests pass.
+ 4. If deployment requires immediate multi-browser support, enable global single-browser lock in config until PID->window mapping is robust.
+
+These additions close the gap found in the consolidated browser notes and provide concrete testing and rollout guidance.
