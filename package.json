@@ -1,10 +1,12 @@
 {
     "name": "pfx",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "ParadoxFX - Multi-screen audio/video effects system for Raspberry Pi",
     "main": "pfx.js",
     "scripts": {
         "start": "node pfx.js",
+        "dev": "LOG_LEVEL=debug node pfx.js",
+        "debug": "LOG_LEVEL=debug node pfx.js",
         "test": "jest",
         "test:unit": "jest test/unit",
         "test:integration": "jest test/integration",

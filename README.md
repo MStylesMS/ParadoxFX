@@ -197,6 +197,7 @@ mosquitto_pub -h localhost -t "paradox/zone1/commands" \
 - **[Configuration & INI Reference](docs/INI_Config.md)** - Consolidated INI reference and examples
 - **[Project Architecture](docs/Scaffold_Summary.md)** - Technical implementation details
 - **[Browser Switching & Startup Timing](docs/Browser_Switching.md)** - Browser lifecycle and show/hide guidance matching runtime behavior
+- **[Production Deployment](README_FULL.md#process-management-with-systemd)** - systemd service setup and process management
 - **Platform notes**: `docs/Pi4_Notes.md`, `docs/Pi5-Notes.md`
 
 ## Requirements

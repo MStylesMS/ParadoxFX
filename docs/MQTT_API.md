@@ -2,6 +2,8 @@
 
 This document provides the complete MQTT API specification for ParadoxFX (Paradox Effects), including command formats, message structures, topic patterns, and response formats.
 
+**Note**: This documentation reflects only the currently implemented commands. For a comprehensive list of documented but unimplemented commands, see [MISSING_FUNCTIONS.md](MISSING_FUNCTIONS.md).
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -358,58 +360,6 @@ Stop current video playback.
 }
 ```
 
-#### pauseVideo
-
-Pause current video playback.
-
-**Format:**
-
-```json
-{
-  "command": "pauseVideo"
-}
-```
-
-#### resumeVideo
-
-Resume paused video playback.
-
-**Format:**
-
-```json
-{
-  "command": "resumeVideo"
-}
-```
-
-#### skipVideo
-
-Skip to next video in playlist while preserving paused state if needed.
-
-**Format:**
-
-```json
-{
-  "command": "skipVideo"
-}
-```
-
-#### pauseAll
-
-Pause all media playback (video and audio).
-
-**Format:**
-
-```json
-{
-  "command": "pauseAll"
-}
-```
-
-#### resumeAll
-
-Resume all paused media playback (video and audio).
-
 ### Browser/Clock Commands
 
 Generic browser control to show/hide a Chromium-based UI (e.g., the clock at http://localhost/clock/). These commands are zone-aware and will target the screen zone’s display.
@@ -476,49 +426,7 @@ Format:
 Parameters:
 - effect (optional): "fade" | "instant" (default: "fade"). When "fade", publishes `{ "command": "fadeout" }` to `paradox/houdini/clock/commands` before switching back.
 
-#### setBrowserUrl
 
-Update the URL. If the browser is running, it will relaunch or navigate accordingly; otherwise it’s stored for the next `enableBrowser`.
-
-Format:
-
-```json
-{
-  "command": "setBrowserUrl",
-  "url": "http://localhost/clock/?theme=dark"
-}
-```
-
-#### setBrowserKeepAlive
-
-Enable or disable auto-restart of the browser if it exits.
-
-Format:
-
-```json
-{
-  "command": "setBrowserKeepAlive",
-  "enabled": true
-}
-```
-
-#### browserStatus (optional)
-
-Request current browser status. Zone publishes status to its status topic including fields like `running`, `url`, `windowClass`, and `keepAlive`.
-
-Format:
-
-```json
-{ "command": "browserStatus" }
-```
-
-**Format:**
-
-```json
-{
-  "command": "resumeAll"
-}
-```
 
 ### Screen Power Management Commands
 
@@ -652,34 +560,6 @@ Terminate browser process and clean up all resources.
 - Browser window is pushed behind MPV (still running, just hidden)
 - **No fade effects or clock commands** - pure window layering
 - Browser process continues running in background
-
-#### setBrowserUrl
-
-Update browser URL (will relaunch browser if running).
-
-```json
-{
-  "command": "setBrowserUrl",
-  "url": "https://www.example.com"
-}
-```
-
-**Parameters:**
-- `url` (required): New URL to load
-
-#### setBrowserKeepAlive
-
-Enable/disable automatic browser restart on crash.
-
-```json
-{
-  "command": "setBrowserKeepAlive",
-  "enabled": true
-}
-```
-
-**Parameters:**
-- `enabled` (required): Boolean flag for keep-alive behavior
 
 ### Browser Window Management Architecture
 
@@ -908,7 +788,7 @@ Play audio effects (supports polyphonic playback).
 
 ## Multi-Zone Audio Commands
 
-Multi-zone audio devices support three distinct audio types with advanced management capabilities. Audio zones are configured with device aliases (hdmi, analog, etc.) and can output to multiple devices simultaneously.
+Multi-zone audio devices support background music, speech, and sound effects with volume control and ducking capabilities.
 
 ### Topic Structure for Audio Zones
 
@@ -919,46 +799,84 @@ paradox/zone1/audio/status     # Status from audio zone 1
 
 ### Background Music Commands
 
-#### playMusic
+#### playBackground
 
-Start background music with automatic volume ducking during speech.
-
-**Format:**
-
-```json
-{
-  "command": "playMusic",
-  "file": "ambient.mp3",
-  "volume": 60,
-  "loop": true
-}
-```
-
-**Parameters:**
-
-- `File` (required): Music file relative to zone's background_music_dir
-- `Volume` (optional): Volume level 0-100, default: 70
-- `Loop` (optional): Whether to loop the music, default: true
-- `FadeIn` (optional): Fade-in duration in seconds, default: 2
-
-#### stopMusic
-
-Stop background music with optional fade-out.
+Play background music with seamless looping and volume control.
 
 **Format:**
 
 ```json
 {
-  "command": "stopMusic",
-  "FadeOut": 3
+  "command": "playBackground",
+  "audio": "ambient/forest.mp3",
+  "volume": 70
 }
 ```
 
 **Parameters:**
 
-- `FadeOut` (optional): Fade-out duration in seconds, default: 2
+- `Audio` (required): Filename or subdirectory path relative to device MEDIA_DIR
+- `Volume` (optional): Volume level (0-100), defaults to device configuration
 
-### Speech/Narration Commands
+**Features:**
+- Seamless looping for continuous playback
+- Real-time volume control for ducking during speech
+- Persistent playback instance for smooth audio experience
+
+**Examples:**
+
+```json
+{
+  "command": "playBackground",
+  "audio": "ambient.mp3"
+}
+```
+
+```json
+{
+  "command": "playBackground",
+  "audio": "music/mystical.mp3",
+  "volume": 60
+}
+```
+
+#### pauseBackground
+
+Pause background music playback.
+
+**Format:**
+
+```json
+{
+  "command": "pauseBackground"
+}
+```
+
+#### resumeBackground
+
+Resume background music playback.
+
+**Format:**
+
+```json
+{
+  "command": "resumeBackground"
+}
+```
+
+#### stopBackground
+
+Stop background music playback.
+
+**Format:**
+
+```json
+{
+  "command": "stopBackground"
+}
+```
+
+### Speech Commands
 
 #### playSpeech
 
@@ -969,28 +887,110 @@ Play speech audio with automatic background music ducking.
 ```json
 {
   "command": "playSpeech",
-  "file": "hint1.wav",
-  "volume": 85,
-  "Priority": "high"
+  "audio": "hint1.wav",
+  "volume": 85
 }
 ```
 
 **Parameters:**
 
-- `File` (required): Speech file relative to zone's speech_dir
+- `Audio` (required): Speech file relative to device MEDIA_DIR
 - `Volume` (optional): Volume level 0-100, default: 80
-- `Priority` (optional): Queue priority ("low", "normal", "high"), default: "normal"
-- `DuckLevel` (optional): Background music duck level 0-100, default: 30
 
-#### clearSpeechQueue
+#### stopSpeech
 
-Clear all queued speech audio.
+Stop current speech playback.
 
 **Format:**
 
 ```json
 {
-  "command": "clearSpeechQueue"
+  "command": "stopSpeech"
+}
+```
+
+### Sound Effects Commands
+
+#### playAudioFx / playSoundEffect
+
+Play sound effect.
+
+**Format:**
+
+```json
+{
+  "command": "playAudioFx",
+  "audio": "click.wav",
+  "volume": 75
+}
+```
+
+**Parameters:**
+
+- `Audio` (required): Effect file relative to device MEDIA_DIR
+- `Volume` (optional): Volume level 0-100, default: 80
+
+### Queue Inspection
+
+#### videoQueue
+
+Return current video queue. Publishes an event with field `video_queue` (array of pending media filenames).
+
+**Format:**
+
+```json
+{
+  "command": "videoQueue"
+}
+```
+
+#### speechQueue
+
+Return current speech queue. Publishes an event with field `speech_queue` (array of pending speech file paths).
+
+**Format:**
+
+```json
+{
+  "command": "speechQueue"
+}
+```
+
+#### audioQueue
+
+Return current audio queue.
+
+**Format:**
+
+```json
+{
+  "command": "audioQueue"
+}
+```
+
+#### clearQueue
+
+Clear video or audio queue (context-dependent).
+
+**Format:**
+
+```json
+{
+  "command": "clearQueue"
+}
+```
+
+### Configuration
+
+#### getConfig
+
+Get current device configuration.
+
+**Format:**
+
+```json
+{
+  "command": "getConfig"
 }
 ```
 
@@ -1026,103 +1026,18 @@ Stop all currently playing sound effects.
 
 ```json
 {
-  "command": "stopAllEffects"
-}
-```
-
-### Zone Management Commands
-
-#### setZoneVolume
-
-Set master volume for the entire audio zone.
-
-**Format:**
-
-```json
-{
-  "command": "setZoneVolume",
-  "volume": 70
+  "command": "playAudioFx",
+  "audio": "click.wav",
+  "volume": 75
 }
 ```
 
 **Parameters:**
 
-- `Volume` (required): Master volume level 0-100
+- `Audio` (required): Effect file relative to device MEDIA_DIR
+- `Volume` (optional): Volume level 0-100, default: 80
 
-#### getZoneStatus
-
-Request current status of the audio zone.
-
-**Format:**
-
-```json
-{
-  "command": "getZoneStatus"
-}
-```
-
-**Response includes:**
-
-- Background music status and current file
-- Speech queue length and current item
-- Active sound effects count
-- Zone volume and device status
-- Audio device availability and aliases
-```
-
-#### stopAudio
-
-Stop all audio playback (background music and speech).
-
-**Format:**
-
-```json
-{
-  "command": "stopAudio"
-}
-```
-
-#### pauseAudio
-
-Pause all audio playback (background music and speech).
-
-**Format:**
-
-```json
-{
-  "command": "pauseAudio"
-}
-```
-
-#### resumeAudio
-
-Resume all paused audio playback (background music and speech).
-
-**Format:**
-
-```json
-{
-  "command": "resumeAudio"
-}
-```
-
-#### stopAllAudioFx
-
-Stop all audio effects playback.
-
-**Format:**
-
-```json
-{
-  "command": "stopAllAudioFx"
-}
-```
-
-#### playBackground
-
-Play background music with seamless looping and volume control.
-
-**Format:**
+### Queue Inspection
 
 ```json
 {

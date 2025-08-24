@@ -23,6 +23,7 @@
         "audioQueueLength": {"type":"integer","minimum":0},
         "speechQueueLength": {"type":"integer","minimum":0},
         "screenAwake": {"type":"boolean"},
+        "zoneVolume": {"type":"number","minimum":0,"maximum":100},
         "focus": {"type":"string","enum":["mpv","chromium","none"]},
         "content": {"type":["string","null"]},
         "browser": {
