@@ -215,6 +215,9 @@ Screen zones additionally support:
 # Set zone volume to 75%
 mosquitto_pub -t "paradox/houdini/mirror/commands" -m '{"command":"setZoneVolume","volume":75}'
 
+# Request immediate state update
+mosquitto_pub -t "paradox/houdini/mirror/commands" -m '{"command":"getState"}'
+
 # Restart PFX (requires systemd service for automatic restart)
 mosquitto_pub -t "paradox/houdini/mirror/commands" -m '{"command":"restartPfx"}'
 
