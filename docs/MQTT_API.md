@@ -747,7 +747,7 @@ Play an audio file with optional volume control.
 
 **Note:** Audio paths are relative to the device's MEDIA_DIR. VolumeAdjust modifies the base VOLUME setting from the device configuration.
 
-#### playAudioFx
+#### playAudioFX
 
 Play audio effects (supports polyphonic playback).
 
@@ -755,7 +755,7 @@ Play audio effects (supports polyphonic playback).
 
 ```json
 {
-  "command": "playAudioFx",
+  "command": "playAudioFX",
   "audio": "effects/explosion.wav",
   "type": "one-shot",
   "volumeAdjust": 10
@@ -772,14 +772,14 @@ Play audio effects (supports polyphonic playback).
 
 ```json
 {
-  "command": "playAudioFx",
+  "command": "playAudioFX",
   "audio": "doorbell.wav"
 }
 ```
 
 ```json
 {
-  "command": "playAudioFx",
+  "command": "playAudioFX",
   "audio": "fx/ambient_loop.wav",
   "type": "loop",
   "volumeAdjust": -30
@@ -911,7 +911,7 @@ Stop current speech playback.
 
 ### Sound Effects Commands
 
-#### playAudioFx / playSoundEffect
+#### playAudioFX / playSoundEffect
 
 Play sound effect.
 
@@ -919,7 +919,7 @@ Play sound effect.
 
 ```json
 {
-  "command": "playAudioFx",
+  "command": "playAudioFX",
   "audio": "click.wav",
   "volume": 75
 }
@@ -1026,7 +1026,7 @@ Stop all currently playing sound effects.
 
 ```json
 {
-  "command": "playAudioFx",
+  "command": "playAudioFX",
   "audio": "click.wav",
   "volume": 75
 }

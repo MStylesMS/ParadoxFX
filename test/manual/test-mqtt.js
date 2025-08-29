@@ -231,19 +231,19 @@ class MqttTester {
                 command: { command: 'playAudio', audio: 'music/background.mp3', volumeAdjust: 20, channel: 'default' }
             },
             {
-                name: 'playAudioFx (minimal)',
+                name: 'playAudioFX (minimal)',
                 description: 'Play an audio effect',
-                command: { command: 'playAudioFx', audio: 'doorbell.wav' }
+                command: { command: 'playAudioFX', audio: 'doorbell.wav' }
             },
             {
-                name: 'playAudioFx (full options)',
+                name: 'playAudioFX (full options)',
                 description: 'Play audio effect with all options',
-                command: { command: 'playAudioFx', audio: 'effects/explosion.wav', type: 'one-shot', volumeAdjust: 10 }
+                command: { command: 'playAudioFX', audio: 'effects/explosion.wav', type: 'one-shot', volumeAdjust: 10 }
             },
             {
-                name: 'playAudioFx (loop)',
+                name: 'playAudioFX (loop)',
                 description: 'Play looping audio effect',
-                command: { command: 'playAudioFx', audio: 'effects/ambient.wav', type: 'loop', volumeAdjust: -30 }
+                command: { command: 'playAudioFX', audio: 'effects/ambient.wav', type: 'loop', volumeAdjust: -30 }
             },
             {
                 name: 'stopAudio',

@@ -54,8 +54,8 @@ function showScreenCommands() {
             json: { command: 'playAudio', audio: 'background.mp3' }
         },
         {
-            name: 'playAudioFx (loop)',
-            json: { command: 'playAudioFx', audio: 'effects/ambient.wav', type: 'loop', volumeAdjust: -30 }
+            name: 'playAudioFX (loop)',
+            json: { command: 'playAudioFX', audio: 'effects/ambient.wav', type: 'loop', volumeAdjust: -30 }
         },
         {
             name: 'transition',

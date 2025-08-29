@@ -7,7 +7,7 @@ const testCommands = [
     { command: 'setImage', image: 'test.png' },
     { command: 'transition', image: 'test.png', video: 'test.mp4' },
     { command: 'playAudio', audio: 'test.mp3', volume: 1.0 },
-    { command: 'playAudioFx', audio: 'test.mp3', type: 'one-shot', volume: 0.5 },
+    { command: 'playAudioFX', audio: 'test.mp3', type: 'one-shot', volume: 0.5 },
     { command: 'clearQueue' },
     { command: 'pauseVideo' },
     { command: 'resumeVideo' },
