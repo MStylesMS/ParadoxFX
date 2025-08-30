@@ -866,13 +866,33 @@ Resume background music playback.
 
 #### stopBackground
 
-Stop background music playback.
+Stop background music playback with optional fade-out.
 
 **Format:**
 
 ```json
 {
+  "command": "stopBackground",
+  "fadeTime": 2.5
+}
+```
+
+**Parameters:**
+
+- `fadeTime` (optional): Fade-out duration in seconds (0.1-30.0). If not specified or 0, stops immediately.
+
+**Examples:**
+
+```json
+{
   "command": "stopBackground"
+}
+```
+
+```json
+{
+  "command": "stopBackground",
+  "fadeTime": 3.0
 }
 ```
 
@@ -1100,13 +1120,33 @@ Resume background music playback.
 
 #### stopBackground
 
-Stop background music playback.
+Stop background music playback with optional fade-out.
 
 **Format:**
 
 ```json
 {
+  "command": "stopBackground",
+  "fadeTime": 2.5
+}
+```
+
+**Parameters:**
+
+- `fadeTime` (optional): Fade-out duration in seconds (0.1-30.0). If not specified or 0, stops immediately.
+
+**Examples:**
+
+```json
+{
   "command": "stopBackground"
+}
+```
+
+```json
+{
+  "command": "stopBackground",
+  "fadeTime": 3.0
 }
 ```
 
@@ -1245,13 +1285,33 @@ Resume current speech playback.
 
 #### stopSpeech
 
-Stop current speech (continue processing queue).
+Stop current speech playback with optional fade-out.
 
 **Format:**
 
 ```json
 {
+  "command": "stopSpeech",
+  "fadeTime": 1.5
+}
+```
+
+**Parameters:**
+
+- `fadeTime` (optional): Fade-out duration in seconds (0.1-30.0). If not specified or 0, stops immediately.
+
+**Examples:**
+
+```json
+{
   "command": "stopSpeech"
+}
+```
+
+```json
+{
+  "command": "stopSpeech",
+  "fadeTime": 2.0
 }
 ```
 
@@ -1344,13 +1404,33 @@ Play a video followed by an image.
 
 #### stopAll
 
-Stop all media playback (video, audio, effects).
+Stop all media playback (video, audio, effects) with optional fade-out for audio components.
 
 **Format:**
 
 ```json
 {
+  "command": "stopAll",
+  "fadeTime": 2.0
+}
+```
+
+**Parameters:**
+
+- `fadeTime` (optional): Fade-out duration in seconds (0.1-30.0) for background music and speech. Video and effects stop immediately. If not specified or 0, stops all immediately.
+
+**Examples:**
+
+```json
+{
   "command": "stopAll"
+}
+```
+
+```json
+{
+  "command": "stopAll",
+  "fadeTime": 3.0
 }
 ```
 

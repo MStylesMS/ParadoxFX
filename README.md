@@ -186,9 +186,17 @@ mosquitto_pub -h localhost -t "paradox/zone1/commands" \
 mosquitto_pub -h localhost -t "paradox/zone1/commands" \
   -m '{"command": "playEffect", "file": "click.wav"}'
 
-# Pause all audio (background + speech)
+# Stop background music with fade-out
 mosquitto_pub -h localhost -t "paradox/zone1/commands" \
-  -m '{"command": "pauseAudio"}'
+  -m '{"command": "stopBackground", "fadeTime": 3.0}'
+
+# Stop speech with fade-out
+mosquitto_pub -h localhost -t "paradox/zone1/commands" \
+  -m '{"command": "stopSpeech", "fadeTime": 1.5}'
+
+# Stop all audio with fade-out (video/effects stop immediately)
+mosquitto_pub -h localhost -t "paradox/zone1/commands" \
+  -m '{"command": "stopAll", "fadeTime": 2.0}'
 ```
 
 ## Documentation

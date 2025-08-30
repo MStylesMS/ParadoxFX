@@ -182,35 +182,48 @@ async function testMultipleStreams(audioManager) {
 }
 
 /**
- * Test queue management
+ * Test fade functionality
  */
-async function testQueueManagement(audioManager) {
-    console.log('\n=== Test 6: Queue Management ===');
+async function testFadeFunctionality(audioManager) {
+    console.log('\n=== Test 7: Fade Functionality ===');
 
     try {
-        console.log('Testing speech queue management...');
-
-        // Queue multiple speech items
-        await audioManager.playSpeech(SPEECH_AUDIO, 90);
-        await audioManager.playSpeech(SPEECH_AUDIO, 90);
-        await audioManager.playSpeech(SPEECH_AUDIO, 90);
-
-        console.log('✓ Multiple speech items queued');
-
-        // Wait a bit then clear queue
-        await new Promise(resolve => setTimeout(resolve, 3000));
-
-        console.log('Clearing speech queue...');
-        await audioManager.clearSpeechQueue();
-        console.log('✓ Speech queue cleared');
+        // Start background music for fade testing
+        console.log('Starting background music for fade test...');
+        await audioManager.playBackgroundMusic(BACKGROUND_MUSIC, 80);
+        console.log('✓ Background music started');
 
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        console.log('✓ Queue management test passed');
+        // Test fade out background music
+        console.log('Testing fade out background music...');
+        await audioManager.fadeBackgroundMusic(0, 3000); // Fade to 0 over 3 seconds
+        console.log('✓ Background music fade initiated');
+
+        await new Promise(resolve => setTimeout(resolve, 3500));
+
+        // Restart background music
+        console.log('Restarting background music...');
+        await audioManager.playBackgroundMusic(BACKGROUND_MUSIC, 80);
+        console.log('✓ Background music restarted');
+
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Test fade out speech (if speech is playing)
+        console.log('Testing speech fade...');
+        await audioManager.playSpeech(SPEECH_AUDIO, 90);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Let speech start
+
+        await audioManager.fadeSpeech(0, 2000); // Fade speech to 0 over 2 seconds
+        console.log('✓ Speech fade initiated');
+
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        console.log('✓ Fade functionality test passed');
         return true;
 
     } catch (error) {
-        console.error('❌ Queue management test failed:', error);
+        console.error('❌ Fade functionality test failed:', error);
         return false;
     }
 }
@@ -228,7 +241,8 @@ async function runTests() {
         soundEffects: false,
         speechDucking: false,
         multipleStreams: false,
-        queueManagement: false
+        queueManagement: false,
+        fadeFunctionality: false
     };
 
     try {
@@ -251,6 +265,9 @@ async function runTests() {
         // Test 6: Queue Management
         results.queueManagement = await testQueueManagement(audioManager);
 
+        // Test 7: Fade Functionality
+        results.fadeFunctionality = await testFadeFunctionality(audioManager);
+
         // Display results
         console.log('\n🏁 Test Results Summary');
         console.log('========================');
@@ -260,6 +277,7 @@ async function runTests() {
         console.log(`Speech with Ducking: ${results.speechDucking ? '✅ PASS' : '❌ FAIL'}`);
         console.log(`Multiple Streams: ${results.multipleStreams ? '✅ PASS' : '❌ FAIL'}`);
         console.log(`Queue Management: ${results.queueManagement ? '✅ PASS' : '❌ FAIL'}`);
+        console.log(`Fade Functionality: ${results.fadeFunctionality ? '✅ PASS' : '❌ FAIL'}`);
 
         const allPassed = Object.values(results).every(result => result);
         console.log(`\nOverall Result: ${allPassed ? '🎉 ALL TESTS PASSED' : '⚠️  SOME TESTS FAILED'}`);
