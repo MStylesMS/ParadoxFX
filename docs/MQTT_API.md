@@ -9,6 +9,7 @@ This document provides the complete MQTT API specification for ParadoxFX (Parado
 - [Overview](#overview)
 - [Topic Structure](#topic-structure)
 - [Message Formats](#message-formats)
+- [Event Publishing](#event-publishing)
 - [Multi-Zone Audio](#multi-zone-audio)
 - [Screen/Media Commands](#screenmedia-commands)
 - [Multi-Zone Audio Commands](#multi-zone-audio-commands)
@@ -113,6 +114,147 @@ System heartbeat messages:
 - `ip_address`: Current IP address of the system
 - `status`: System status ("online", "offline", "error")
 - `uptime`: System uptime in seconds
+
+## Event Publishing
+
+PFX publishes real-time events for all media completion and command validation activities. Events are published to dedicated event and warning topics for external system integration.
+
+### Event Topics
+
+Each device publishes events to these topics:
+
+```
+{baseTopic}/events     # Real-time events and notifications
+{baseTopic}/warnings   # Warning and error messages
+```
+
+### Command Validation Events
+
+All MQTT commands are validated and publish events indicating their processing status:
+
+**Valid Command Event:**
+```json
+{
+  "timestamp": "2025-09-07T12:00:00.000Z",
+  "type": "command",
+  "command": "playVideo",
+  "status": "valid",
+  "zone": "screen:mirror-hdmi0"
+}
+```
+
+**Invalid Command Event:**
+```json
+{
+  "timestamp": "2025-09-07T12:00:00.000Z",
+  "type": "command",
+  "command": "invalidCommand",
+  "status": "invalid",
+  "error": "Unknown command: invalidCommand",
+  "zone": "screen:mirror-hdmi0"
+}
+```
+
+**Command Execution Events:**
+```json
+{
+  "timestamp": "2025-09-07T12:00:00.000Z",
+  "type": "command",
+  "command": "playVideo",
+  "status": "executed",
+  "file": "intro.mp4",
+  "zone": "screen:mirror-hdmi0"
+}
+```
+
+### Media Completion Events
+
+Media completion events are published when playback naturally ends (not when stopped manually):
+
+**Speech Completion Event:**
+```json
+{
+  "timestamp": "2025-09-07T12:00:00.000Z",
+  "type": "speech",
+  "state": "ended",
+  "file": "hint1.wav",
+  "zone": "screen:mirror-hdmi0"
+}
+```
+
+**Background Music Completion Event:**
+```json
+{
+  "timestamp": "2025-09-07T12:00:00.000Z",
+  "type": "background",
+  "state": "ended",
+  "file": "ambient.mp3",
+  "zone": "screen:mirror-hdmi0"
+}
+```
+
+**Note:** Video completion events are not published as videos are typically managed by external systems. Audio effects (playAudioFX) do not publish completion events per design requirements.
+
+### Warning and Error Events
+
+Warnings and errors are published to both `/events` and `/warnings` topics:
+
+**Warning Event:**
+```json
+{
+  "timestamp": "2025-09-07T12:00:00.000Z",
+  "type": "warning",
+  "level": "INFO",
+  "message": "File not found: missing.mp3",
+  "zone": "screen:mirror-hdmi0"
+}
+```
+
+**Error Event:**
+```json
+{
+  "timestamp": "2025-09-07T12:00:00.000Z",
+  "type": "error",
+  "level": "ERROR",
+  "message": "MPV process crashed",
+  "zone": "screen:mirror-hdmi0"
+}
+```
+
+### Event Message Level Control
+
+The `message_level` configuration setting controls which events are published:
+
+```ini
+[global]
+message_level = INFO  # Publish INFO level events only (default)
+# message_level = DEBUG  # Publish both INFO and DEBUG level events
+```
+
+- **INFO level**: Command validation, media completion, and important warnings
+- **DEBUG level**: All INFO events plus detailed operational messages
+
+### Event Publishing Examples
+
+**Subscribe to all events for a zone:**
+```bash
+mosquitto_sub -t "paradox/houdini/mirror/events"
+```
+
+**Subscribe to warnings for all zones:**
+```bash
+mosquitto_sub -t "paradox/+/+/warnings"
+```
+
+**Monitor command validation:**
+```bash
+mosquitto_sub -t "paradox/houdini/mirror/events" | grep '"type": "command"'
+```
+
+**Monitor media completion:**
+```bash
+mosquitto_sub -t "paradox/houdini/mirror/events" | grep '"state": "ended"'
+```
 
 ## Multi-Zone Audio
 
@@ -785,6 +927,46 @@ Play audio effects (supports polyphonic playback).
   "volumeAdjust": -30
 }
 ```
+
+#### stopAudio
+
+Stop all audio playback (background music and speech) with optional fade-out.
+
+**Format:**
+
+```json
+{
+  "command": "stopAudio",
+  "fadeTime": 2.5
+}
+```
+
+**Parameters:**
+
+- `fadeTime` (optional): Fade-out duration in seconds (0.1-30.0). If not specified or 0, stops immediately.
+
+**Behavior:**
+- Stops background music playback (with fade if specified)
+- Clears all queued speech items immediately
+- Publishes `{ all_audio_stopped: true, fade_time: fadeTime }` event
+- Logs the action with fade time information
+
+**Examples:**
+
+```json
+{
+  "command": "stopAudio"
+}
+```
+
+```json
+{
+  "command": "stopAudio",
+  "fadeTime": 3.0
+}
+```
+
+**Note:** Unlike `stopAll`, this command only affects audio components (background music and speech) and does not stop video playback.
 
 ## Multi-Zone Audio Commands
 

@@ -699,11 +699,97 @@ async function testMultipleAudioStreams() {
 // ============================================================================
 
 /**
+ * Check audio sink volumes and warn if outside recommended range
+ */
+async function checkAudioVolumes() {
+    console.log('\n=== Audio Sink Volume Check ===');
+
+    try {
+        // Try PipeWire first (Pi5), fallback to PulseAudio
+        let volumeCommand;
+        let isPipeWire = false;
+
+        if (process.platform === 'linux') {
+            try {
+                // Check if wpctl (PipeWire) is available
+                execSync('which wpctl', { stdio: 'pipe' });
+                volumeCommand = 'wpctl status';
+                isPipeWire = true;
+            } catch (e) {
+                try {
+                    // Fallback to pactl (PulseAudio)
+                    execSync('which pactl', { stdio: 'pipe' });
+                    volumeCommand = 'pactl list sinks';
+                    isPipeWire = false;
+                } catch (e2) {
+                    console.log('❌ Neither wpctl nor pactl found - cannot check volumes');
+                    return;
+                }
+            }
+        } else {
+            console.log('❌ Volume checking not supported on this platform');
+            return;
+        }
+
+        const output = execSync(volumeCommand, { encoding: 'utf8' });
+        const lines = output.split('\n');
+
+        if (isPipeWire) {
+            console.log('Using PipeWire (wpctl) for volume check...');
+            // Parse PipeWire output
+            let inSinksSection = false;
+            for (const line of lines) {
+                if (line.includes('Sinks:')) {
+                    inSinksSection = true;
+                    continue;
+                }
+                if (inSinksSection && line.includes('Built-in Audio') && line.includes('vol:')) {
+                    const volMatch = line.match(/vol:\s+([0-9]+\.[0-9]+)/);
+                    if (volMatch) {
+                        const volume = parseFloat(volMatch[1]);
+                        if (volume < 0.8 || volume > 1.2) {
+                            console.log(`⚠️  WARNING: HDMI sink volume ${volume} is outside recommended range (0.8-1.2)`);
+                        } else {
+                            console.log(`✅ HDMI sink volume ${volume} is within recommended range`);
+                        }
+                    }
+                }
+            }
+        } else {
+            console.log('Using PulseAudio (pactl) for volume check...');
+            // Parse PulseAudio output
+            let currentSink = null;
+            for (const line of lines) {
+                if (line.includes('Sink #')) {
+                    currentSink = line;
+                } else if (line.includes('Volume:') && currentSink) {
+                    const volMatch = line.match(/([0-9]+)%/);
+                    if (volMatch) {
+                        const volumePercent = parseInt(volMatch[1]);
+                        const volume = volumePercent / 100;
+                        if (volume < 0.8 || volume > 1.2) {
+                            console.log(`⚠️  WARNING: Sink volume ${volume} (${volumePercent}%) is outside recommended range (0.8-1.2)`);
+                        } else {
+                            console.log(`✅ Sink volume ${volume} (${volumePercent}%) is within recommended range`);
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.log(`❌ Error checking audio volumes: ${error.message}`);
+    }
+}
+
+/**
  * Main execution logic - Comprehensive audio testing
  */
 (async () => {
     console.log('🎵 MPV Audio Capabilities Test Suite');
     console.log('=====================================');
+
+    // Check audio volumes at the beginning
+    await checkAudioVolumes();
 
     // Terminate any old MPV instances
     try {

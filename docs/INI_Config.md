@@ -70,11 +70,14 @@ Defines video+audio screen zones. Common keys:
 | default_image | string | No | default.png | Startup image |
 | mpv_video_options | string | No | - | Extra mpv CLI options |
 | mpvOntop | boolean | No | true | If `false` remove `--ontop` from mpv args (useful when Chromium must be on top) |
+| max_volume | integer | No | 100 | Maximum allowed volume % (0-200, enforced by MPV --volume-max) |
 
 Notes:
 - `mpvOntop = false` is recommended for zones where Chromium browser must be raised above MPV (e.g., clocks/UI overlays).
 - Use `display = :0` and `xinerama_screen` to target specific monitors under X11. For Pi5 dual-HDMI use X11 (see Pi5 section).
+- `max_volume` setting prevents audio from exceeding the specified level, providing volume safety limits for installations
 
+<!-- Combined sink configuration allows routing audio to multiple physical outputs simultaneously -->
 Combined sink configuration (PulseAudio)
 
 PFx supports creating and managing PulseAudio "combined" sinks when you need one logical audio sink that forwards audio to multiple physical sinks (for example, two HDMI outputs).
@@ -126,6 +129,14 @@ Audio-only zones. Common keys:
 | background_music_volume | integer | No | 100 | Music volume |
 | ducking_volume | integer | No | 100 | Ducked level |
 | mpv_audio_options | string | No | - | Extra mpv audio options |
+| max_volume | integer | No | 100 | Maximum allowed volume % for all audio subsystems (0-200) |
+
+<!-- Volume Management Notes:
+- max_volume applies to all audio subsystems (background music, sound effects, speech)
+- MPV enforces volume limits using --volume-max argument
+- Values above 100% are supported for systems requiring boosted audio
+- Default fallback is 100% if max_volume is not specified
+-->
 
 ### [light:<id>] and [lightgroup:<id>]
 
@@ -145,6 +156,7 @@ Controller-global settings (serial_port, bridge_ip, polling_interval, timeout, m
 
 - Pi5 is HDMI-only for analog audio. Use `hdmi0` / `hdmi1` mappings or PipeWire sink names.
 - For reliable dual-HDMI video targeting, switch Pi5 to X11 (Wayland has multi-monitor limitations for mpv). Use `sudo raspi-config` → Advanced → Wayland → X11.
+- **Audio Volume Settings**: Pi5 HDMI sinks may default to low volumes (0.35-0.40). Set to 1.0 using `wpctl set-volume <sink_id> 1.0` for proper audio levels.
 - Recommended boot config additions in `/boot/firmware/config.txt`:
 
 ```ini
@@ -169,6 +181,7 @@ port = 1883
 [global]
 device_name = main-controller
 log_level = info
+message_level = info
 
 [screen:main]
 type = screen
@@ -189,6 +202,7 @@ client_id = pfx-pi5-hh
 [global]
 device_name = pi5-dual
 log_level = info
+message_level = info
 
 [screen:zone1-hdmi0]
 type = screen
@@ -196,6 +210,7 @@ media_dir = /opt/paradox/media/zone1
 audio_device = pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo
 display = :0
 xinerama_screen = 0
+max_volume = 120  # Limit HDMI-0 audio to 120% for safety
 
 [screen:zone2-hdmi1]
 type = screen
@@ -203,7 +218,15 @@ media_dir = /opt/paradox/media/zone2
 audio_device = pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo
 display = :0
 xinerama_screen = 1
+max_volume = 100  # Standard limit for HDMI-1
 ```
+
+<!-- Volume Configuration Examples:
+- max_volume = 100: Standard safety limit (default)
+- max_volume = 120: Moderate boost allowed for quiet environments
+- max_volume = 80: Conservative limit for loud installations
+- Values above 100% require careful testing to avoid distortion
+-->
 
 ## Troubleshooting & Diagnostics
 

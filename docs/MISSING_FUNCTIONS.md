@@ -57,16 +57,6 @@ Resume all paused media playback (video and audio).
 
 ## Audio Management Commands (Currently Missing)
 
-### stopAudio
-Stop all audio playback (background music and speech).
-
-**Format:**
-```json
-{
-  "command": "stopAudio"
-}
-```
-
 ### pauseAudio
 Pause all audio playback (background music and speech).
 
@@ -226,7 +216,7 @@ Request current status of the audio zone.
 
 ## Implementation Priority
 1. **High Priority**: pauseVideo, resumeVideo, pauseAll, resumeAll (basic playback control)
-2. **Medium Priority**: stopAudio, pauseAudio, resumeAudio (audio management)
+2. **Medium Priority**: ✅ stopAudio (implemented), pauseAudio, resumeAudio (audio management)
 3. **Low Priority**: playMusic, playEffect, queue inspection commands (advanced features)
 
 ## Notes

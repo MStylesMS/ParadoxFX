@@ -6,6 +6,45 @@
 echo "=== PulseAudio Combined Sink Test ==="
 echo "Testing PFX audio setup functionality..."
 
+# Function to check audio sink volumes
+check_audio_volumes() {
+    echo ""
+    echo "=== Audio Sink Volume Check ==="
+
+    # Try PipeWire first (Pi5), fallback to PulseAudio
+    if command -v wpctl &> /dev/null; then
+        echo "Using PipeWire (wpctl) for volume check..."
+        wpctl status | grep -A 5 "Sinks:" | while read -r line; do
+            if [[ $line =~ vol:\ ([0-9]+\.[0-9]+) ]]; then
+                volume="${BASH_REMATCH[1]}"
+                if (( $(echo "$volume < 0.8" | bc -l) )) || (( $(echo "$volume > 1.2" | bc -l) )); then
+                    echo "⚠️  WARNING: Sink volume $volume is outside recommended range (0.8-1.2)"
+                else
+                    echo "✅ Sink volume $volume is within recommended range"
+                fi
+            fi
+        done
+    elif command -v pactl &> /dev/null; then
+        echo "Using PulseAudio (pactl) for volume check..."
+        pactl list sinks | grep -A 5 "Volume:" | while read -r line; do
+            if [[ $line =~ ([0-9]+)% ]]; then
+                volume_percent="${BASH_REMATCH[1]}"
+                volume=$(echo "scale=2; $volume_percent / 100" | bc)
+                if (( $(echo "$volume < 0.8" | bc -l) )) || (( $(echo "$volume > 1.2" | bc -l) )); then
+                    echo "⚠️  WARNING: Sink volume $volume ($volume_percent%) is outside recommended range (0.8-1.2)"
+                else
+                    echo "✅ Sink volume $volume ($volume_percent%) is within recommended range"
+                fi
+            fi
+        done
+    else
+        echo "❌ Neither wpctl nor pactl found - cannot check volumes"
+    fi
+}
+
+# Run volume check at the beginning
+check_audio_volumes
+
 # Check if PulseAudio is running
 if ! pgrep -x "pulseaudio" > /dev/null; then
     echo "❌ PulseAudio is not running"

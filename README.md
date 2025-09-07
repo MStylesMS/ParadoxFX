@@ -92,16 +92,41 @@ type = screen
 topic = paradox/living-room/screen
 media_dir = /opt/media
 audio_device = hdmi
+volume = 80
+max_volume = 120
 
 [audio:zone1]
 type = audio
 devices = analog
 background_music_dir = /opt/media/music
+volume = 80
+max_volume = 120
 
 [light:living-room-hue]
 type = light
 topic = paradox/living-room/lights
 controller = hue
+```
+
+#### Volume Control Configuration
+
+ParadoxFX supports configurable volume limits for all audio zones:
+
+- **`volume`**: Default volume level (0-150, default: 80 for audio zones, 70 for screen zones)
+- **`max_volume`**: Maximum allowed volume level (0-200, default: 150)
+
+The `max_volume` setting prevents audio from exceeding the specified level, providing safety limits for different environments. This applies to:
+- Video playback audio
+- Background music
+- Speech/narration
+- Sound effects
+
+Example with volume constraints:
+```ini
+[screen:zone1-hdmi0]
+type = screen
+volume = 80
+max_volume = 120  # Audio will never exceed 120, even if volume commands request higher
 ```
 
 ### Send Commands

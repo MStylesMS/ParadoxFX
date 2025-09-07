@@ -50,6 +50,13 @@ ParadoxFX features a comprehensive three-subsystem audio architecture designed f
 - **Integration**: Coordinates with background music for seamless audio experience
 - **Use Cases**: Guided instructions, hints, character voices, announcements
 
+<!-- Volume Safety and Control:
+- max_volume setting provides safety limits for all audio subsystems
+- MPV --volume-max argument enforces hard limits at the player level
+- Volume validation ensures values are within 0-200% range
+- Configuration supports both max_volume and maxVolume formats for compatibility
+-->
+
 ### 2. Multi-Platform Media Playback
 
 - **Image Display:**
@@ -195,6 +202,7 @@ client_id = pfx-pi4-01
 
 [global]
 log_level = info
+message_level = info
 media_base_path = /opt/media
 max_concurrent_videos = 2
 enable_hardware_acceleration = true
@@ -237,6 +245,12 @@ bridge_username = your-hue-username
 
 ### 7. Enhanced Architecture
 
+<!-- Core architectural principles:
+- Modular design with clear separation of concerns
+- Zone-based abstraction for multi-device management
+- IPC-based communication between components
+- Platform-specific optimizations while maintaining API compatibility
+-->
 - **Multi-Platform Application**: Adapts to hardware capabilities across Pi3, Pi4, Pi5, and Linux
 - **Shared MQTT Broker**: All devices and zones use intelligent connection multiplexing  
 - **Enhanced Audio Manager**: Three-subsystem audio architecture with MPV-based playback
@@ -307,11 +321,19 @@ bridge_username = your-hue-username
 
 ParadoxFX uses MPV extensively for media playback:
 
+<!-- MPV Integration Details:
+- Single MPV instance per zone for video/images with IPC control
+- Separate MPV instances for each audio subsystem (background, effects, speech)
+- JSON IPC protocol for real-time command/response communication
+- Hardware acceleration via VAAPI/V4L2 on supported platforms
+- Audio routing through PulseAudio/PipeWire with device-specific sink selection
+-->
 - **MPV Integration**: MPV-based playback with JSON IPC for control. Images and video are managed by a zone-specific MPV process; background music and speech use separate MPV instances managed by the AudioManager.
 - **IPC Control**: JSON-based socket communication for real-time control
 - **Hardware Acceleration**: Platform-specific optimization (GPU decode, etc.)
 - **Audio System Integration**: The implementation uses PulseAudio-compatible tooling (pactl, combined sinks). Pure PipeWire-only workflows are not guaranteed and may require additional mapping.
 - **Multi-Instance**: Independent MPV processes are used per soft device/zone for media; additional MPV instances exist for background audio and speech.
+- **Volume Management**: MPV's --volume-max argument enforces volume safety limits configured via max_volume settings
 
 ### 9. Testing
 

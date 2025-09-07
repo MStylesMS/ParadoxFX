@@ -9,7 +9,7 @@ Checklist (what I recommend)
 - [ ] Add an optional config flag `windowManager.foregroundCheck = "xdotool|wm-api|none"` to let operators choose the foreground detection mechanism.
 - [ ] As an alternative (opt-in): provide `useXdotoolForegroundCheck` that runs `xdotool getwindowfocus` when WM APIs are missing.
 - [ ] Add a small unit/integration test that simulates window IDs and verifies `browser.foreground` flips as expected.
-- [ ] Document the change and the schema (already done in `docs/schema/pfx-status.schema.json`) and add run steps to the README.
+- [ ] Document the change and the schema (already done in `docs/pfx-status.schema.json`) and add run steps to the README.
 
 Problem statement
 -----------------
