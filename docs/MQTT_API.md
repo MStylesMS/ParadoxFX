@@ -736,6 +736,31 @@ mosquitto_pub -t "paradox/houdini/clock/commands" -m '{"command": "fadeIn"}'
 
 **Clock MQTT Topic**: `paradox/houdini/clock/commands`
 
+#### verifyBrowser
+
+Check browser health and restart if needed (automated health monitoring).
+
+**Format:**
+
+```json
+{
+  "command": "verifyBrowser"
+}
+```
+
+**Behavior:**
+- Requests current browser state from the PFX zone
+- Waits briefly (500ms) for state update to arrive
+- If browser is not running or responding, automatically restarts it
+- Uses the previously configured URL or zone default
+- Useful for sequence-based reliability checks and automated recovery
+
+**Use Cases:**
+- Sequence steps that need to ensure browser is healthy before proceeding
+- Automated recovery from browser crashes during game sequences
+- System initialization and startup verification
+- Periodic health checks in long-running games
+
 **Status Reporting**: Browser status is included in zone status updates:
 
 ```json
@@ -1506,6 +1531,44 @@ Skip current speech and move to next in queue.
 ```json
 {
   "command": "skipSpeech"
+}
+```
+
+#### stopAudio
+
+Stop all audio playback (background music, speech, and sound effects) with optional fade-out.
+
+**Format:**
+
+```json
+{
+  "command": "stopAudio",
+  "fadeTime": 2.0
+}
+```
+
+**Parameters:**
+
+- `fadeTime` (optional): Fade-out duration in seconds (0.1-30.0) for background music and speech. Sound effects stop immediately. If not specified or 0, stops all audio immediately.
+
+**Features:**
+- Comprehensive audio control stopping all audio channels
+- Configurable fade-out for background music and speech
+- Immediate stop for sound effects (no fade)
+- Useful for sequence management and emergency stops
+
+**Examples:**
+
+```json
+{
+  "command": "stopAudio"
+}
+```
+
+```json
+{
+  "command": "stopAudio",
+  "fadeTime": 3.0
 }
 ```
 
