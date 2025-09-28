@@ -42,6 +42,46 @@ base_path = ./media
 
 See the example configuration files in the `config/` directory for more options.
 
+### Advanced MQTT Client Options
+
+Recent versions introduce finer control over MQTT connection and heartbeat behavior. These can be specified in your INI (or injected via environment -> config translation) and are especially useful for constrained networks and test determinism.
+
+| Option | Description | Default (if unset) |
+| ------ | ----------- | ------------------- |
+| `mqttMaxAttempts` | Maximum connection attempts before giving up. `0` means unlimited retries. | `3` (tests) / may be higher in production |
+| `mqttConnectTimeoutMs` | Per-attempt socket connect timeout. If broker doesn’t respond in this window, attempt fails. | `5000` |
+| `mqttOverallTimeoutMs` | Total wall-clock timeout for the initial connect sequence (across retries). Throws `MQTT overall connection timeout` on failure. | `8000` |
+| `heartbeatInterval` | Interval (ms) between heartbeat status messages. | Required (e.g. `5000`) |
+| `heartbeatTopic` | MQTT topic to publish heartbeat JSON payloads. | Required |
+| `DEBUG_MQTT` (env) | When set to `1`, emits verbose internal connection/backoff debug logs (suppressed otherwise). | Off |
+
+Behavior notes:
+* When `mqttOverallTimeoutMs` elapses without a successful connection, the client rejects the connect promise and force-closes the socket to avoid hanging processes (critical for CI).
+* `mqttMaxAttempts = 0` is an opt-in for indefinite retry loops (not recommended for tests).
+* Heartbeat interval timers are `unref()`'d so they do not block process exit when running in one-off scripts or test runners.
+* Forced disconnect (`disconnect()`) now closes the underlying socket immediately to prevent lingering handles.
+
+Example snippet (INI style):
+```ini
+[mqtt]
+broker_url = mqtt://localhost:1883
+heartbeat_topic = paradox/pfx/heartbeat
+heartbeat_interval = 5000
+max_attempts = 5
+connect_timeout_ms = 4000
+overall_timeout_ms = 15000
+```
+
+If you export environment variables to feed config, you can enable verbose MQTT debugging on demand:
+```bash
+DEBUG_MQTT=1 node pfx.js
+```
+
+In Jest or other automated test contexts, shorten the timeouts dramatically for fast failure:
+```bash
+MQTT_CONNECT_TIMEOUT_MS=800 MQTT_OVERALL_TIMEOUT_MS=2500 MQTT_MAX_ATTEMPTS=2 DEBUG_MQTT=1 npm test
+```
+
 ## Running PFX
 
 ### Manual Execution

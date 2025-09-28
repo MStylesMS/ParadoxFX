@@ -31,6 +31,8 @@ ParadoxFX is a comprehensive system for controlling various devices through MQTT
 
 ```bash
 # Clone the repository
+## Command Outcome Events & Warnings
+
 git clone <repository-url>
 cd pfx
 
@@ -128,6 +130,24 @@ type = screen
 volume = 80
 max_volume = 120  # Audio will never exceed 120, even if volume commands request higher
 ```
+
+### Advanced MQTT Connection Tuning
+
+For unstable networks or CI test determinism you can tune connection behavior (see full reference in `README_FULL.md`):
+
+Environment / config keys:
+* `mqttMaxAttempts` – Max connection attempts (0 = unlimited)
+* `mqttConnectTimeoutMs` – Per-attempt TCP connect timeout
+* `mqttOverallTimeoutMs` – Total wall-clock timeout across retries
+* `heartbeatInterval` / `heartbeatTopic` – Periodic status publication
+* `DEBUG_MQTT=1` (env) – Enable verbose internal connection/backoff logs
+
+Example (fast-fail test run):
+```bash
+MQTT_CONNECT_TIMEOUT_MS=800 MQTT_OVERALL_TIMEOUT_MS=2500 MQTT_MAX_ATTEMPTS=2 npm test
+```
+
+On timeout the client rejects with `MQTT overall connection timeout` and force-closes the socket to avoid hanging test processes.
 
 ### Send Commands
 
