@@ -24,7 +24,10 @@ describe('MqttClient', () => {
             mqttServer: 'localhost',
             mqttPort: 1883,
             heartbeatTopic: 'test/heartbeat',
-            heartbeatInterval: 1000
+            heartbeatInterval: 1000,
+            mqttMaxAttempts: 1,
+            mqttConnectTimeoutMs: 200,
+            mqttOverallTimeoutMs: 400
         };
 
         mqttClient = new MqttClient(config);
@@ -45,24 +48,18 @@ describe('MqttClient', () => {
 
         test('should handle connection errors', async () => {
             const connectPromise = mqttClient.connect();
-
-            // Simulate connection error
             const errorCallback = mockMqttInstance.on.mock.calls.find(call => call[0] === 'error')[1];
+            // Fire error before connect
             errorCallback(new Error('Connection failed'));
-
             await expect(connectPromise).rejects.toThrow('Connection failed');
         });
 
         test('should timeout on slow connections', async () => {
             jest.useFakeTimers();
-
             const connectPromise = mqttClient.connect();
-
-            // Fast forward past timeout
-            jest.advanceTimersByTime(10000);
-
-            await expect(connectPromise).rejects.toThrow('MQTT connection timeout');
-
+            // Advance beyond overall timeout (400ms)
+            jest.advanceTimersByTime(450);
+            await expect(connectPromise).rejects.toThrow('overall connection timeout');
             jest.useRealTimers();
         });
     });

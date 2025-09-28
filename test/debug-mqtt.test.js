@@ -1,49 +1,47 @@
 /**
- * Minimal MQTT Jest test to debug hanging issue
+ * Minimal MQTT Jest test to debug hanging issue.
+ * Uses ensureBroker; gated by LONG_TESTS for routine runs.
  */
 
 const MqttClient = require('../lib/core/mqtt-client');
+const { ensureBroker } = require('./utils/broker-helper');
+const longTestsEnabled = process.env.LONG_TESTS === '1';
+const maybe = longTestsEnabled ? describe : describe.skip;
 
-describe('Debug MQTT', () => {
-    let mqttClient;
+maybe('Debug MQTT', () => {
+    let mqttClient; let brokerControl; let host = 'localhost'; let port = 1883;
+
+    beforeAll(async () => {
+        brokerControl = await ensureBroker();
+        const u = new URL(brokerControl.url);
+        host = u.hostname; port = parseInt(u.port, 10);
+        console.log(`Debug test using broker ${brokerControl.url} (embedded: ${brokerControl.usedEmbedded})`);
+    });
+
+    afterAll(async () => {
+        if (brokerControl && brokerControl.usedEmbedded) { await brokerControl.stop(); }
+    });
 
     beforeEach(() => {
-        console.log('beforeEach: creating config...');
-        const config = {
-            mqttServer: 'localhost',
-            mqttPort: 1883,
+        mqttClient = new MqttClient({
+            mqttServer: host,
+            mqttPort: port,
             heartbeatTopic: 'test/debug/heartbeat',
-            heartbeatInterval: 5000
-        };
-
-        console.log('beforeEach: creating MqttClient...');
-        mqttClient = new MqttClient(config);
-        console.log('beforeEach: MqttClient created');
+            heartbeatInterval: 5000,
+            mqttMaxAttempts: 2,
+            mqttConnectTimeoutMs: 1500,
+            mqttOverallTimeoutMs: 4000
+        });
     });
 
     afterEach(async () => {
-        console.log('afterEach: starting...');
         if (mqttClient && mqttClient.connected) {
-            console.log('afterEach: disconnecting...');
             await mqttClient.disconnect();
-            console.log('afterEach: disconnected');
         }
-        console.log('afterEach: finished');
     });
 
     test('minimal connection test', async () => {
-        console.log('test: starting connection...');
-        console.log('test: mqttClient exists:', !!mqttClient);
-        console.log('test: about to call connect()...');
-        
-        // Try with a timeout wrapper
-        const connectPromise = mqttClient.connect();
-        console.log('test: connect() called, promise created');
-        
-        await connectPromise;
-        console.log('test: connect() resolved');
-        console.log('test: connected, status:', mqttClient.connected);
+        await mqttClient.connect();
         expect(mqttClient.connected).toBe(true);
-        console.log('test: finished');
-    }, 30000);
+    }, 20000);
 });

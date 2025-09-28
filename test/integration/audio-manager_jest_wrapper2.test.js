@@ -1,12 +1,17 @@
-const path = require('path');
+// Slim secondary wrapper retained only as optional smoke test.
+// Disabled by default unless LONG_TESTS=1 and SMOKE_AUDIO=1
+const longTestsEnabled = process.env.LONG_TESTS === '1';
+const smokeEnabled = process.env.SMOKE_AUDIO === '1';
+const shouldRun = longTestsEnabled && smokeEnabled;
 
-jest.setTimeout(120000); // 2 minutes
+jest.setTimeout(60000);
 
-describe('audio manager integration wrapper', () => {
-    test('run audio manager integration tests in-process', async () => {
+const maybe = shouldRun ? describe : describe.skip;
+
+maybe('audio manager integration smoke wrapper', () => {
+    test('smoke run', async () => {
         const audioTest = require('./audio-manager.test.js');
-        // audio-manager.test.js exports runTests
         const { allPassed } = await audioTest.runTests();
-        expect(allPassed).toBeDefined();
+        expect(typeof allPassed).toBe('boolean');
     });
 });

@@ -276,6 +276,13 @@ if (require.main === module) {
         process.exit(1);
     });
 } else {
-    // When imported by Jest, export runTests for a test wrapper to call
+    // When imported by Jest, export runTests and add placeholder test
     module.exports = { runTests };
+    if (typeof describe === 'function') {
+        describe('audio-manager-auto integration placeholder', () => {
+            test('placeholder – manual integration script', () => {
+                expect(true).toBe(true);
+            });
+        });
+    }
 }
