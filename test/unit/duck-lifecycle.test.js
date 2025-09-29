@@ -17,15 +17,15 @@ describe('DuckLifecycle', () => {
         dl.addTrigger('v1', 'video');
         dl.addTrigger('s1', 'speech');
         dl.addTrigger('s2', 'speech');
-    expect(dl.count()).toBe(3);
+        expect(dl.count()).toBe(3);
         const snap = dl.snapshot();
-            expect(snap.count).toBe(3);
+        expect(snap.count).toBe(3);
         expect(snap.kinds.video).toBe(1);
         expect(snap.kinds.speech).toBe(2);
         dl.removeTrigger('s1');
         dl.removeTrigger('v1');
-    expect(dl.count()).toBe(1);
-    expect(dl.active()).toBe(true); // still one remaining
+        expect(dl.count()).toBe(1);
+        expect(dl.active()).toBe(true); // still one remaining
         dl.clear();
         expect(dl.active()).toBe(false);
         expect(dl.count()).toBe(0);

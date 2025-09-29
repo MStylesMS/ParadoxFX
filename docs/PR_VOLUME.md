@@ -1,7 +1,7 @@
 # PR: Unified Volume & Ducking Model
 
 ## Status
-Draft / Proposal (Pre-implementation)
+Phases 1–3 implemented (config parsing, resolver with tests, duck lifecycle triggers). Currently executing Phase 4 (runtime command handlers for updating base volumes & ducking adjustment) prior to state publication & integration.
 
 Implementation Branch: `PR-VOLUME` (initial commit: adds plan steps 6 & 7). All subsequent implementation commits will reference this doc with `PR-VOLUME:` prefix in commit messages for traceability.
 
@@ -142,29 +142,92 @@ Here, each `volume` is the configured *base* volume for that type. If background
 - Reject legacy duck parameters (negative integers pretending to be dB) with a warning and ignore.
 
 ## Implementation Plan (Phase Breakdown)
-1. Data Model & Loader:
-   - Extend config loader to parse `*_volume`, `ducking_adjust`, `max_volume` (kebab_case) into camelCase.
-   - Initialize zone volume model object.
-2. Resolver & Utility:
-   - Implement `volumeResolver.resolve(type, commandParams, context)`.
-3. Duck Lifecycle:
-   - Add active duck counter & hooks in `playSpeech` / `playVideo` start & cleanup on completion.
-4. Command Handlers:
-   - Add `setVolume` & `setDuckingAdjustment` with validation + standardized outcomes.
+1. (DONE) Data Model & Loader:
+   - Config loader parses `*_volume`, `ducking_adjust`, `max_volume`; produces `baseVolumes`, `duckingAdjust`, `maxVolume`.
+2. (DONE) Resolver & Utility:
+   - `volume-resolver.js` pure function with unit tests (precedence, clamping, ducking, skipDucking).
+3. (DONE) Duck Lifecycle:
+   - `duck-lifecycle.js` + integration in `screen-zone` (video + speech triggers) and `base-zone` exposure (`getDuckActive`).
+4. (IN PROGRESS) Command Handlers:
+   - Implement runtime mutation commands for base volumes & ducking adjustment (details below). No legacy removal yet.
 5. State Publishing:
-   - Extend zone status to include `current_state.volumes` and `current_state.ducking` as described.
+   - Extend status with `current_state.volumes` + `current_state.ducking` (base + duck active snapshot). (Pending)
 6. Config INI Samples Update:
-   - Update `config/*.ini` examples to adopt new per-type `*_volume` keys; remove deprecated keys (e.g., `ducking_volume`, legacy single `volume`).
-   - Ensure `max_volume` & `ducking_adjust` usage consistent; add comments for ranges and clamping semantics.
+   - Update examples to prefer per-type keys. (Pending)
 7. Documentation Updates:
-   - Propagate model changes to `README.md`, `docs/MQTT_API.md`, `README_FULL.md`, and `docs/INI_Config.md` (replace legacy volume/ducking sections, add new command examples `setVolume`, `setDuckingAdjustment`).
-   - Add migration notes (legacy keys still read? or warn + ignore) and cross-link to this PR doc.
+   - Update README / MQTT API / INI docs with new model & migration notes. (Pending)
 8. MPV Integration:
-   - Centralize volume application into one helper for background, and per-invocation for others.
-9. Tests:
-   - Unit tests for resolver edge cases, clamping, precedence, duck activation stack.
+   - Replace legacy per-duck absolute adjustments with resolver-driven percentage duck for background; remove double-duck risk. (Pending)
+9. Tests Expansion:
+   - Add command handler tests, state publication tests, duck lifecycle integration tests for overlapping triggers. (Partial – lifecycle unit test complete.)
 10. Cleanup:
-   - Remove legacy code and unused config keys, strip direct volume references in favor of resolver.
+   - Remove legacy ducking registry and negative duck-level semantics once resolver path live. (Pending)
+
+### Phase 4 Detailed Design (Command Handlers)
+
+New/clarified MQTT commands (JSON payloads shown) to mutate persistent zone volume model:
+
+1. Update a single base volume (per type):
+```
+{"command":"setVolume","type":"speech","volume":80}
+```
+2. Bulk update multiple base volumes (optional extension):
+```
+{"command":"setVolume","volumes":{"background":95,"video":90}}
+```
+3. Update ducking adjustment:
+```
+{"command":"setDuckingAdjustment","adjustValue":-45}
+```
+
+Validation rules:
+| Field | Presence | Valid Range | Clamp | Warning Codes |
+|-------|----------|-------------|-------|---------------|
+| `type` | required if no `volumes` map | one of background|speech|effects|video | n/a | invalid_type |
+| `volume` | required when single `type` provided | 0..200 | yes | clamp_base_volume_low / clamp_base_volume_high |
+| `volumes` | optional object (bulk mode) | keys subset of allowed types | per value | clamp_base_volume_low / clamp_base_volume_high |
+| `adjustValue` | required for setDuckingAdjustment | -100..0 | yes | clamp_ducking_adjust_low / clamp_ducking_adjust_high (positive -> coerced 0) |
+
+Outcome semantics:
+| Condition | outcome | Notes |
+|-----------|---------|-------|
+| Successful update w/o clamp | success | Event + status publish |
+| Successful with clamp | success + warning | Warning published (code & original) |
+| Invalid type / payload | failed | error_type: validation |
+
+Event payload examples:
+```
+{ "command":"setVolume","outcome":"success","parameters":{"type":"speech","volume":80},"message":"speech base volume set to 80" }
+{ "command":"setVolume","outcome":"success","parameters":{"type":"background","volume":260},"message":"background base volume clamped to 200 (requested 260)","warning_type":"clamp_base_volume_high" }
+{ "command":"setDuckingAdjustment","outcome":"success","parameters":{"adjustValue":-45},"message":"ducking_adjust set to -45" }
+```
+
+Internal model updates:
+```
+zone.baseVolumes[type] = clampedVolume
+zone.duckingAdjust = clampedAdjust
+```
+The legacy `currentState.volume` (single field) remains untouched for now (will eventually mirror background base or be deprecated).
+
+Publishing:
+After each successful mutation, immediately publish status so downstream controllers can reconcile.
+
+Failure cases (examples):
+```
+{"command":"setVolume","type":"ambient","volume":90} -> outcome: failed, error_type: validation, message: "Invalid volume type 'ambient'"
+{"command":"setDuckingAdjustment","adjustValue":10} -> coerce to 0 with warning (positive not allowed)
+```
+
+Concurrency / sequencing:
+- Mutations are synchronous (single-threaded JS). No special locking required.
+- Bulk updates apply all valid keys; invalid keys are reported individually in a combined warning array (aggregate outcome still success if at least one valid update occurred; failed if none valid).
+
+Telemetry additions (optional future):
+- Track last mutation timestamp per type for diagnostics.
+
+Forward compatibility:
+- If future per-zone presets or profiles are added, these commands can feed a higher-level preset manager; schema leaves space for `profile` field.
+
 
 ## Edge Cases Covered
 | Scenario | Expected Result |
