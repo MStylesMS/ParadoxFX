@@ -3,7 +3,7 @@
 > Historical Note (Context Summary): Phases 1–5 delivered the data model, resolver, duck lifecycle, and flattened status schema. Phase 6 added configuration samples; Phase 7 broadened documentation & migration notes. Phase 8 (this change set) completes runtime integration across all playback paths, unifies `adjustVolume` (removing legacy `volumeAdjust`), and removes legacy absolute duck stacking. Future phases (9+) will focus on optional telemetry (effective volumes) and legacy doc consolidation.
 
 ## Status
-Phases 1–8 complete (runtime integration + unified resolver + lifecycle ducking). Phase 9 in progress adding telemetry (`effective_volume`, `pre_duck_volume`, `ducked`) to playback outcomes & recompute events and migrating active configs off `volumeAdjust`. Backward compatibility shim intentionally skipped.
+Phases 1–9 complete (runtime integration + unified resolver + lifecycle ducking + telemetry on playback outcomes & background recompute events + config migration off `volumeAdjust`/`ducking_volume`). Remaining work is limited to optional schema validation tests and final smoke test artifacts prior to merge. Backward compatibility shim intentionally skipped.
 
 Implementation Branch: `PR-VOLUME` (initial commit: adds plan steps 6 & 7). All subsequent implementation commits will reference this doc with `PR-VOLUME:` prefix in commit messages for traceability.
 
@@ -248,20 +248,20 @@ Example (Audio Zone with background music only):
    - `volume-resolver.js` pure function with unit tests (precedence, clamping, ducking, skipDucking).
 3. (DONE) Duck Lifecycle:
    - `duck-lifecycle.js` + integration in `screen-zone` (video + speech triggers) and `base-zone` exposure (`getDuckActive`).
-4. (IN PROGRESS) Command Handlers:
+4. (DONE) Command Handlers:
    - Implement runtime mutation commands for base volumes & ducking adjustment (details below). No legacy removal yet.
 5. (DONE) State Publishing (Revised Flattened Schema):
    - Flattened top-level payload with background/speech/effects/video/browser blocks, base volumes only, `isDucked` boolean.
 6. (DONE) Config INI Samples Update:
    - Added `config/pfx-volume-example.ini` showcasing per-type base volumes and ducking_adjust.
-7. Documentation Updates:
-   - Update README / MQTT API / INI docs with new model & migration notes. (Pending)
-8. MPV Integration:
-   - Replace legacy per-duck absolute adjustments with resolver-driven percentage duck for background; remove double-duck risk. (Pending)
+7. (DONE) Documentation Updates:
+   - README / MQTT API / INI docs updated with unified model, migration notes, telemetry & schemas.
+8. (DONE) MPV Integration:
+   - Legacy per-duck absolute adjustments removed; resolver-driven percentage duck (single application) active.
 9. Tests Expansion:
    - Add command handler tests, state publication tests, duck lifecycle integration tests for overlapping triggers. (Partial – lifecycle unit test complete.)
-10. Cleanup:
-   - Remove legacy ducking registry and negative duck-level semantics once resolver path live. (Pending)
+10. (DONE) Cleanup:
+   - Legacy ducking registry & negative duck stacking removed; `ducking_volume` migrated to `ducking_adjust` in active config.
 
 ### Phase 4 Detailed Design (Command Handlers)
 
@@ -349,15 +349,16 @@ All prior ambiguities resolved; no further open questions.
 | Misinterpretation of adjustVolume sign | Explicit range validation + clear error messages. |
 | Over-complication of state payload | Keep schema stable; only add nested volumes object. |
 
-## Phase 9 Snapshot
+## Phase 9 Snapshot (Final)
 Delivered:
-- Telemetry fields present on playback outcomes & `background_volume_recomputed` events.
-- Updated tests (telemetry + duck recompute) passing.
-- Active config `houdini.edn` migrated from `volumeAdjust` to `adjustVolume`.
+- Telemetry fields on playback command outcomes & `background_volume_recomputed` events (effective_volume, pre_duck_volume, ducked).
+- JSON Schemas published for playback outcomes & background recompute events.
+- Docs (README, MQTT_API, INI_Config, Functional Spec) reference unified resolver & telemetry.
+- Active configs migrated off `volumeAdjust` and legacy `ducking_volume` (now `ducking_adjust`).
 
-Remaining before Phase 9 wrap:
-- Final doc sweep (remove stale internal plan verbiage – this section trimmed already).
-- Optional: add concise telemetry note to external MQTT docs (deferred decision).
+Deferred / Optional (post-merge enhancements):
+- Automated runtime schema validation (AJV test harness) – in progress separately.
+- Additional integration smoke captures for PR notes (optional artifact).
 
 ---
 **Reviewer Checklist**

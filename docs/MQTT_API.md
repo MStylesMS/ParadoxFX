@@ -46,6 +46,72 @@ These telemetry fields are event-only (not included in steady periodic status sn
 #### JSON Schema References
 See `docs/json-schemas/command-outcome-playback.schema.json` and `docs/json-schemas/background-volume-recompute.schema.json` for machine-readable validation of telemetry-enriched events.
 
+#### Example Telemetry Event Sequence
+When a playback command is issued the system may emit several related events. Below is a real capture (trimmed) from a `playBackground` command that specified both `volume` and `adjustVolume` (triggering a resolution warning) followed by a manual duck / unduck cycle.
+
+```jsonc
+[
+  {
+    "timestamp": "2025-09-29T18:20:03.633Z",
+    "zone": "mirror",
+    "type": "events",
+    "command_received": "playBackground",
+    "parameters": { "file": "music.mp3", "volume": 120, "adjustVolume": -25 }
+  },
+  {
+    "timestamp": "2025-09-29T18:20:03.688Z",
+    "zone": "mirror",
+    "type": "events",
+    "background_music_started": true,
+    "file": "music.mp3",
+    "volume": 120,
+    "pre_duck": 120,
+    "ducked": false,
+    "adjust_volume": -25
+  },
+  {
+    "timestamp": "2025-09-29T18:20:03.688Z",
+    "zone": "mirror",
+    "type": "events",
+    "command": "playBackground",
+    "outcome": "warning",
+    "parameters": { "file": "music.mp3", "volume": 120, "warnings": ["both_volume_and_adjust"] },
+    "message": "Background playback started with volume resolution warnings",
+    "warning_type": "volume_resolution_warning"
+  },
+  {
+    "timestamp": "2025-09-29T18:20:03.688Z",
+    "zone": "mirror",
+    "type": "events",
+    "command": "playBackground",
+    "outcome": "success",
+    "parameters": { "file": "music.mp3", "volume": 120, "adjustVolume": -25 },
+    "message": "Command 'playBackground' executed successfully"
+  },
+  {
+    "timestamp": "2025-09-29T18:20:08.638Z",
+    "zone": "mirror",
+    "type": "events",
+    "background_volume_recomputed": true,
+    "volume": 120,
+    "pre_duck": 120,
+    "ducked": true,
+    "effective_volume": 120,
+    "pre_duck_volume": 120
+  }
+]
+```
+
+Notes:
+- A warning outcome is emitted (with `warning_type`) when both `volume` and `adjustVolume` are supplied; a subsequent success outcome is also emitted for the same command (legacy pattern maintained for backward compatibility with clients expecting a terminal success). Consumers may treat the warning outcome as authoritative and ignore the later success.
+- `background_music_started` and `background_volume_recomputed` events carry real-time telemetry; periodic state snapshots intentionally omit `effective_volume`, `pre_duck_volume`, and `ducked` to stay lightweight.
+- The full captured sample file lives at: `docs/examples/sample-volume-telemetry-events.json`.
+
+Client Guidance:
+- If you only care about final status, deduplicate by the tuple `(timestamp truncated to ms, command)` keeping the first non-success outcome (warning/failed) if present.
+- For analytics, prefer the telemetry-bearing events (`*_recomputed`, `*_started`) plus the command outcome with any `warning_type` / `error_type`.
+
+
 ### Base Architecture
 
 - **Commands**: Sent to `{baseTopic}/commands`
