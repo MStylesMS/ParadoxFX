@@ -1,17 +1,27 @@
 # PR: Unified Volume & Ducking Model
 
+> Historical Note (Context Summary): Phases 1–5 delivered the data model, resolver, duck lifecycle, and flattened status schema. Phase 6 added configuration samples; Phase 7 broadened documentation & migration notes. Phase 8 (this change set) completes runtime integration across all playback paths, unifies `adjustVolume` (removing legacy `volumeAdjust`), and removes legacy absolute duck stacking. Future phases (9+) will focus on optional telemetry (effective volumes) and legacy doc consolidation.
+
 ## Status
-Phases 1–4 implemented (config parsing, resolver with tests, duck lifecycle triggers, runtime mutation commands). Phase 5 flattened status schema IMPLEMENTED (video/browser blocks always present for screen zones; base volumes mapped from config; `isDucked` only). Phase 6 (config INI samples + helper exposure) PARTIALLY COMPLETE: added `config/pfx-volume-example.ini` and lightweight integration helper `resolve-effective-volume.js` (wrapper around core resolver) to prepare for Phase 8 runtime application. Remaining future phases (7–10) not yet executed.
+Phases 1–6 implemented. Phase 8 RUNTIME INTEGRATION COMPLETE:
+ - All playback paths (audio + screen zones) now use `resolveEffectiveVolume` for background, speech, video, generic audio, and sound effects.
+ - Duck lifecycle (speech/video/manual triggers) drives a single percentage duck applied only to background; no legacy absolute stacking remains.
+ - `adjustVolume` unified across all media types (legacy `volumeAdjust` parameter removed).
+ - Per-play absolute `volume` still overrides and produces a warning if `adjustVolume` also provided.
+ - Resolver warnings aggregated and surfaced as `outcome: 'warning'` with `warning_type: 'volume_resolution_warning'` containing list of warning codes per play.
+ - Background volume recomputed on duck trigger add/remove via `_recomputeBackgroundAfterDuckChange()` for both zones.
+ - Legacy `_applyDucking` / `_removeDucking` code path fully eliminated from active logic (only lifecycle triggers remain).
+
+Pending cleanup / future (Phase 9+): additional documentation consolidation & potential addition of effective volume telemetry if operationally needed.
 
 Implementation Branch: `PR-VOLUME` (initial commit: adds plan steps 6 & 7). All subsequent implementation commits will reference this doc with `PR-VOLUME:` prefix in commit messages for traceability.
 
 ## Goal
 Replace the current ad-hoc and inconsistent volume & ducking handling with a clear, predictable, easily testable model that:
 - Uses absolute base volumes (0–200) with a zone-level max clamp.
+Outcome: event shows volume 120; warning outcome lists code indicating adjust ignored (resolver warning set).
 - Uses per‑play transient adjustments (percentage) without affecting persisted zone state.
 - Applies a single ducking adjustment (percentage reduction) that only affects background audio while speech or video is active (video does NOT get ducked itself).
-- Publishes effective volumes per media type in zone state.
-- Eliminates legacy negative ducking semantics and multi-layer hidden scaling.
 
 ## Design Summary
 | Concept | Type / Range | Scope | Notes |
