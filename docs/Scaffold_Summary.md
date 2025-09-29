@@ -39,6 +39,11 @@
 - **Parallel Audio Streams**: Simultaneous multi-zone audio without interference
 - **Performance Validated**: 9 MPV instances (3 zones × 3 audio types) running concurrently
 
+**Phase 8–9 Enhancements** (current branch)
+- Unified volume resolver (precedence: command `volume` > command `adjustVolume` > zone base).
+- Single non-stacking background ducking via `ducking_adjust` (negative percent) applied only while speech / other duck triggers active.
+- Telemetry fields (`effective_volume`, `pre_duck_volume`, `ducked`) added to playback outcome & background recompute events (events only; not added to steady status payloads).
+
 ### ✅ External Controllers
 
 - **Hue Controller**: Philips Hue integration (placeholder)

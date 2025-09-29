@@ -1,0 +1,50 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://paradoxfx.dev/schemas/background-volume-recompute.schema.json",
+    "title": "Background Volume Recompute Event",
+    "description": "Schema for events published when background music volume is recomputed due to duck lifecycle changes.",
+    "type": "object",
+    "required": [
+        "timestamp",
+        "background_volume_recomputed",
+        "effective_volume",
+        "pre_duck_volume",
+        "ducked"
+    ],
+    "properties": {
+        "timestamp": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "background_volume_recomputed": {
+            "type": "boolean",
+            "const": true
+        },
+        "effective_volume": {
+            "type": [
+                "number",
+                "integer"
+            ],
+            "minimum": 0,
+            "maximum": 200
+        },
+        "pre_duck_volume": {
+            "type": [
+                "number",
+                "integer"
+            ],
+            "minimum": 0,
+            "maximum": 200
+        },
+        "ducked": {
+            "type": "boolean"
+        },
+        "zone": {
+            "type": "string"
+        },
+        "note": {
+            "type": "string"
+        }
+    },
+    "additionalProperties": true
+}

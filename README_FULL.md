@@ -42,6 +42,9 @@ base_path = ./media
 
 See the example configuration files in the `config/` directory for more options.
 
+### Unified Volume & Ducking
+Effective playback volume follows precedence: command `volume` > command `adjustVolume` > zone base `volume`. Background ducking applies a single negative percentage (`ducking_adjust`) only to background music while a duck trigger (speech / video / manual) is active. Telemetry fields (`effective_volume`, `pre_duck_volume`, `ducked`) are published on playback outcome and background recompute events (not in steady status). See `docs/INI_Config.md` for full details.
+
 ### Advanced MQTT Client Options
 
 Recent versions introduce finer control over MQTT connection and heartbeat behavior. These can be specified in your INI (or injected via environment -> config translation) and are especially useful for constrained networks and test determinism.

@@ -5,6 +5,12 @@
 - Advanced MQTT client configuration options: `mqttMaxAttempts`, `mqttConnectTimeoutMs`, `mqttOverallTimeoutMs` for deterministic connection behavior in unstable networks and CI.
 - Heartbeat publication now unrefs its interval, allowing clean process exit when only heartbeat remains.
 - Environment flag `DEBUG_MQTT=1` to enable verbose internal connection/backoff diagnostics (suppressed by default).
+ - Phase 9 (Volume Model) Part 2: Telemetry JSON Schemas for playback outcomes & background recompute events (`docs/json-schemas/command-outcome-playback.schema.json`, `background-volume-recompute.schema.json`).
+ - Unified volume & ducking documentation (precedence + telemetry) finalized across README / INI / MQTT API.
+
+### Telemetry Notes
+- Playback command outcome events now optionally include `effective_volume`, `pre_duck_volume`, `ducked` (already emitted in Part 1; schemas added here for machine validation).
+- Background duck lifecycle publishes `background_volume_recomputed` events with matching telemetry fields.
 
 ### Changed
 - MQTT client cleanup: removed noisy ad-hoc console debug lines in favor of gated logger.debug output.
@@ -15,6 +21,7 @@
 
 ### Migration Notes
 No action required; defaults preserve current behavior. To leverage deterministic fast-fail in CI, set smaller values for the new timeout/attempt options (e.g. `mqttConnectTimeoutMs=800`, `mqttOverallTimeoutMs=2500`, `mqttMaxAttempts=2`).
+For telemetry consumers: incorporate new schemas and ignore telemetry fields if not needed (event shape backward compatible).
 
 
 ## [1.1.0] - 2025-09-28

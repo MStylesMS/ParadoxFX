@@ -1,0 +1,125 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://paradoxfx.dev/schemas/command-outcome-playback.schema.json",
+    "title": "Playback Command Outcome Event",
+    "description": "Schema for enriched command outcome events for playback-related commands (playBackground, playSpeech, playSoundEffect, playVideo when applicable).",
+    "type": "object",
+    "required": [
+        "timestamp",
+        "command",
+        "outcome",
+        "message"
+    ],
+    "properties": {
+        "timestamp": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "command": {
+            "type": "string",
+            "enum": [
+                "playBackground",
+                "playSpeech",
+                "playSoundEffect",
+                "playAudioFX",
+                "playEffect",
+                "playVideo"
+            ]
+        },
+        "outcome": {
+            "type": "string",
+            "enum": [
+                "success",
+                "failed",
+                "warning"
+            ]
+        },
+        "message": {
+            "type": "string"
+        },
+        "parameters": {
+            "type": "object",
+            "description": "Original normalized command parameters plus resolved telemetry fields when available.",
+            "properties": {
+                "file": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "volume": {
+                    "type": [
+                        "number",
+                        "integer"
+                    ],
+                    "minimum": 0,
+                    "maximum": 200
+                },
+                "adjustVolume": {
+                    "type": [
+                        "number",
+                        "integer"
+                    ],
+                    "minimum": -100,
+                    "maximum": 100
+                },
+                "loop": {
+                    "type": "boolean"
+                },
+                "effective_volume": {
+                    "type": [
+                        "number",
+                        "integer"
+                    ],
+                    "minimum": 0,
+                    "maximum": 200
+                },
+                "pre_duck_volume": {
+                    "type": [
+                        "number",
+                        "integer"
+                    ],
+                    "minimum": 0,
+                    "maximum": 200
+                },
+                "ducked": {
+                    "type": "boolean"
+                },
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "additionalProperties": true
+        },
+        "error_type": {
+            "type": "string"
+        },
+        "error_message": {
+            "type": "string"
+        },
+        "warning_type": {
+            "type": "string"
+        }
+    },
+    "allOf": [
+        {
+            "if": {
+                "properties": {
+                    "outcome": {
+                        "const": "failed"
+                    }
+                }
+            },
+            "then": {
+                "required": [
+                    "error_type",
+                    "error_message"
+                ]
+            }
+        }
+    ],
+    "additionalProperties": true
+}

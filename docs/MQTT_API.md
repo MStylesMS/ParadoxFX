@@ -23,6 +23,95 @@ This document provides the complete MQTT API specification for ParadoxFX (Parado
 
 PFx uses MQTT for all device communication. Each device subscribes to a command topic and publishes status updates and responses. The system also provides heartbeat messages and error reporting.
 
+### Unified Volume & Ducking Model
+
+Playback volume for audio/video related commands is resolved using this precedence (highest → lowest):
+1. `volume` (absolute 0–200) supplied in the command payload
+2. `adjustVolume` (transient -100..+100 %) supplied in the command payload
+3. Zone base `volume` from configuration (INI)
+
+If both `volume` and `adjustVolume` are present the absolute `volume` is used and a warning event is published (command still succeeds, `adjustVolume` ignored).
+
+Background ducking applies ONLY to background music and ONLY while a duck trigger is active (speech, video or manual—depending on feature set). The configured `ducking_adjust` (negative percent, e.g. -40) is applied once; ducks do not stack.
+
+### Volume Telemetry (Phase 9)
+
+Command outcome events for playback plus background-volume recompute events now include:
+- `effective_volume`: Final volume applied after resolution and ducking
+- `pre_duck_volume`: Effective volume before ducking reduction (equal to `effective_volume` if no duck active)
+- `ducked`: Boolean (true if background was reduced by a duck)
+
+These telemetry fields are event-only (not included in steady periodic status snapshots) to keep status lean. Subscribe to `{baseTopic}/events` to observe them.
+
+#### JSON Schema References
+See `docs/json-schemas/command-outcome-playback.schema.json` and `docs/json-schemas/background-volume-recompute.schema.json` for machine-readable validation of telemetry-enriched events.
+
+#### Example Telemetry Event Sequence
+When a playback command is issued the system may emit several related events. Below is a real capture (trimmed) from a `playBackground` command that specified both `volume` and `adjustVolume` (triggering a resolution warning) followed by a manual duck / unduck cycle.
+
+```jsonc
+[
+  {
+    "timestamp": "2025-09-29T18:20:03.633Z",
+    "zone": "mirror",
+    "type": "events",
+    "command_received": "playBackground",
+    "parameters": { "file": "music.mp3", "volume": 120, "adjustVolume": -25 }
+  },
+  {
+    "timestamp": "2025-09-29T18:20:03.688Z",
+    "zone": "mirror",
+    "type": "events",
+    "background_music_started": true,
+    "file": "music.mp3",
+    "volume": 120,
+    "pre_duck": 120,
+    "ducked": false,
+    "adjust_volume": -25
+  },
+  {
+    "timestamp": "2025-09-29T18:20:03.688Z",
+    "zone": "mirror",
+    "type": "events",
+    "command": "playBackground",
+    "outcome": "warning",
+    "parameters": { "file": "music.mp3", "volume": 120, "warnings": ["both_volume_and_adjust"] },
+    "message": "Background playback started with volume resolution warnings",
+    "warning_type": "volume_resolution_warning"
+  },
+  {
+    "timestamp": "2025-09-29T18:20:03.688Z",
+    "zone": "mirror",
+    "type": "events",
+    "command": "playBackground",
+    "outcome": "success",
+    "parameters": { "file": "music.mp3", "volume": 120, "adjustVolume": -25 },
+    "message": "Command 'playBackground' executed successfully"
+  },
+  {
+    "timestamp": "2025-09-29T18:20:08.638Z",
+    "zone": "mirror",
+    "type": "events",
+    "background_volume_recomputed": true,
+    "volume": 120,
+    "pre_duck": 120,
+    "ducked": true,
+    "effective_volume": 120,
+    "pre_duck_volume": 120
+  }
+]
+```
+
+Notes:
+- A warning outcome is emitted (with `warning_type`) when both `volume` and `adjustVolume` are supplied; a subsequent success outcome is also emitted for the same command (legacy pattern maintained for backward compatibility with clients expecting a terminal success). Consumers may treat the warning outcome as authoritative and ignore the later success.
+- `background_music_started` and `background_volume_recomputed` events carry real-time telemetry; periodic state snapshots intentionally omit `effective_volume`, `pre_duck_volume`, and `ducked` to stay lightweight.
+- The full captured sample file lives at: `docs/examples/sample-volume-telemetry-events.json`.
+
+Client Guidance:
+- If you only care about final status, deduplicate by the tuple `(timestamp truncated to ms, command)` keeping the first non-success outcome (warning/failed) if present.
+- For analytics, prefer the telemetry-bearing events (`*_recomputed`, `*_started`) plus the command outcome with any `warning_type` / `error_type`.
+
+
 ### Base Architecture
 
 - **Commands**: Sent to `{baseTopic}/commands`
@@ -399,6 +488,32 @@ Screen devices handle image display, video playback, and audio playback.
 
 * `killPfx`
   Gracefully terminate the PFX process via SIGTERM. Publishes `command_completed` event.
+
+### Media Playback & Stop Commands (Fade Support)
+
+The following stop-related commands accept an optional `fadeTime` (seconds) parameter. When provided and greater than 0, audio (and now video audio) will fade smoothly to silence before stopping. For composite commands the same `fadeTime` is applied to all supported media types.
+
+Supported fade-capable commands:
+
+| Command        | Zone Type        | Media Affected                          | Notes |
+|----------------|------------------|------------------------------------------|-------|
+| `stopBackground` | audio, screen   | Background music                         | Fades background music volume to 0 then stops |
+| `stopSpeech`     | audio, screen   | Active speech playback / queue           | Fades active speech channel before clearing queue |
+| `stopAudio`      | screen, audio   | Background + speech                      | Applies fade to both where active |
+| `stopVideo`      | screen          | Video playback audio track               | Fades video audio then stops video (image resets) |
+| `stopAll`        | screen          | Video (audio), background, speech        | Applies unified fade to each active medium |
+
+Example (fade out all media over 3 seconds):
+```json
+{ "command": "stopAll", "fadeTime": 3 }
+```
+
+Example (fade only background music over 2 seconds):
+```json
+{ "command": "stopBackground", "fadeTime": 2 }
+```
+
+If `fadeTime` is omitted or 0, the stop is immediate (legacy behavior). Video fading falls back to immediate stop if the underlying player does not support runtime volume adjustments.
 
 ### Image Commands
 

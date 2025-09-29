@@ -1,15 +1,18 @@
 # PR: Unified Volume & Ducking Model
 
+> Historical Note (Context Summary): Phases 1–5 delivered the data model, resolver, duck lifecycle, and flattened status schema. Phase 6 added configuration samples; Phase 7 broadened documentation & migration notes. Phase 8 (this change set) completes runtime integration across all playback paths, unifies `adjustVolume` (removing legacy `volumeAdjust`), and removes legacy absolute duck stacking. Future phases (9+) will focus on optional telemetry (effective volumes) and legacy doc consolidation.
+
 ## Status
-Draft / Proposal (Pre-implementation)
+Phases 1–9 complete (runtime integration + unified resolver + lifecycle ducking + telemetry on playback outcomes & background recompute events + config migration off `volumeAdjust`/`ducking_volume`). Remaining work is limited to optional schema validation tests and final smoke test artifacts prior to merge. Backward compatibility shim intentionally skipped.
+
+Implementation Branch: `PR-VOLUME` (initial commit: adds plan steps 6 & 7). All subsequent implementation commits will reference this doc with `PR-VOLUME:` prefix in commit messages for traceability.
 
 ## Goal
 Replace the current ad-hoc and inconsistent volume & ducking handling with a clear, predictable, easily testable model that:
 - Uses absolute base volumes (0–200) with a zone-level max clamp.
+Outcome: event shows volume 120; warning outcome lists code indicating adjust ignored (resolver warning set).
 - Uses per‑play transient adjustments (percentage) without affecting persisted zone state.
 - Applies a single ducking adjustment (percentage reduction) that only affects background audio while speech or video is active (video does NOT get ducked itself).
-- Publishes effective volumes per media type in zone state.
-- Eliminates legacy negative ducking semantics and multi-layer hidden scaling.
 
 ## Design Summary
 | Concept | Type / Range | Scope | Notes |
@@ -112,21 +115,120 @@ final = round(ducked)
 ```
 `duckActive` = (activeDuckCounter > 0). Speech & video start increment; finish decrement. The duck level does not stack—any active triggers apply the single configured ducking percentage.
 
-## State Publication Format (Draft)
-Augment existing zone state payload `current_state`:
+## State Publication Format (Revised Phase 5)
+
+The status payload published to `<baseTopic>/state` is being flattened and simplified.
+
+Goals:
+- Provide one authoritative location for each base volume.
+- Expose only whether ducking is active (`isDucked`), not internals.
+- Screen and audio zones share the same shape; screen zones additionally expose `video` and `browser` objects.
+- No backward compatibility block and no migration phase markers.
+- Base volumes only (no effective/ducked volume numbers published).
+
+### Flattened Schema
+
+Top-level keys (illustrative order):
 ```
-"current_state": {
-   "volumes": {
-      "background": { "volume": 90, "ducked": true },
-      "speech": { "volume": 110 },
-      "effects": { "volume": 120 },
-      "video": { "volume": 95 }
-   },
-   "ducking": { "active": true, "adjust": -35, "active_triggers": 2 },
-  ... existing fields ...
+{
+  "timestamp": ISO8601,
+  "zone": string,
+  "type": "status",
+  "status": string,            // high-level zone status (idle, playing_video, etc.)
+  "isDucked": boolean,         // true if any ducking trigger active
+  "maxVolume": number,         // zone max volume (clamp ceiling)
+  "background": {
+     "status": "idle"|"playing"|"paused",
+     "file": string|null,
+     "socket_path": string,
+     "volume": number          // base background volume
+  },
+  "speech": {
+     "status": "idle"|"playing"|"paused",
+     "file": string|null,
+     "next": string|null,      // next queued speech file if any
+     "queue_length": number,   // number of pending speech items (excluding current)
+     "socket_path": string,
+     "volume": number          // base speech volume
+  },
+  "effects": {
+     "volume": number          // base effects volume
+  },
+  // Present only on screen zones:
+  "video": {
+     "status": "idle"|"playing"|"paused",
+     "file": string|null,
+     "next": string|null,      // next queued video (if queueing re-enabled) else null
+     "queue_length": number,   // pending queued video items (excluding current)
+     "socket_path": string,
+     "volume": number          // base video volume
+  },
+  "browser": {                 // screen zones only
+     "enabled": boolean,
+     "url": string|null,
+     "focused": boolean,
+     "process_id": number|null,
+     "window_id": string|null
+  },
+  "lastCommand": string|null,
+  "errors": [ ... ]
 }
 ```
-Here, each `volume` is the configured *base* volume for that type. If background is currently ducked, `ducked: true` is present. (Effective runtime volume = base with adjustments + ducking applied internally; we expose base for clarity and can add `effective` later if needed.)
+
+Notes:
+- `volume` fields are the configured **base** volumes (mutable via `setVolume`).
+- `isDucked` derives from the duck lifecycle (speech/video active). The actual numerical ducking adjustment is *not* published.
+- `queue_length` for `speech` counts remaining queued speech items (not including the one currently playing). For audio zones this reflects `speechQueue.length`; for screen zones it mirrors audio manager speech queue length.
+- `next` is the next queued item if available (first in queue), else `null`.
+- `video.queue_length`/`video.next` will be `0`/`null` respectively if the simplified non-playlist mode remains (still included for forward consistency).
+- `effects` has only a `volume` because effects are instantaneous; no persistent MPV instance state.
+
+Example (Screen Zone playing video while ducked):
+```
+{
+  "timestamp": "2025-09-28T19:50:12.144Z",
+  "zone": "zone1",
+  "type": "status",
+  "status": "playing_video",
+  "isDucked": true,
+  "maxVolume": 150,
+  "background": { "status": "playing", "file": "bgm/loop1.ogg", "socket_path": "/tmp/mpv-zone1-background.sock", "volume": 90 },
+  "speech": { "status": "idle", "file": null, "next": null, "queue_length": 0, "socket_path": "/tmp/mpv-zone1-speech.sock", "volume": 110 },
+  "effects": { "volume": 120 },
+  "video": { "status": "playing", "file": "intro.mp4", "next": null, "queue_length": 0, "socket_path": "/tmp/mpv-zone1-media.sock", "volume": 95 },
+  "browser": { "enabled": false, "url": null, "focused": false, "process_id": null, "window_id": null },
+  "lastCommand": "playVideo",
+  "errors": []
+}
+```
+
+Example (Audio Zone with background music only):
+```
+{
+  "timestamp": "2025-09-28T19:50:13.020Z",
+  "zone": "audio1",
+  "type": "status",
+  "status": "idle",
+  "isDucked": false,
+  "maxVolume": 140,
+  "background": { "status": "playing", "file": "music/ambient.ogg", "socket_path": "/tmp/mpv-audio1-background.sock", "volume": 70 },
+  "speech": { "status": "idle", "file": null, "next": null, "queue_length": 0, "socket_path": "/tmp/mpv-audio1-speech.sock", "volume": 75 },
+  "effects": { "volume": 80 },
+  "lastCommand": "setVolume",
+  "errors": []
+}
+```
+
+### Implementation Notes (Phase 5)
+- The previous nested `current_state.volumes` and `current_state.ducking` blocks are removed.
+- The `media` MPV instance key is renamed to `video` for screen zones.
+- BaseZone will construct the flattened object; ScreenZone will append `video` & `browser` objects.
+- `isDucked` returns true if duckLifecycle.active() OR legacy duck map non-empty (during transition); legacy internals are not exposed.
+- Effective (ducked) background volume is not emitted; only the base volume is shown.
+
+### Future Phases
+- When resolver-based runtime effective volumes are adopted (Phase 8), we may optionally add `effective_volume` fields if operationally needed.
+- Queue metrics can be expanded if richer scheduling returns.
 
 ## Outcome & Warning Semantics
 - Clamp events publish `outcome: success` with an added warning message (standardized outcome model) and a /warnings topic payload.
@@ -140,29 +242,92 @@ Here, each `volume` is the configured *base* volume for that type. If background
 - Reject legacy duck parameters (negative integers pretending to be dB) with a warning and ignore.
 
 ## Implementation Plan (Phase Breakdown)
-1. Data Model & Loader:
-   - Extend config loader to parse `*_volume`, `ducking_adjust`, `max_volume` (kebab_case) into camelCase.
-   - Initialize zone volume model object.
-2. Resolver & Utility:
-   - Implement `volumeResolver.resolve(type, commandParams, context)`.
-3. Duck Lifecycle:
-   - Add active duck counter & hooks in `playSpeech` / `playVideo` start & cleanup on completion.
-4. Command Handlers:
-   - Add `setVolume` & `setDuckingAdjustment` with validation + standardized outcomes.
-5. State Publishing:
-   - Extend zone status to include `current_state.volumes` and `current_state.ducking` as described.
-6. Config INI Samples Update:
-   - Update `config/*.ini` examples to adopt new per-type `*_volume` keys; remove deprecated keys (e.g., `ducking_volume`, legacy single `volume`).
-   - Ensure `max_volume` & `ducking_adjust` usage consistent; add comments for ranges and clamping semantics.
-7. Documentation Updates:
-   - Propagate model changes to `README.md`, `docs/MQTT_API.md`, `README_FULL.md`, and `docs/INI_Config.md` (replace legacy volume/ducking sections, add new command examples `setVolume`, `setDuckingAdjustment`).
-   - Add migration notes (legacy keys still read? or warn + ignore) and cross-link to this PR doc.
-8. MPV Integration:
-   - Centralize volume application into one helper for background, and per-invocation for others.
-9. Tests:
-   - Unit tests for resolver edge cases, clamping, precedence, duck activation stack.
-10. Cleanup:
-   - Remove legacy code and unused config keys, strip direct volume references in favor of resolver.
+1. (DONE) Data Model & Loader:
+   - Config loader parses `*_volume`, `ducking_adjust`, `max_volume`; produces `baseVolumes`, `duckingAdjust`, `maxVolume`.
+2. (DONE) Resolver & Utility:
+   - `volume-resolver.js` pure function with unit tests (precedence, clamping, ducking, skipDucking).
+3. (DONE) Duck Lifecycle:
+   - `duck-lifecycle.js` + integration in `screen-zone` (video + speech triggers) and `base-zone` exposure (`getDuckActive`).
+4. (DONE) Command Handlers:
+   - Implement runtime mutation commands for base volumes & ducking adjustment (details below). No legacy removal yet.
+5. (DONE) State Publishing (Revised Flattened Schema):
+   - Flattened top-level payload with background/speech/effects/video/browser blocks, base volumes only, `isDucked` boolean.
+6. (DONE) Config INI Samples Update:
+   - Added `config/pfx-volume-example.ini` showcasing per-type base volumes and ducking_adjust.
+7. (DONE) Documentation Updates:
+   - README / MQTT API / INI docs updated with unified model, migration notes, telemetry & schemas.
+8. (DONE) MPV Integration:
+   - Legacy per-duck absolute adjustments removed; resolver-driven percentage duck (single application) active.
+9. Tests Expansion:
+   - Add command handler tests, state publication tests, duck lifecycle integration tests for overlapping triggers. (Partial – lifecycle unit test complete.)
+10. (DONE) Cleanup:
+   - Legacy ducking registry & negative duck stacking removed; `ducking_volume` migrated to `ducking_adjust` in active config.
+
+### Phase 4 Detailed Design (Command Handlers)
+
+New/clarified MQTT commands (JSON payloads shown) to mutate persistent zone volume model:
+
+1. Update a single base volume (per type):
+```
+{"command":"setVolume","type":"speech","volume":80}
+```
+2. Bulk update multiple base volumes (optional extension):
+```
+{"command":"setVolume","volumes":{"background":95,"video":90}}
+```
+3. Update ducking adjustment:
+```
+{"command":"setDuckingAdjustment","adjustValue":-45}
+```
+
+Validation rules:
+| Field | Presence | Valid Range | Clamp | Warning Codes |
+|-------|----------|-------------|-------|---------------|
+| `type` | required if no `volumes` map | one of background|speech|effects|video | n/a | invalid_type |
+| `volume` | required when single `type` provided | 0..200 | yes | clamp_base_volume_low / clamp_base_volume_high |
+| `volumes` | optional object (bulk mode) | keys subset of allowed types | per value | clamp_base_volume_low / clamp_base_volume_high |
+| `adjustValue` | required for setDuckingAdjustment | -100..0 | yes | clamp_ducking_adjust_low / clamp_ducking_adjust_high (positive -> coerced 0) |
+
+Outcome semantics:
+| Condition | outcome | Notes |
+|-----------|---------|-------|
+| Successful update w/o clamp | success | Event + status publish |
+| Successful with clamp | success + warning | Warning published (code & original) |
+| Invalid type / payload | failed | error_type: validation |
+
+Event payload examples:
+```
+{ "command":"setVolume","outcome":"success","parameters":{"type":"speech","volume":80},"message":"speech base volume set to 80" }
+{ "command":"setVolume","outcome":"success","parameters":{"type":"background","volume":260},"message":"background base volume clamped to 200 (requested 260)","warning_type":"clamp_base_volume_high" }
+{ "command":"setDuckingAdjustment","outcome":"success","parameters":{"adjustValue":-45},"message":"ducking_adjust set to -45" }
+```
+
+Internal model updates:
+```
+zone.baseVolumes[type] = clampedVolume
+zone.duckingAdjust = clampedAdjust
+```
+The legacy `currentState.volume` (single field) remains untouched for now (will eventually mirror background base or be deprecated).
+
+Publishing:
+After each successful mutation, immediately publish status so downstream controllers can reconcile.
+
+Failure cases (examples):
+```
+{"command":"setVolume","type":"ambient","volume":90} -> outcome: failed, error_type: validation, message: "Invalid volume type 'ambient'"
+{"command":"setDuckingAdjustment","adjustValue":10} -> coerce to 0 with warning (positive not allowed)
+```
+
+Concurrency / sequencing:
+- Mutations are synchronous (single-threaded JS). No special locking required.
+- Bulk updates apply all valid keys; invalid keys are reported individually in a combined warning array (aggregate outcome still success if at least one valid update occurred; failed if none valid).
+
+Telemetry additions (optional future):
+- Track last mutation timestamp per type for diagnostics.
+
+Forward compatibility:
+- If future per-zone presets or profiles are added, these commands can feed a higher-level preset manager; schema leaves space for `profile` field.
+
 
 ## Edge Cases Covered
 | Scenario | Expected Result |
@@ -184,13 +349,16 @@ All prior ambiguities resolved; no further open questions.
 | Misinterpretation of adjustVolume sign | Explicit range validation + clear error messages. |
 | Over-complication of state payload | Keep schema stable; only add nested volumes object. |
 
-## Next Steps
-Upon approval:
-1. Implement volume model & resolver.
-2. Add commands + tests.
-3. Refactor zones & audio manager.
-4. Update documentation (README sections referencing volume).
-5. Remove deprecated logic.
+## Phase 9 Snapshot (Final)
+Delivered:
+- Telemetry fields on playback command outcomes & `background_volume_recomputed` events (effective_volume, pre_duck_volume, ducked).
+- JSON Schemas published for playback outcomes & background recompute events.
+- Docs (README, MQTT_API, INI_Config, Functional Spec) reference unified resolver & telemetry.
+- Active configs migrated off `volumeAdjust` and legacy `ducking_volume` (now `ducking_adjust`).
+
+Deferred / Optional (post-merge enhancements):
+- Automated runtime schema validation (AJV test harness) – in progress separately.
+- Additional integration smoke captures for PR notes (optional artifact).
 
 ---
 **Reviewer Checklist**

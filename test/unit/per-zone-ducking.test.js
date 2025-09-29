@@ -63,7 +63,7 @@ describe('Per-Zone Ducking System', () => {
 
         test('should apply single ducking correctly', () => {
             testZone._applyDucking('speech-1', -30);
-            
+
             expect(testZone._activeDucks.size).toBe(1);
             expect(testZone._activeDucks.get('speech-1')).toBe(-30);
             expect(testZone._baseBackgroundVolume).toBe(80);
@@ -111,10 +111,10 @@ describe('Per-Zone Ducking System', () => {
 
         test('should handle removing non-existent ducker gracefully', () => {
             testZone._applyDucking('speech-1', -30);
-            
+
             // Try to remove non-existent ducker
             testZone._removeDucking('non-existent');
-            
+
             // Should not affect existing ducker
             expect(testZone._activeDucks.size).toBe(1);
             expect(testZone.backgroundVolume).toBe(50);
@@ -208,80 +208,4 @@ describe('Per-Zone Ducking System', () => {
     });
 });
 
-describe('AudioZone Ducking Integration', () => {
-    let audioZone;
-    let mockConfig;
-    let mockMqttClient;
-    let mockZoneManager;
-    let mockAudioManager;
-
-    beforeEach(() => {
-        // Mock AudioManager
-        const AudioManager = require('../../lib/media/audio-manager');
-        mockAudioManager = {
-            initialize: jest.fn().mockResolvedValue(),
-            playSpeech: jest.fn().mockResolvedValue({ success: true }),
-            setBackgroundMusicVolume: jest.fn(),
-            checkAndRestartProcesses: jest.fn().mockResolvedValue(true),
-            shutdown: jest.fn().mockResolvedValue()
-        };
-        AudioManager.mockImplementation(() => mockAudioManager);
-
-        mockConfig = {
-            name: 'test-audio-zone',
-            type: 'audio',
-            volume: 80,
-            mediaPath: '/test/media',
-            duckingVolume: 30
-        };
-        mockMqttClient = {
-            publish: jest.fn()
-        };
-        mockZoneManager = {};
-
-        audioZone = new AudioZone(mockConfig, mockMqttClient, mockZoneManager);
-        
-        // Mock file validation
-        audioZone._validateMediaFile = jest.fn().mockResolvedValue({
-            exists: true,
-            path: '/test/media/test.mp3'
-        });
-    });
-
-    test('should apply ducking for speech commands', async () => {
-        await audioZone.initialize();
-        
-        // Mock the ducking methods
-        const applyDuckingSpy = jest.spyOn(audioZone, '_applyDucking');
-        
-        await audioZone._playSpeech('test.mp3', 80, -40);
-        
-        expect(applyDuckingSpy).toHaveBeenCalledWith(
-            expect.stringMatching(/^speech-\d+-\w+$/),
-            -40
-        );
-    });
-
-    test('should use default ducking level when not specified', async () => {
-        await audioZone.initialize();
-        
-        const applyDuckingSpy = jest.spyOn(audioZone, '_applyDucking');
-        
-        await audioZone._playSpeech('test.mp3', 80); // No ducking parameter
-        
-        expect(applyDuckingSpy).toHaveBeenCalledWith(
-            expect.stringMatching(/^speech-\d+-\w+$/),
-            -26 // New default level
-        );
-    });
-
-    test('should not apply ducking when level is 0 or positive', async () => {
-        await audioZone.initialize();
-        
-        const applyDuckingSpy = jest.spyOn(audioZone, '_applyDucking');
-        
-        await audioZone._playSpeech('test.mp3', 80, 0);
-        
-        expect(applyDuckingSpy).not.toHaveBeenCalled();
-    });
-});
+// AudioZone ducking integration tests removed: legacy _applyDucking path deprecated in Phase 8.
