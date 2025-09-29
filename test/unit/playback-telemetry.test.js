@@ -33,7 +33,7 @@ function makeMockAudioManager() {
 }
 
 // Minimal screen zone supporting only video background recompute patch points.
-jest.mock('../../lib/zones/screen-power-manager', () => {
+jest.mock('../../lib/utils/screen-power-manager', () => {
     return jest.fn().mockImplementation(() => ({ autoWakeForMedia: jest.fn().mockResolvedValue() }));
 });
 

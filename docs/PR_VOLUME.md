@@ -3,16 +3,7 @@
 > Historical Note (Context Summary): Phases 1–5 delivered the data model, resolver, duck lifecycle, and flattened status schema. Phase 6 added configuration samples; Phase 7 broadened documentation & migration notes. Phase 8 (this change set) completes runtime integration across all playback paths, unifies `adjustVolume` (removing legacy `volumeAdjust`), and removes legacy absolute duck stacking. Future phases (9+) will focus on optional telemetry (effective volumes) and legacy doc consolidation.
 
 ## Status
-Phases 1–6 implemented. Phase 8 RUNTIME INTEGRATION COMPLETE:
- - All playback paths (audio + screen zones) now use `resolveEffectiveVolume` for background, speech, video, generic audio, and sound effects.
- - Duck lifecycle (speech/video/manual triggers) drives a single percentage duck applied only to background; no legacy absolute stacking remains.
- - `adjustVolume` unified across all media types (legacy `volumeAdjust` parameter removed).
- - Per-play absolute `volume` still overrides and produces a warning if `adjustVolume` also provided.
- - Resolver warnings aggregated and surfaced as `outcome: 'warning'` with `warning_type: 'volume_resolution_warning'` containing list of warning codes per play.
- - Background volume recomputed on duck trigger add/remove via `_recomputeBackgroundAfterDuckChange()` for both zones.
- - Legacy `_applyDucking` / `_removeDucking` code path fully eliminated from active logic (only lifecycle triggers remain).
-
-Pending cleanup / future (Phase 9+): additional documentation consolidation & potential addition of effective volume telemetry if operationally needed.
+Phases 1–8 complete (runtime integration + unified resolver + lifecycle ducking). Phase 9 in progress adding telemetry (`effective_volume`, `pre_duck_volume`, `ducked`) to playback outcomes & recompute events and migrating active configs off `volumeAdjust`. Backward compatibility shim intentionally skipped.
 
 Implementation Branch: `PR-VOLUME` (initial commit: adds plan steps 6 & 7). All subsequent implementation commits will reference this doc with `PR-VOLUME:` prefix in commit messages for traceability.
 
@@ -358,12 +349,15 @@ All prior ambiguities resolved; no further open questions.
 | Misinterpretation of adjustVolume sign | Explicit range validation + clear error messages. |
 | Over-complication of state payload | Keep schema stable; only add nested volumes object. |
 
-## Next Steps
-Short-term (Phase 7+):
-1. Update external docs (README / MQTT_API.md / INI docs) to reference flattened status + per-type *_volume keys.
-2. Integrate `resolveEffectiveVolume` into playback paths (background/speech/video) applying ducking percentage at runtime (Phase 8) then remove legacy per-duck absolute system.
-3. Expand tests covering runtime application (effective volume actually passed to audio/video managers) and overlapping triggers parity.
-4. Cleanup legacy fields & transitional debug markers (Phase 10).
+## Phase 9 Snapshot
+Delivered:
+- Telemetry fields present on playback outcomes & `background_volume_recomputed` events.
+- Updated tests (telemetry + duck recompute) passing.
+- Active config `houdini.edn` migrated from `volumeAdjust` to `adjustVolume`.
+
+Remaining before Phase 9 wrap:
+- Final doc sweep (remove stale internal plan verbiage – this section trimmed already).
+- Optional: add concise telemetry note to external MQTT docs (deferred decision).
 
 ---
 **Reviewer Checklist**
