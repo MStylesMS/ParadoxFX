@@ -400,6 +400,32 @@ Screen devices handle image display, video playback, and audio playback.
 * `killPfx`
   Gracefully terminate the PFX process via SIGTERM. Publishes `command_completed` event.
 
+### Media Playback & Stop Commands (Fade Support)
+
+The following stop-related commands accept an optional `fadeTime` (seconds) parameter. When provided and greater than 0, audio (and now video audio) will fade smoothly to silence before stopping. For composite commands the same `fadeTime` is applied to all supported media types.
+
+Supported fade-capable commands:
+
+| Command        | Zone Type        | Media Affected                          | Notes |
+|----------------|------------------|------------------------------------------|-------|
+| `stopBackground` | audio, screen   | Background music                         | Fades background music volume to 0 then stops |
+| `stopSpeech`     | audio, screen   | Active speech playback / queue           | Fades active speech channel before clearing queue |
+| `stopAudio`      | screen, audio   | Background + speech                      | Applies fade to both where active |
+| `stopVideo`      | screen          | Video playback audio track               | Fades video audio then stops video (image resets) |
+| `stopAll`        | screen          | Video (audio), background, speech        | Applies unified fade to each active medium |
+
+Example (fade out all media over 3 seconds):
+```json
+{ "command": "stopAll", "fadeTime": 3 }
+```
+
+Example (fade only background music over 2 seconds):
+```json
+{ "command": "stopBackground", "fadeTime": 2 }
+```
+
+If `fadeTime` is omitted or 0, the stop is immediate (legacy behavior). Video fading falls back to immediate stop if the underlying player does not support runtime volume adjustments.
+
 ### Image Commands
 
 #### setImage
