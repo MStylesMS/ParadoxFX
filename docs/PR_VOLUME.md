@@ -3,6 +3,8 @@
 ## Status
 Draft / Proposal (Pre-implementation)
 
+Implementation Branch: `PR-VOLUME` (initial commit: adds plan steps 6 & 7). All subsequent implementation commits will reference this doc with `PR-VOLUME:` prefix in commit messages for traceability.
+
 ## Goal
 Replace the current ad-hoc and inconsistent volume & ducking handling with a clear, predictable, easily testable model that:
 - Uses absolute base volumes (0–200) with a zone-level max clamp.
