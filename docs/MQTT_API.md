@@ -23,6 +23,29 @@ This document provides the complete MQTT API specification for ParadoxFX (Parado
 
 PFx uses MQTT for all device communication. Each device subscribes to a command topic and publishes status updates and responses. The system also provides heartbeat messages and error reporting.
 
+### Unified Volume & Ducking Model
+
+Playback volume for audio/video related commands is resolved using this precedence (highest → lowest):
+1. `volume` (absolute 0–200) supplied in the command payload
+2. `adjustVolume` (transient -100..+100 %) supplied in the command payload
+3. Zone base `volume` from configuration (INI)
+
+If both `volume` and `adjustVolume` are present the absolute `volume` is used and a warning event is published (command still succeeds, `adjustVolume` ignored).
+
+Background ducking applies ONLY to background music and ONLY while a duck trigger is active (speech, video or manual—depending on feature set). The configured `ducking_adjust` (negative percent, e.g. -40) is applied once; ducks do not stack.
+
+### Volume Telemetry (Phase 9)
+
+Command outcome events for playback plus background-volume recompute events now include:
+- `effective_volume`: Final volume applied after resolution and ducking
+- `pre_duck_volume`: Effective volume before ducking reduction (equal to `effective_volume` if no duck active)
+- `ducked`: Boolean (true if background was reduced by a duck)
+
+These telemetry fields are event-only (not included in steady periodic status snapshots) to keep status lean. Subscribe to `{baseTopic}/events` to observe them.
+
+#### JSON Schema References
+See `docs/json-schemas/command-outcome-playback.schema.json` and `docs/json-schemas/background-volume-recompute.schema.json` for machine-readable validation of telemetry-enriched events.
+
 ### Base Architecture
 
 - **Commands**: Sent to `{baseTopic}/commands`

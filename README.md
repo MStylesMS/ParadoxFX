@@ -253,6 +253,44 @@ mosquitto_pub -h localhost -t "paradox/zone1/commands" \
 - **[Production Deployment](README_FULL.md#process-management-with-systemd)** - systemd service setup and process management
 - **Platform notes**: `docs/Pi4_Notes.md`, `docs/Pi5-Notes.md`
 
+## Volume & Ducking Model (Unified)
+
+Effective playback volume is resolved per command with this precedence (highest → lowest):
+1. Absolute `volume` (0–200) provided in the command payload
+2. Relative `adjustVolume` (-100..+100 % delta) provided in the command payload
+3. Zone base `volume` from configuration
+
+If both `volume` and `adjustVolume` are present, the absolute value is used and a warning event is published (command still succeeds).
+
+Background ducking applies ONLY to background music. The configured `ducking_adjust` (negative percent, e.g. `-40`) reduces background while a duck trigger (speech, video, manual duck) is active; ducks do not stack.
+
+### Quick Examples
+
+Temporary 30% reduction relative to base (base 80 → effective 56 before any ducking):
+```bash
+mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"playSpeech","file":"hint1.wav","adjustVolume":-30}'
+```
+
+Force absolute 120 (ignores any adjustVolume, emits warning):
+```bash
+mosquitto_pub -t "paradox/zone1/commands" -m '{"command":"playSpeech","file":"hint1.wav","volume":120,"adjustVolume":-25}'
+```
+
+Set global background ducking (INI) for a zone:
+```ini
+[screen:zone1-hdmi0]
+type = screen
+volume = 80
+ducking_adjust = -40   ; Background plays at 60% during speech
+```
+
+### Telemetry
+Playback outcome and background-volume recompute events now include:
+`effective_volume`, `pre_duck_volume`, `ducked`.
+They are NOT part of steady state `status` messages; subscribe to `{baseTopic}/events`.
+
+Full details: `docs/INI_Config.md` (Unified Volume & Ducking section).
+
 ## Requirements
 
 - Node.js 16+ and npm

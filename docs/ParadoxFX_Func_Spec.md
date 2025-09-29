@@ -50,6 +50,18 @@ ParadoxFX features a comprehensive three-subsystem audio architecture designed f
 - **Integration**: Coordinates with background music for seamless audio experience
 - **Use Cases**: Guided instructions, hints, character voices, announcements
 
+##### Unified Volume & Ducking (Phases 8–9)
+Volume resolution precedence (highest → lowest):
+1. Command `volume` (absolute 0–200)
+2. Command `adjustVolume` (delta -100..+100 % applied to base)
+3. Zone base `volume` (INI)
+
+If both are supplied a warning is emitted and `adjustVolume` is ignored.
+
+Ducking applies a single negative percentage `ducking_adjust` to BACKGROUND MUSIC ONLY while any duck trigger is active (speech, video if configured, or manual future hooks). Ducks do not stack. When the last trigger ends background returns to its pre-duck level.
+
+Telemetry (events only): `effective_volume`, `pre_duck_volume`, `ducked` are published on playback outcomes and background recompute events (not in steady state status stream).
+
 <!-- Volume Safety and Control:
 - max_volume setting provides safety limits for all audio subsystems
 - MPV --volume-max argument enforces hard limits at the player level

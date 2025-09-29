@@ -48,7 +48,7 @@ General advice:
 | heartbeat_enabled | boolean | No | false | Enable heartbeat messages |
 | heartbeat_interval | integer(ms) | No | 10000 | Heartbeat interval in ms |
 | heartbeat_topic | string | No | paradox/heartbeat | Heartbeat MQTT topic |
-| ducking_volume | integer | No | 30 | Default ducking percent (0-100) |
+| ducking_adjust | integer (negative %) | No | 0 | Background reduction percent applied while any duck trigger active (0 = no duck). Expressed as negative percentage (e.g. -40). |
 | max_concurrent_videos | integer | No | 1 | Max videos per zone |
 | enable_hardware_acceleration | boolean | No | false | HW decode flag (mpv) |
 
@@ -127,7 +127,7 @@ Audio-only zones. Common keys:
 | topic | string | Yes | N/A | MQTT topic |
 | audio_device | string | Yes | N/A | Pulse/PipeWire/ALSA device id |
 | background_music_volume | integer | No | 100 | Music volume |
-| ducking_volume | integer | No | 100 | Ducked level |
+| ducking_adjust | integer (negative %) | No | 0 | Background reduction percent while duck active (speech / manual / video trigger). |
 | mpv_audio_options | string | No | - | Extra mpv audio options |
 | max_volume | integer | No | 100 | Maximum allowed volume % for all audio subsystems (0-200) |
 
@@ -190,6 +190,7 @@ media_dir = /opt/media
 volume = 75
 player_type = auto
 audio_device = default
+ducking_adjust = -35  ; Reduce background to 65% during active duck (speech / manual duck)
 ```
 
 Pi5 dual-HDMI example:
@@ -211,6 +212,7 @@ audio_device = pulse/alsa_output.platform-107c701400.hdmi.hdmi-stereo
 display = :0
 xinerama_screen = 0
 max_volume = 120  # Limit HDMI-0 audio to 120% for safety
+ducking_adjust = -40  # Background reduced to 60% during speech/video/manual duck
 
 [screen:zone2-hdmi1]
 type = screen
@@ -219,6 +221,7 @@ audio_device = pulse/alsa_output.platform-107c706400.hdmi.hdmi-stereo
 display = :0
 xinerama_screen = 1
 max_volume = 100  # Standard limit for HDMI-1
+ducking_adjust = -30
 ```
 
 <!-- Volume Configuration Examples:
@@ -247,5 +250,51 @@ xdotool search --class ParadoxBrowser
 ---
 
 *Last updated: August 2025 — consolidated reference*
+
+---
+
+## Unified Volume & Ducking Model (Phase 8–9)
+
+This deployment uses a unified resolver that determines an effective playback volume for each command.
+
+Precedence (highest → lowest):
+1. `volume` (absolute 0–200) per command
+2. `adjustVolume` (transient -100% .. +100%) per command — applied as a percentage delta to the zone base
+3. Zone base `volume` (from INI)
+
+If both `volume` and `adjustVolume` are provided the system applies only `volume` and emits a warning event (command still succeeds).
+
+### Ducking
+`ducking_adjust` (configured per zone or globally) is a negative percentage (0 or negative) applied ONLY to background music while any duck trigger is active:
+- Speech playback
+- Active video (if implemented to trigger ducking for your profile)
+- Manual duck command (future / optional)
+
+Only a single duck percentage is applied at a time; no stacking. When the last trigger ends background volume returns to its pre-duck effective level.
+
+### Telemetry (Phase 9)
+Playback command outcome events and background-volume recompute events now include:
+- `effective_volume` – Final volume actually applied after resolution & ducking
+- `pre_duck_volume` – Effective volume before ducking applied (same as effective when no duck active)
+- `ducked` – Boolean indicating whether a duck reduction was applied
+
+These fields are NOT currently added to steady-state status messages (to keep status lean). Subscribe to zone `{baseTopic}/events` to capture recompute and playback telemetry.
+
+### Configuration Summary
+| Concept | Key / Field | Notes |
+|---------|-------------|-------|
+| Base volume | `volume` (INI) | Persistent per zone |
+| Per-play absolute | `volume` (command) | Overrides everything else |
+| Per-play delta | `adjustVolume` (command) | Applied to base when absolute not present |
+| Ducking | `ducking_adjust` (INI) | Negative percentage applied to background only |
+| Telemetry | `effective_volume`, `pre_duck_volume`, `ducked` | Events only |
+
+Legacy `volumeAdjust` has been removed; use `adjustVolume` instead.
+
+### JSON Schemas
+Machine-readable JSON Schemas for volume telemetry events (playback outcome & background recompute) are available in `docs/json-schemas/`:
+- `command-outcome-playback.schema.json`
+- `background-volume-recompute.schema.json`
+These can be consumed by external validators / dashboards to ensure event shape compliance.
 
 ````
