@@ -7,6 +7,7 @@
 - Environment flag `DEBUG_MQTT=1` to enable verbose internal connection/backoff diagnostics (suppressed by default).
  - Phase 9 (Volume Model) Part 2: Telemetry JSON Schemas for playback outcomes & background recompute events (`docs/json-schemas/command-outcome-playback.schema.json`, `background-volume-recompute.schema.json`).
  - Unified volume & ducking documentation (precedence + telemetry) finalized across README / INI / MQTT API.
+ - (Planned) Media completion events for non-looping background tracks, speech items, and videos (`*_completed`), with telemetry snapshot at natural end.
 
 ### Telemetry Notes
 - Playback command outcome events now optionally include `effective_volume`, `pre_duck_volume`, `ducked` (already emitted in Part 1; schemas added here for machine validation).
@@ -20,6 +21,21 @@
 - Potential Jest/test runner hang caused by heartbeat interval or open MQTT socket after tests complete.
 
 ### Migration Notes
+### Audit: Playback Completion Events
+Current implementation publishes start / stop / manual stop events:
+- Background: `background_music_started`, `background_music_stopped` (no natural end event when a non-looping track finishes automatically)
+- Speech: `speech_started`, `speech_stopped` (manual/forced) – no explicit `speech_completed` on natural end
+- Video: `video_started`, `video_stopped` (manual stop); no `video_completed` on natural EOF (default image swap occurs silently)
+
+Sound effects remain intentionally fire-and-forget (no completion tracking by design).
+
+Planned addition (next minor):
+- Emit `background_music_completed`, `speech_completed`, `video_completed` events on natural (non-interrupted) EOF.
+- Include: `{ file, effective_volume, pre_duck_volume, ducked, duration_ms, playback_ms, interrupted: false }` (subset if data unavailable).
+- Distinguish manual interruptions: existing `*_stopped` events remain for fade/stop/skip scenarios (will include `interrupted: true` field once implemented for clarity).
+
+Implementation outline documented internally (see upcoming PR) and will add JSON Schema for `media-playback-completed` events.
+
 No action required; defaults preserve current behavior. To leverage deterministic fast-fail in CI, set smaller values for the new timeout/attempt options (e.g. `mqttConnectTimeoutMs=800`, `mqttOverallTimeoutMs=2500`, `mqttMaxAttempts=2`).
 For telemetry consumers: incorporate new schemas and ignore telemetry fields if not needed (event shape backward compatible).
 

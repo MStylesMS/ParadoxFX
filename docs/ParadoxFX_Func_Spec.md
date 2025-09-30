@@ -135,6 +135,12 @@ ParadoxFX provides professional-grade seamless transitions using per-zone MPV pr
   - **Resuming Playback:**
     - A `resumeVideo` command will resume the currently paused video.
     - If a `playVideo` command is issued for the *same file* that is currently loaded and paused (from a previous `setImage` command), it will be treated as a `resumeVideo` command to avoid reloading the file.
+- **Video Looping:**
+  - Videos can be played in continuous loop mode using the `loop: true` parameter
+  - Loop implementation uses manual restart approach (stop→loadMedia→play) for observability
+  - Loop iteration tracking with telemetry events published each iteration
+  - Loops automatically cancelled when new media is queued
+  - **⚠️ KNOWN BUG:** Loop currently hangs after 1-2 iterations. Use stopVideo command to break out of hung loop.
 - **Stop Commands:**
   - `stopVideo`, `stopAudio`, `stopAllAudioFx`, and `stopAll` commands immediately stop playback and clear queues as appropriate.
   - `sleepScreen` and `wakeScreen` commands control display power management

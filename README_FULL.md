@@ -261,6 +261,9 @@ mosquitto_pub -t "paradox/houdini/mirror/commands" -m '{"command":"setZoneVolume
 # Request immediate state update
 mosquitto_pub -t "paradox/houdini/mirror/commands" -m '{"command":"getState"}'
 
+# Play looping video (⚠️ KNOWN BUG: may hang after 1-2 iterations, use stopVideo to break)
+mosquitto_pub -t "paradox/houdini/mirror/commands" -m '{"command":"playVideo","file":"background.mp4","loop":true}'
+
 # Restart PFX (requires systemd service for automatic restart)
 mosquitto_pub -t "paradox/houdini/mirror/commands" -m '{"command":"restartPfx"}'
 
