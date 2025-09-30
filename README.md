@@ -160,6 +160,10 @@ mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
 mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
   -m '{"command": "playVideo", "video": "/media/intro.mp4", "volume": 80}'
 
+# Play a looping video (⚠️ KNOWN BUG: may hang after 1-2 iterations)
+mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
+  -m '{"command": "playVideo", "video": "/media/background.mp4", "loop": true}'
+
 # Pause video
 mosquitto_pub -h localhost -t "paradox/living-room/screen/commands" \
   -m '{"command": "pauseVideo"}'

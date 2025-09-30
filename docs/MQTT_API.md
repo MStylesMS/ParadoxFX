@@ -566,7 +566,8 @@ Play a video file with optional volume control and background ducking.
   "command": "playVideo",
   "video": "intro.mp4",
   "volumeAdjust": -10,
-  "ducking": -24
+  "ducking": -24,
+  "loop": false
 }
 ```
 
@@ -576,6 +577,7 @@ Play a video file with optional volume control and background ducking.
 - `VolumeAdjust` (optional): Volume adjustment percentage (-100 to +100), applied to device base VOLUME setting
 - `Channel` (optional): Audio channel routing
 - `Ducking` (optional): Background music volume reduction in units. Use negative values only (e.g., -24 to reduce by 24 units). Default: -24 for videos, 0 for images. Positive values are ignored with warning.
+- `loop` (optional): Boolean flag to enable continuous looping. Default: false. When true, video will restart automatically after natural end until stopped with stopVideo or new media is queued. **⚠️ KNOWN BUG:** Loop currently hangs after 1-2 iterations. Use stopVideo to break out of hung loop.
 
 Ducking resolution precedence (highest → lowest):
 1. Explicit `ducking` parameter in the command payload
@@ -603,7 +605,17 @@ Ducking resolution precedence (highest → lowest):
 }
 ```
 
+```json
+{
+  "command": "playVideo",
+  "video": "background.mp4",
+  "loop": true
+}
+```
+
 **Note:** Video paths are relative to the device's MEDIA_DIR. VolumeAdjust modifies the base VOLUME setting from the device configuration. For example, if device VOLUME is 80 and VolumeAdjust is -10, the effective volume will be 72 (80 * 0.90).
+
+**Loop Behavior:** When `loop: true` is specified, the video will restart automatically after natural end. Loop is cancelled automatically if new media is queued. Use stopVideo command to manually stop a looping video. **⚠️ KNOWN BUG:** Loop currently hangs after 1-2 iterations and requires stopVideo to break out.
 
 #### stopVideo
 
