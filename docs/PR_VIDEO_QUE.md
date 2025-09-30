@@ -25,7 +25,7 @@ Accepted for `playVideo`:
 - `volume` (optional)
 - `adjustVolume` (optional)
 - `ducking` (optional negative dB attenuation to apply to background/audio system while video plays – retained if existing infra expects it)
-- (No `loop`) – explicitly unsupported.
+- `loop` (optional, boolean) – if `true`, video restarts on natural end until queue receives new item. Only activates when queue is/will be empty. Defaults to `false`.
 
 Accepted for `setImage` (video first-frame path):
 - `file` or `image`
@@ -72,6 +72,7 @@ Playback Monitoring:
   file: '<path>',
   started: true,
   resumed: <boolean>,
+  looping: <boolean|undefined>,    // Present and true if loop active
   media_type: 'video',
   duration_s: <number|null>,   // known or null if unknown at start
   volume: <number|undefined>,
@@ -109,6 +110,7 @@ Fields baseline:
   duration_s: <number|null>,
   watched_s: <number>,          // accumulated active playback
   position_s: <number|undefined>,// alias for watched_s (only if not natural?) optional; may omit if equal
+  loop_iterations: <number|undefined>, // Number of complete loops if video was looping
   queue_remaining: <int>,        // after dequeueing completion
   ts: '<iso8601>'
   // If error:
