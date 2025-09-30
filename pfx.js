@@ -33,12 +33,12 @@ class PFxApplication {
             // Ensure log directory exists and set up file logging
             const logDir = path.resolve('/opt/paradox/logs');
             fs.mkdirSync(logDir, { recursive: true });
-            
+
             // Create timestamped log file for this session
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19);
             const logFile = path.join(logDir, `pfx-${timestamp}.log`);
             const logStream = fs.createWriteStream(logFile, { flags: 'a' });
-            
+
             // Also create/update the latest log symlink
             const latestLogFile = path.join(logDir, 'pfx-latest.log');
             try {
@@ -64,8 +64,17 @@ class PFxApplication {
                 origWarn(...args);
                 logStream.write(args.join(' ') + '\n');
             };
+            // Load version from local package.json once logging streams are ready
+            let version = '0.0.0';
+            try {
+                const pkg = require('./package.json');
+                version = pkg.version || version;
+            } catch (err) {
+                // ignore; fallback version already set
+            }
+
             console.log('****************************************');
-            this.logger.info('Starting Paradox Effects application...');
+            this.logger.info(`PFx Starting Paradox Effects application v${version} ...`);
             this.logger.info(`Logging to: ${logFile}`);
             console.log('****************************************');
             this.logger.info(`Using configuration: ${configPath}`);
@@ -206,8 +215,8 @@ class PFxApplication {
             try {
                 const proc = info.proc;
                 if (proc && !proc.killed) {
-                    try { process.kill(proc.pid, 'SIGTERM'); } catch (_) {}
-                    try { process.kill(proc.pid, 'SIGKILL'); } catch (_) {}
+                    try { process.kill(proc.pid, 'SIGTERM'); } catch (_) { }
+                    try { process.kill(proc.pid, 'SIGKILL'); } catch (_) { }
                     this.logger.info(`Stopped ${info.bin} on DISPLAY=${display}`);
                 }
             } catch (err) {
