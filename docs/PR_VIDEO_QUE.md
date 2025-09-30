@@ -1,9 +1,9 @@
 # PR_VIDEO_QUE: Unified Video Queue & Event Model
 
-Status: Draft (Implementation In Progress)
+Status: ✅ IMPLEMENTED (with known loop bug)
 Author: Copilot Agent
 Date: 2025-09-29
-Branch: PR_QUE_EOF
+Branch: PR_QUE_EOF → Merged to main (2025-09-30)
 
 ## Objectives
 
@@ -226,4 +226,89 @@ SetImage(video) paused-first-frame:
 - Add structured logs: `VIDEO_START`, `VIDEO_FINAL`, `VIDEO_QUEUE_ENQUEUE`, `VIDEO_QUEUE_ADVANCE` with concise JSON for internal troubleshooting.
 
 ---
-Implementation will now proceed according to this specification.
+
+## Implementation Status
+
+### ✅ COMPLETED (2025-09-30)
+
+**Implemented Features:**
+- Video queue FIFO with configurable size limit (default: 5)
+- Intelligent duplicate detection and replacement logic
+- ffprobe-based duration probing with caching (`lib/media/ffprobe-duration.js`)
+- VideoPlaybackTracker for pause-aware EOF detection (`lib/media/video-playback-tracker.js`)
+- Start/final event schema with `started`, `done`, `reason`, `message` fields
+- Loop parameter support with manual restart approach
+- Loop iteration tracking and telemetry events
+- Automatic loop cancellation when new media queued
+- Queue inspection commands (`videoQueue`, `speechQueue`)
+- Complete removal of legacy timeout-based EOF detection
+- Guard mechanisms to prevent concurrent loop restarts
+- Timeout protection on MPV operations during restart
+
+**Test Assets Created:**
+- `media/test/video/A.mp4`, `B.mp4`, `C.mp4` (6s colored test videos)
+- `media/test/video/Q1-Q4.mp4` (5-8s labeled test videos for loop testing)
+
+**Documentation:**
+- `docs/VIDEO_LOOP_TEST_SCENARIOS.md` - Manual test scenarios
+- Updated MQTT_API.md, README.md, README_FULL.md, ParadoxFX_Func_Spec.md
+
+### ⚠️ KNOWN ISSUES
+
+**Video Loop Bug:**
+The video looping feature (loop: true) has a known bug where loop restarts work for the first iteration but fail to restart after the second iteration, causing the video to hang.
+
+**Symptoms:**
+- First loop iteration: ✅ Works (restarts once)
+- Subsequent iterations: ❌ Hangs after second iteration
+- VideoPlaybackTracker fires once, logs "Loop iteration 1", but subsequent iterations don't trigger
+
+**Root Cause (Hypothesis):**
+The tracker is not firing its onNaturalEnd callback after the first restart, despite being recreated and started in `_handleLoopRestart()`. Possible causes:
+- probeDurationSeconds might be returning null after restart
+- Tracker might not be starting properly after MPV loadMedia
+- Tracker reference might be lost or overwritten
+
+**Workaround:**
+Use `stopVideo` command to break out of hung loop state. The system remains responsive to stopVideo even when looping hangs.
+
+**Testing Status:**
+- ✅ Non-looping videos work correctly
+- ✅ First loop iteration works (restarts once)
+- ❌ Subsequent iterations hang after second iteration
+- ✅ Loop cancellation works when items queued
+- ✅ stopVideo recovery works
+
+**Files Modified:**
+- `lib/zones/screen-zone.js` - Loop state, restart logic, EOF detection
+- `lib/media/video-playback-tracker.js` - Wall-clock timing-based EOF
+- `lib/media/ffprobe-duration.js` - Duration probing with caching
+
+### 📋 TODO FOR BUG FIX
+
+- [ ] Debug why VideoPlaybackTracker onNaturalEnd stops firing after first restart
+- [ ] Add explicit logging around tracker creation/start in _handleLoopRestart
+- [ ] Verify probeDurationSeconds returns valid duration after restart
+- [ ] Check if tracker.start() is being called properly
+- [ ] Investigate if tracker needs different initialization after MPV restart
+- [ ] Consider if MPV state after loadMedia affects tracker behavior
+
+### 🧪 PENDING TESTS
+
+Nine unit tests specified but not yet implemented:
+- [ ] Test 1: Single video natural end with paused last frame
+- [ ] Test 2: Sequential video queue (A then B)
+- [ ] Test 3: Duplicate playVideo ignored when same file playing
+- [ ] Test 4: setImage(video) after playVideo shows first frame
+- [ ] Test 5: Replay same video after completion
+- [ ] Test 6: setImage(video) mid-play immediate display
+- [ ] Test 7: playVideo removes trailing setImage from queue
+- [ ] Test 8: Three sequential videos (A, B, C)
+- [ ] Test 9: Duplicate at tail (B, C, B) all play in order
+
+Test utilities exist in `test/unit/video-queue.test.js` but tests need fake timers integration.
+
+---
+
+**Implementation complete as of merge commit 58164fc (2025-09-30).**
+**Loop bug documented in all user-facing documentation with workaround.**
