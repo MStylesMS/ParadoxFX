@@ -2,10 +2,10 @@
   "profiles": {
     "pi4": {
       "name": "Raspberry Pi 4",
-      "description": "Pi4 with auto hardware acceleration (recommended for most setups)",
+      "description": "Pi4 with safer hardware acceleration to avoid blue screen issues",
       "tested": true,
       "baseArgs": [
-        "--hwdec=auto",
+        "--hwdec=auto-copy",
         "--vo=gpu",
         "--cache=yes",
         "--demuxer-max-bytes=32M",
@@ -14,18 +14,14 @@
         "--keep-open=always"
       ],
       "displayArgs": {
-        "wayland": [
-          "--vo=gpu"
-        ],
-        "x11": [
-          "--vo=gpu"
-        ]
+        "wayland": [],
+        "x11": []
       },
       "performance": {
         "profile": null,
         "extraArgs": []
       },
-      "notes": "Pi4 uses auto hardware decoding for best performance. Removed gpu-context=drm for compatibility."
+      "notes": "Pi4 uses auto-copy hardware decoding to avoid DRM/blue screen issues. Copies decoded frames to system RAM for GPU compositing."
     },
     "pi5": {
       "name": "Raspberry Pi 5",
@@ -41,12 +37,8 @@
         "--keep-open=always"
       ],
       "displayArgs": {
-        "wayland": [
-          "--vo=gpu"
-        ],
-        "x11": [
-          "--vo=gpu"
-        ]
+        "wayland": [],
+        "x11": []
       },
       "performance": {
         "profile": null,
@@ -68,12 +60,8 @@
         "--keep-open=always"
       ],
       "displayArgs": {
-        "wayland": [
-          "--vo=gpu"
-        ],
-        "x11": [
-          "--vo=gpu"
-        ]
+        "wayland": [],
+        "x11": []
       },
       "performance": {
         "profile": "fast",
