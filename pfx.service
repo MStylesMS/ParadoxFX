@@ -1,0 +1,40 @@
+[Unit]
+Description=Paradox Effects (PFX) - Media and Effects Controller
+Documentation=https://github.com/MStylesMS/ParadoxFX
+# Ensure full network stack & broker before starting; provide readiness marker via ExecStartPost
+After=network-online.target graphical.target mosquitto.service
+Wants=network-online.target mosquitto.service
+
+[Service]
+Type=simple
+User=paradox
+Group=paradox
+WorkingDirectory=/opt/paradox/apps/ParadoxFX
+Environment="DISPLAY=:0"
+Environment="XAUTHORITY=/home/paradox/.Xauthority"
+Environment="XDG_RUNTIME_DIR=/run/user/1000"
+Environment="PFX_SKIP_PULSE_WAIT=0"
+Environment="NODE_ENV=production"
+ExecStartPre=/bin/sleep 5
+ExecStartPre=/opt/paradox/apps/ParadoxFX/scripts/cleanup.sh
+ExecStartPre=/bin/rm -f /run/paradox/pfx.ready
+ExecStart=/usr/bin/node /opt/paradox/apps/ParadoxFX/pfx.js --config /opt/paradox/config/pfx.ini
+ExecStartPost=/opt/paradox/scripts/pfx-ready.sh
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+StartLimitInterval=5min
+StartLimitBurst=3
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pfx
+
+# Resource limits (optional)
+Nice=-5
+LimitNOFILE=4096
+
+[Install]
+WantedBy=graphical.target

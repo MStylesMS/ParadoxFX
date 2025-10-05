@@ -44,11 +44,15 @@ General advice:
 | Setting | Type | Req | Default | Description |
 |---|---:|:--:|---|---|
 | log_level | string | No | info | error|warn|info|debug|trace |
+| log_directory | path | No | (none) | Directory for log files. If not set, logs only to console (captured by systemd). Enables automatic log rotation (30 days / 100MB limit). |
+| message_level | string | No | info | Verbosity for INFO/DEBUG messages |
 | media_base_path | path | Yes | N/A | Base directory for media (prefer zone-specific media_dir) |
 | heartbeat_enabled | boolean | No | false | Enable heartbeat messages |
 | heartbeat_interval | integer(ms) | No | 10000 | Heartbeat interval in ms |
 | heartbeat_topic | string | No | paradox/heartbeat | Heartbeat MQTT topic |
 | ducking_adjust | integer (negative %) | No | 0 | Background reduction percent applied while any duck trigger active (0 = no duck). Expressed as negative percentage (e.g. -40). |
+| pulseaudio_wait_ms | integer (ms) | No | 6000 | Max time PFX will wait at startup for PulseAudio to become responsive before skipping combined sink setup. Increase if you see early "PulseAudio not available" warnings on boot. |
+| pulseaudio_wait_interval_ms | integer (ms) | No | 500 | Poll interval while waiting for PulseAudio readiness. Lower for finer granularity; keep >=250ms to avoid excess polling. |
 | max_concurrent_videos | integer | No | 1 | Max videos per zone |
 | enable_hardware_acceleration | boolean | No | false | HW decode flag (mpv) |
 

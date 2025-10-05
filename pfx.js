@@ -30,41 +30,8 @@ class PFxApplication {
             const argv = minimist(process.argv.slice(2));
             const configFile = argv.config || argv.c || argv._[0] || 'pfx.ini';
             const configPath = path.resolve(configFile);
-            // Ensure log directory exists and set up file logging
-            const logDir = path.resolve('/opt/paradox/logs');
-            fs.mkdirSync(logDir, { recursive: true });
 
-            // Create timestamped log file for this session
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19);
-            const logFile = path.join(logDir, `pfx-${timestamp}.log`);
-            const logStream = fs.createWriteStream(logFile, { flags: 'a' });
-
-            // Also create/update the latest log symlink
-            const latestLogFile = path.join(logDir, 'pfx-latest.log');
-            try {
-                if (fs.existsSync(latestLogFile)) {
-                    fs.unlinkSync(latestLogFile);
-                }
-                fs.symlinkSync(path.basename(logFile), latestLogFile);
-            } catch (err) {
-                // Ignore symlink errors, just use timestamped file
-            }
-            const origLog = console.log;
-            const origError = console.error;
-            const origWarn = console.warn;
-            console.log = (...args) => {
-                origLog(...args);
-                logStream.write(args.join(' ') + '\n');
-            };
-            console.error = (...args) => {
-                origError(...args);
-                logStream.write(args.join(' ') + '\n');
-            };
-            console.warn = (...args) => {
-                origWarn(...args);
-                logStream.write(args.join(' ') + '\n');
-            };
-            // Load version from local package.json once logging streams are ready
+            // Load version first (needed for startup message)
             let version = '0.0.0';
             try {
                 const pkg = require('./package.json');
@@ -75,7 +42,6 @@ class PFxApplication {
 
             console.log('****************************************');
             this.logger.info(`PFx Starting Paradox Effects application v${version} ...`);
-            this.logger.info(`Logging to: ${logFile}`);
             console.log('****************************************');
             this.logger.info(`Using configuration: ${configPath}`);
             if (!fs.existsSync(configPath)) {
@@ -83,17 +49,101 @@ class PFxApplication {
                 this.logger.error('Copy pfx.ini.example to pfx.ini and customize your settings.');
                 process.exit(1);
             }
+            
             // Load configuration
             this.config = await ConfigLoader.load(configPath);
+
+            // Set up file logging if log_directory is configured
+            let logStream = null;
+            if (this.config.global.log_directory) {
+                const logDir = path.resolve(this.config.global.log_directory);
+                fs.mkdirSync(logDir, { recursive: true });
+
+                // Clean up old logs on startup
+                const LogCleanup = require('./lib/utils/log-cleanup');
+                const cleanupResult = await LogCleanup.cleanup(logDir, {
+                    maxAgeDays: 30,
+                    maxSizeMB: 100,
+                    excludeFiles: ['pfx-latest.log']
+                });
+                if (cleanupResult.deleted > 0) {
+                    this.logger.info(`Cleaned up ${cleanupResult.deleted} old log files (kept ${cleanupResult.kept}, total ${cleanupResult.totalSize}MB)`);
+                }
+
+                // Create timestamped log file for this session
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19);
+                const logFile = path.join(logDir, `pfx-${timestamp}.log`);
+                logStream = fs.createWriteStream(logFile, { flags: 'a' });
+
+                // Also create/update the latest log symlink
+                const latestLogFile = path.join(logDir, 'pfx-latest.log');
+                try {
+                    if (fs.existsSync(latestLogFile)) {
+                        fs.unlinkSync(latestLogFile);
+                    }
+                    fs.symlinkSync(path.basename(logFile), latestLogFile);
+                } catch (err) {
+                    // Ignore symlink errors, just use timestamped file
+                }
+
+                // Redirect console output to log file
+                const origLog = console.log;
+                const origError = console.error;
+                const origWarn = console.warn;
+                console.log = (...args) => {
+                    origLog(...args);
+                    logStream.write(args.join(' ') + '\n');
+                };
+                console.error = (...args) => {
+                    origError(...args);
+                    logStream.write(args.join(' ') + '\n');
+                };
+                console.warn = (...args) => {
+                    origWarn(...args);
+                    logStream.write(args.join(' ') + '\n');
+                };
+
+                this.logger.info(`Logging to: ${logFile}`);
+            } else {
+                this.logger.info('File logging disabled (no log_directory configured)');
+            }
             this.logger.info(`Loaded configuration for ${Object.keys(this.config.devices).length} devices`);
+
+            // Ensure XDG_RUNTIME_DIR is set (mpv & PulseAudio rely on it). If absent, attempt to infer for current user.
+            if (!process.env.XDG_RUNTIME_DIR) {
+                try {
+                    const uid = process.getuid && process.getuid();
+                    if (uid !== undefined) {
+                        const candidate = `/run/user/${uid}`;
+                        if (fs.existsSync(candidate)) {
+                            process.env.XDG_RUNTIME_DIR = candidate;
+                            this.logger.info(`Set XDG_RUNTIME_DIR fallback to ${candidate}`);
+                        } else {
+                            this.logger.warn('XDG_RUNTIME_DIR not set and fallback path missing; some audio/video features may warn.');
+                        }
+                    }
+                } catch (e) {
+                    this.logger.debug('Could not set XDG_RUNTIME_DIR fallback: ' + e.message);
+                }
+            }
 
             // Set up combined audio sinks if configured
             const AudioSetup = require('./lib/utils/audio-setup');
             const audioSetup = new AudioSetup();
-            if (await audioSetup.testPulseAudio()) {
+            // Optional PulseAudio wait (defaults enabled). Can disable via env PFX_SKIP_PULSE_WAIT=1
+            const skipPulseWait = process.env.PFX_SKIP_PULSE_WAIT === '1';
+            let pulseReady = false;
+            const waitTotal = this.config.global.pulseAudioWaitMs || 6000;
+            const waitInterval = this.config.global.pulseAudioWaitIntervalMs || 500;
+            if (!skipPulseWait && audioSetup.waitForPulseAudio) {
+                pulseReady = await audioSetup.waitForPulseAudio(waitTotal, waitInterval);
+            } else {
+                pulseReady = await audioSetup.testPulseAudio();
+            }
+            if (pulseReady) {
                 await audioSetup.setupCombinedSinks(this.config.global, Object.values(this.config.devices));
             } else {
-                this.logger.warn('PulseAudio not available, skipping combined sink setup');
+                this.logger.warn('PulseAudio not available after initial wait, skipping combined sink setup');
             }
 
             // Initialize MQTT client
