@@ -23,6 +23,31 @@
       },
       "notes": "Pi4 uses auto-copy hardware decoding to avoid DRM/blue screen issues. Copies decoded frames to system RAM for GPU compositing."
     },
+    "pi4-sw": {
+      "name": "Raspberry Pi 4 - Software",
+      "description": "Pi4 with software decoding for maximum reliability (tested Oct 2025)",
+      "tested": true,
+      "baseArgs": [
+        "--hwdec=no",
+        "--vo=gpu",
+        "--cache=no",
+        "--no-terminal",
+        "--no-osc",
+        "--keep-open=always"
+      ],
+      "displayArgs": {
+        "wayland": [],
+        "x11": []
+      },
+      "performance": {
+        "profile": null,
+        "extraArgs": [
+          "--video-sync=audio",
+          "--framedrop=vo"
+        ]
+      },
+      "notes": "Software decoding tested on Pi4 Rev 1.1 - delivers 0 dropped frames vs 23% with hardware decode. CPU usage ~80% but perfectly smooth playback. Hardware decoder (v4l2m2m) has reliability issues on some Pi4 units."
+    },
     "pi5": {
       "name": "Raspberry Pi 5",
       "description": "Optimized settings for Pi5 with dual HDMI and hardware acceleration (X11 compatible)",
@@ -71,6 +96,34 @@
         ]
       },
       "notes": "Pi3 has limited GPU capabilities. Smaller buffers and aggressive performance settings."
+    },
+    "pi3-sw": {
+      "name": "Raspberry Pi 3 - Software",
+      "description": "Pi3 with software decoding and aggressive optimizations for weaker CPU",
+      "tested": false,
+      "baseArgs": [
+        "--hwdec=no",
+        "--vo=gpu",
+        "--cache=no",
+        "--demuxer-max-bytes=8M",
+        "--no-terminal",
+        "--no-osc",
+        "--keep-open=always"
+      ],
+      "displayArgs": {
+        "wayland": [],
+        "x11": []
+      },
+      "performance": {
+        "profile": null,
+        "extraArgs": [
+          "--video-sync=audio",
+          "--framedrop=vo",
+          "--opengl-swapinterval=0",
+          "--vd-lavc-threads=2"
+        ]
+      },
+      "notes": "Software decoding optimized for Pi3's quad-core A53. Uses minimal cache, aggressive frame dropping, 2 decode threads. May struggle with 1080p - consider 720p content. Based on successful pi4-sw profile."
     },
     "pi-zero": {
       "name": "Raspberry Pi Zero/Zero W",
