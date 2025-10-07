@@ -109,6 +109,13 @@ class PFxApplication {
             }
             this.logger.info(`Loaded configuration for ${Object.keys(this.config.devices).length} devices`);
 
+            // Detect OS and log system information
+            const { getOSDetection } = require('./lib/utils/os-detection');
+            const osInfo = getOSDetection();
+            this.logger.info(`Running on ${osInfo.toString()}`);
+            this.logger.info(`Browser command: ${osInfo.getBrowserCommand()}`);
+            this.logger.debug(`Window detection config: ${JSON.stringify(osInfo.getWindowDetectionConfig())}`);
+
             // Ensure XDG_RUNTIME_DIR is set (mpv & PulseAudio rely on it). If absent, attempt to infer for current user.
             if (!process.env.XDG_RUNTIME_DIR) {
                 try {
