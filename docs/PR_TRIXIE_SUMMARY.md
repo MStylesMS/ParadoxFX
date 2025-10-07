@@ -2,12 +2,45 @@
 
 **Branch**: PR_TRIXIE  
 **Base**: main (commit 4afd04c)  
-**Status**: Ready for Bookworm testing  
-**Date**: October 6, 2025
+**Status**: ⚠️ MERGED WITH KNOWN ISSUE - REGRESSION ON PERFORMANCE  
+**Date**: October 6-7, 2025
+
+---
+
+## ⚠️ **CRITICAL NOTICE: REGRESSION ON PERFORMANCE** ⚠️
+
+**ISSUE**: Trixie runs **noticeably slower** than Bookworm with similar browser window management issues.
+
+**Testing Results**:
+- **Bookworm (12)**: Browser issues present, but **FASTER overall performance**
+- **Trixie (13)**: Browser issues present, **SLOWER overall performance** ⚠️
+
+**Impact**: 
+- Zone initialization slower on Trixie
+- Browser operations more sluggish on Trixie  
+- Overall system responsiveness degraded on Trixie
+
+**Root Cause**: Unknown - Not related to VDPAU or browser detection changes. May be:
+- Debian Trixie OS-level performance characteristics
+- Window manager differences
+- Hardware acceleration differences
+- MPV/Chromium performance on Trixie
+
+**Status**: Merged to enable Trixie compatibility, but **REQUIRES INVESTIGATION**
+
+**Action Items**:
+1. ⚠️ Profile performance differences between Bookworm and Trixie
+2. ⚠️ Investigate zone initialization timing on both OS versions
+3. ⚠️ Consider Bookworm as recommended OS until performance issue resolved
+4. ⚠️ Add performance benchmarks to testing suite
+
+---
 
 ## Overview
 
 This PR adds comprehensive support for Debian Trixie (13) while maintaining full backward compatibility with Debian Bookworm (12).
+
+**Note**: Browser window management issues observed on both OS versions are pre-existing (see PR plans below).
 
 ## Commits on Branch
 
